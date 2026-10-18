@@ -1,0 +1,7 @@
+run seed migration 
+
+docker compose exec server node src/db/seed.js
+
+restart dev with hot reload 
+
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up

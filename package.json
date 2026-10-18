@@ -1,0 +1,31 @@
+{
+  "name": "district4-culinary-guide",
+  "version": "1.0.0",
+  "packageManager": "pnpm@11.7.0",
+  "private": true,
+  "description": "Multilingual Culinary Tourism & Audio Guide System for District 4, Ho Chi Minh City",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"pnpm --filter server dev\" \"pnpm --filter web dev\"",
+    "dev:all": "concurrently -n server,web,mobile -c blue,green,magenta \"pnpm --filter server dev\" \"pnpm --filter web dev\" \"pnpm --filter mobile start\"",
+    "dev:server": "pnpm --filter server dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:mobile": "pnpm --filter mobile start",
+    "dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up",
+    "build:web": "pnpm --filter web build",
+    "start": "pnpm --filter server start",
+    "db:migrate": "pnpm --filter server migrate",
+    "db:seed": "pnpm --filter server seed",
+    "check:server": "node scripts/check-server.js",
+    "check:imports": "node scripts/scan-imports.js",
+    "check:api": "node scripts/scan-api-contract.js",
+    "check:web": "pnpm --filter web test",
+    "check:mobile": "pnpm --filter mobile check:syntax && pnpm --filter mobile test",
+    "check:all": "pnpm check:server && pnpm check:imports && pnpm check:api && pnpm check:web && pnpm check:mobile"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

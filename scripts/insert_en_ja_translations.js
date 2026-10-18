@@ -1,0 +1,15 @@
+const { Client } = require('pg');
+const c = new Client({
+  host: 'd4-postgres',
+  user: 'district4_user',
+  database: 'district4_food',
+  password: process.env.DB_PASSWORD || 'district4_user'
+});
+(async () => {
+  await c.connect();
+  const r1 = await c.query("SELECT l.id, l.code, count(dt.id)::int AS cnt FROM languages l LEFT JOIN dish_translations dt ON dt.language_id = l.id WHERE l.is_active = true GROUP BY l.id, l.code ORDER BY l.id");
+  console.log('cnt per lang:', r1.rows);
+  const r2 = await c.query("SELECT dt.id, dt.dish_id, l.code AS lang, dt.name, dt.description FROM dish_translations dt JOIN languages l ON l.id = dt.language_id WHERE l.code='en' ORDER BY dt.dish_id LIMIT 3");
+  console.log('sample en:', r2.rows);
+  await c.end();
+})().catch(e => { console.error(e); process.exit(1); });

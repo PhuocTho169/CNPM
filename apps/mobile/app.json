@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "District 4 Food Guide",
+    "slug": "district4-food-guide",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "district4food",
+    "splash": {
+      "backgroundColor": "#e65100",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera is used to scan QR codes at culinary locations.",
+        "NSLocationWhenInUseUsageDescription": "Location is used to show nearby culinary places."
+      }
+    },
+    "android": {
+      "permissions": ["CAMERA", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "adaptiveIcon": { "backgroundColor": "#e65100" }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to scan QR codes at culinary locations."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to show nearby culinary places."
+        }
+      ]
+    ]
+  }
+}

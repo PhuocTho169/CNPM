@@ -1,0 +1,61 @@
+# =====================================================================
+# DEV overlay — hot reload trong Docker
+#
+# Dùng kèm file compose gốc:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Khác biệt so với production compose:
+#   - server: mount ./server + ./database, chạy nodemon → sửa code backend tự restart
+#   - web-dev: chạy Vite dev server (HMR) → sửa frontend là trình duyệt tự cập nhật
+#   - admin-web (bản build tĩnh) vẫn chạy ở :8080 nhưng KHÔNG hot reload;
+#     khi dev hãy mở http://localhost:5173
+# =====================================================================
+services:
+  server:
+    command: sh -c "node src/db/migrate.js && node src/db/seed.js && npx nodemon --legacy-watch src/index.js"
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./server:/app/server
+      - ./database:/app/database
+      # giữ node_modules đã cài trong image (không bị mount đè từ Windows)
+      - server_node_modules:/app/server/node_modules
+      # QUAN TRỌNG: base compose mount named volume vào /app/server/uploads.
+      # Ở dev, bind mount ./server đã chứa sẵn thư mục uploads, nên volume đè lên
+      # bind mount và che mất file audio/QR trên host → mọi URL /uploads trả 404.
+      # Mount trực tiếp thư mục host để dev nhìn thấy đúng file đang có.
+      - ./server/uploads:/app/server/uploads
+    ports:
+      - "5002:5000"   # dev API port (tránh conflict với prod 5001)
+
+  web-dev:
+    # Node 22+ is required by the pnpm version pinned in root package.json
+    # ("packageManager"). Node 20 aborts with ERR_UNKNOWN_BUILTIN_MODULE.
+    image: node:22-alpine
+    working_dir: /app
+    environment:
+      # Vite proxy /api và /uploads sang container server
+      VITE_PROXY_TARGET: http://server:5000
+      VITE_USE_POLLING: "true"   # cần cho file watching hoạt động mượt trên Windows/macOS
+      # Same pnpm major as the lockfile (see root package.json "packageManager").
+      # A mismatch here makes pnpm resolve peer-dependency suffixes differently
+      # from the lockfile and it aborts with ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY.
+      COREPACK_ENABLE_STRICT: "0"
+    command: >
+      sh -c "corepack enable &&
+             corepack install &&
+             pnpm install --filter web &&
+             pnpm --filter web dev --host 0.0.0.0"
+    volumes:
+      - .:/app
+      - root_node_modules:/app/node_modules
+      - web_node_modules:/app/apps/web/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+
+volumes:
+  server_node_modules:
+  root_node_modules:
+  web_node_modules:

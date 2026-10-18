@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: d4-postgres
+    environment:
+      POSTGRES_DB: district4_food
+      POSTGRES_USER: district4_user
+      POSTGRES_PASSWORD: district4_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U district4_user -d district4_food"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: d4-server
+    env_file:
+      - ./server/.env
+    environment:
+      # Inside Docker the backend MUST reach postgres by service name, not localhost
+      DATABASE_URL: postgresql://district4_user:district4_password@postgres:5432/district4_food
+      PORT: 5000
+    ports:
+      - "5001:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # WORKDIR is /app/server and UPLOAD_DIR=uploads is relative, so the real
+      # path is /app/server/uploads. Mounting at /app/uploads silently kept the
+      # volume unused, so every QR PNG / audio file was lost on container rebuild.
+      - server_uploads:/app/server/uploads
+
+  admin-web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: d4-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+    name: district4_postgres_data
+  server_uploads:
+    name: district4_server_uploads

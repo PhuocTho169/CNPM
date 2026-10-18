@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Noodles banner">
+  <defs>
+    <linearGradient id="nd-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4e1d05"/>
+      <stop offset="0.5" stop-color="#9a3412"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+    <linearGradient id="nd-bowl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffdf8"/>
+      <stop offset="1" stop-color="#fcd9b6"/>
+    </linearGradient>
+    <linearGradient id="nd-broth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fde68a"/>
+      <stop offset="1" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#nd-bg)"/>
+  <circle cx="400" cy="270" r="230" fill="#fdba74" opacity="0.18"/>
+  <g fill="#fed7aa" opacity="0.5">
+    <circle cx="110" cy="120" r="4"/><circle cx="690" cy="150" r="5"/>
+    <circle cx="150" cy="480" r="4"/><circle cx="660" cy="470" r="4.5"/>
+    <circle cx="260" cy="90" r="3"/><circle cx="560" cy="100" r="3.5"/>
+  </g>
+
+  <!-- steam -->
+  <g fill="none" stroke="#ffedd5" stroke-width="9" stroke-linecap="round" opacity="0.55">
+    <path d="M330 250 C316 220 352 202 338 170"/>
+    <path d="M400 238 C386 204 422 186 408 148"/>
+    <path d="M470 250 C456 220 492 202 478 170"/>
+  </g>
+
+  <!-- bowl -->
+  <ellipse cx="400" cy="528" rx="210" ry="26" fill="#2b0f02" opacity="0.5"/>
+  <path d="M196 358 C196 442 288 500 400 500 C512 500 604 442 604 358 Z" fill="url(#nd-bowl)"/>
+  <ellipse cx="400" cy="358" rx="204" ry="42" fill="#fffaf1"/>
+  <ellipse cx="400" cy="360" rx="178" ry="32" fill="url(#nd-broth)"/>
+
+  <!-- noodles -->
+  <g fill="none" stroke="#fef3c7" stroke-width="7" stroke-linecap="round">
+    <path d="M270 366 C310 344 356 384 402 364"/>
+    <path d="M330 382 C376 358 434 396 486 374"/>
+    <path d="M382 350 C434 330 492 360 546 342"/>
+    <path d="M296 384 C340 368 396 392 442 380"/>
+  </g>
+  <!-- toppings -->
+  <ellipse cx="342" cy="344" rx="28" ry="12" fill="#b45309"/>
+  <ellipse cx="462" cy="376" rx="26" ry="11" fill="#92400e"/>
+  <ellipse cx="520" cy="346" rx="22" ry="9" fill="#b45309"/>
+  <ellipse cx="300" cy="372" rx="18" ry="7" fill="#15803d"/>
+  <ellipse cx="540" cy="368" rx="16" ry="7" fill="#166534"/>
+  <circle cx="392" cy="378" r="8" fill="#dc2626"/>
+  <circle cx="472" cy="340" r="7" fill="#dc2626"/>
+
+  <!-- chopsticks -->
+  <g transform="rotate(-26 560 320)">
+    <rect x="524" y="140" width="12" height="240" rx="6" fill="#7c4a21"/>
+    <rect x="546" y="152" width="12" height="228" rx="6" fill="#9a6132"/>
+  </g>
+
+  <g font-family="system-ui, 'Segoe UI', sans-serif" text-anchor="middle">
+    <text x="400" y="552" font-size="26" font-weight="700" letter-spacing="9" fill="#fff7ed" opacity="0.95">MÓN NƯỚC</text>
+    <text x="400" y="574" font-size="12" letter-spacing="5" fill="#fed7aa" opacity="0.85">DISTRICT 4 · NOODLE SOUP</text>
+  </g>
+</svg>

@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Seafood banner">
+  <defs>
+    <linearGradient id="sea-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#023e46"/>
+      <stop offset="0.55" stop-color="#0b6e78"/>
+      <stop offset="1" stop-color="#14b8a6"/>
+    </linearGradient>
+    <linearGradient id="sea-plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0fdfa"/>
+      <stop offset="1" stop-color="#99f6e4"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sea-bg)"/>
+  <circle cx="400" cy="300" r="250" fill="#99f6e4" opacity="0.14"/>
+  <g fill="none" stroke="#5eead4" stroke-width="6" opacity="0.3" stroke-linecap="round">
+    <path d="M0 120 C120 90 220 150 340 120 C460 90 560 150 800 110"/>
+    <path d="M0 480 C140 450 240 510 380 480 C520 450 620 510 800 470"/>
+  </g>
+  <g fill="#bae6fd" opacity="0.5">
+    <circle cx="120" cy="220" r="7"/><circle cx="150" cy="170" r="4"/>
+    <circle cx="670" cy="200" r="6"/><circle cx="640" cy="150" r="3.5"/>
+    <circle cx="700" cy="420" r="5"/><circle cx="110" cy="400" r="4.5"/>
+  </g>
+
+  <!-- plate -->
+  <ellipse cx="400" cy="352" rx="250" ry="120" fill="#042f2e" opacity="0.45"/>
+  <ellipse cx="400" cy="336" rx="242" ry="116" fill="url(#sea-plate)"/>
+  <ellipse cx="400" cy="336" rx="196" ry="88" fill="#ccfbf1"/>
+  <ellipse cx="400" cy="336" rx="150" ry="62" fill="#f0fdfa"/>
+
+  <!-- shrimp -->
+  <g transform="translate(300 300) rotate(-14)">
+    <path d="M0 0 C34 -30 84 -22 94 14 C101 40 84 62 58 58 C34 54 22 34 34 18" fill="none" stroke="#f97316" stroke-width="24" stroke-linecap="round"/>
+    <path d="M82 46 L118 66 L88 74 Z" fill="#fb923c"/>
+    <circle cx="30" cy="22" r="6" fill="#7c2d12"/>
+  </g>
+  <!-- shells -->
+  <g transform="translate(508 356)">
+    <path d="M-52 0 A52 52 0 0 1 52 0 Z" fill="#fdba74"/>
+    <g stroke="#ea580c" stroke-width="4" opacity="0.8">
+      <line x1="-38" y1="-6" x2="-16" y2="-40"/>
+      <line x1="-14" y1="-10" x2="-4" y2="-46"/>
+      <line x1="12" y1="-10" x2="6" y2="-46"/>
+      <line x1="36" y1="-6" x2="20" y2="-40"/>
+    </g>
+  </g>
+  <g transform="translate(196 372) scale(0.7)">
+    <path d="M-52 0 A52 52 0 0 1 52 0 Z" fill="#fca5a5"/>
+    <g stroke="#dc2626" stroke-width="5" opacity="0.7">
+      <line x1="-36" y1="-6" x2="-16" y2="-40"/>
+      <line x1="-10" y1="-10" x2="-2" y2="-46"/>
+      <line x1="16" y1="-10" x2="10" y2="-46"/>
+      <line x1="38" y1="-6" x2="22" y2="-40"/>
+    </g>
+  </g>
+  <!-- lemon -->
+  <g transform="translate(586 268)">
+    <circle r="42" fill="#fde047"/>
+    <circle r="33" fill="#fef08a"/>
+    <g stroke="#eab308" stroke-width="3">
+      <line x1="-24" y1="0" x2="24" y2="0"/>
+      <line x1="0" y1="-24" x2="0" y2="24"/>
+      <line x1="-17" y1="-17" x2="17" y2="17"/>
+      <line x1="17" y1="-17" x2="-17" y2="17"/>
+    </g>
+  </g>
+  <!-- herbs -->
+  <ellipse cx="330" cy="392" rx="30" ry="12" fill="#22c55e" transform="rotate(-12 330 392)"/>
+  <ellipse cx="452" cy="404" rx="26" ry="10" fill="#16a34a" transform="rotate(10 452 404)"/>
+
+  <g font-family="system-ui, 'Segoe UI', sans-serif" text-anchor="middle">
+    <text x="400" y="540" font-size="26" font-weight="700" letter-spacing="9" fill="#ecfeff" opacity="0.92">HẢI SẢN</text>
+    <text x="400" y="562" font-size="12" letter-spacing="5" fill="#99f6e4" opacity="0.8">DISTRICT 4 · SEAFOOD</text>
+  </g>
+</svg>

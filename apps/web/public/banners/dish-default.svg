@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Dish banner">
+  <defs>
+    <linearGradient id="df-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4e2600"/>
+      <stop offset="0.55" stop-color="#b45309"/>
+      <stop offset="1" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="df-plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffdf9"/>
+      <stop offset="1" stop-color="#f0dfc8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#df-bg)"/>
+  <circle cx="400" cy="290" r="240" fill="#fde68a" opacity="0.2"/>
+  <g fill="#fef3c7" opacity="0.5">
+    <circle cx="118" cy="130" r="4"/><circle cx="688" cy="158" r="5"/>
+    <circle cx="146" cy="468" r="4"/><circle cx="666" cy="452" r="4.5"/>
+    <circle cx="252" cy="92" r="3"/><circle cx="556" cy="98" r="3.5"/>
+  </g>
+
+  <!-- plate -->
+  <ellipse cx="400" cy="348" rx="248" ry="118" fill="#2b0f02" opacity="0.4"/>
+  <ellipse cx="400" cy="332" rx="240" ry="114" fill="url(#df-plate)"/>
+  <ellipse cx="400" cy="332" rx="188" ry="84" fill="#fdf3e3"/>
+  <ellipse cx="400" cy="332" rx="140" ry="58" fill="#fffaf2"/>
+
+  <!-- signature star dish -->
+  <g transform="translate(400 332)">
+    <path d="M0 -74 L22 -22 L78 -22 L34 12 L50 66 L0 34 L-50 66 L-34 12 L-78 -22 L-22 -22 Z" fill="#f59e0b"/>
+    <path d="M0 -52 L15 -16 L55 -16 L24 8 L35 46 L0 24 L-35 46 L-24 8 L-55 -16 L-15 -16 Z" fill="#fde68a"/>
+  </g>
+
+  <!-- fork & spoon -->
+  <g transform="rotate(-14 190 330)">
+    <rect x="182" y="196" width="14" height="230" rx="7" fill="#e5e7eb"/>
+    <rect x="170" y="176" width="38" height="46" rx="10" fill="#f3f4f6"/>
+    <line x1="176" y1="180" x2="176" y2="216" stroke="#9ca3af" stroke-width="4"/>
+    <line x1="186" y1="180" x2="186" y2="216" stroke="#9ca3af" stroke-width="4"/>
+    <line x1="196" y1="180" x2="196" y2="216" stroke="#9ca3af" stroke-width="4"/>
+  </g>
+  <g transform="rotate(14 610 330)">
+    <rect x="604" y="196" width="14" height="230" rx="7" fill="#e5e7eb"/>
+    <ellipse cx="611" cy="182" rx="28" ry="38" fill="#f3f4f6"/>
+    <ellipse cx="611" cy="180" rx="17" ry="25" fill="#d1d5db"/>
+  </g>
+
+  <!-- herbs -->
+  <ellipse cx="300" cy="386" rx="24" ry="10" fill="#22c55e" transform="rotate(-16 300 386)"/>
+  <ellipse cx="508" cy="392" rx="20" ry="9" fill="#16a34a" transform="rotate(14 508 392)"/>
+
+  <g font-family="system-ui, 'Segoe UI', sans-serif" text-anchor="middle">
+    <text x="400" y="540" font-size="26" font-weight="700" letter-spacing="9" fill="#fffbeb" opacity="0.95">MÓN NGON QUẬN 4</text>
+    <text x="400" y="562" font-size="12" letter-spacing="5" fill="#fde68a" opacity="0.9">DISTRICT 4 · SIGNATURE DISH</text>
+  </g>
+</svg>

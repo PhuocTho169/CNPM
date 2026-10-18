@@ -1,0 +1,26 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "verify:qr": "node scripts/verify-qr-decode.cjs",
+    "test:geo": "node scripts/test-geo.mjs",
+    "test:lang": "node scripts/test-ui-lang.mjs",
+    "test": "node scripts/test-geo.mjs && node scripts/test-ui-lang.mjs"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "jsqr": "^1.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
+    "vite": "^5.4.8"
+  }
+}

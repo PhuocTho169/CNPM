@@ -1,0 +1,12 @@
+node_modules
+.git
+.env
+.env.*
+*.md
+readme_*.md
+scripts/
+docker-compose*.yml
+README.md
+Bao-cao-du-an-Quan4-Culinary-Guide.docx
+system-presentation-standalone.html
+!database/
