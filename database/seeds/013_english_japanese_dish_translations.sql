@@ -11,15 +11,15 @@ BEGIN
   SELECT d.id,
          l.id,
          COALESCE(NULLIF(v.name, ''), k.name),
-         COALESCE(NULLIF(v.desc, ''), k.description),
-         COALESCE(NULLIF(v.ing, ''), k.ingredients),
+         COALESCE(NULLIF(v.description, ''), k.description),
+         COALESCE(NULLIF(v.ingredients, ''), k.ingredients),
          NULL
   FROM dishes d
   JOIN languages l ON l.code IN ('en', 'ja')
          AND l.id NOT IN (SELECT dt.language_id FROM dish_translations dt WHERE dt.dish_id = d.id)
   JOIN dish_translations k ON k.dish_id = d.id AND k.language_id = (SELECT id FROM languages WHERE code = 'ko')
   LEFT JOIN LATERAL (
-    SELECT t.name, t.desc, t.ing
+    SELECT t.name, t.description, t.ingredients
     FROM (VALUES
       (d.code, 'en', 'Crab udon-style noodle soup', 'Thick rice noodles in a rich crab-and-pork-bone broth, served with crab paste and shrimp.', 'Fresh swimming crab, rice flour, tapioca starch, shrimp, cinnamon fish cake'),
       (d.code, 'ja', '蟹肉粗米糕', '厚实米粉浸泡在蟹肉與豬骨熬製的濃醬湯裡，配蟹肉餅與新鮮蝦仁。', '活泳蟹、米粉、太白粉、蝦仁、肉桂魚餅'),
@@ -45,11 +45,11 @@ BEGIN
       (d.code, 'ja', '傳統滴漏冰咖啡', '用傳統filter 慢滴濃咖啡，倒入蒸發奶與冰塊中。', '羅布斯塔咖啡豆、蒸發奶、冰塊'),
       (d.code, 'en', 'Seafood hotpot at Vĩnh Khánh', 'A shared seafood hotpot with shrimp, squid and clams in a mildly spicy broth, with vegetables and noodles.', 'Shrimp, squid, clams, hotpot broth, vegetables'),
       (d.code, 'ja', '永慶海鮮火鍋', '適合一群人共享的海鮮火鍋：蝦、魷魚、蛤蜊，微辣湯底配青菜與米粉。', '蝦、魷魚、蛤蜊、火鍋湯底、蔬菜')
-    ) AS t(code, lang, name, desc, ing)
+    ) AS t(code, lang, name, description, ingredients)
     WHERE t.code = d.code AND t.lang = l.code
     LIMIT 1
   ) v ON true
-  WHERE v.code IS NOT NULL
+  WHERE v.name IS NOT NULL
   ORDER BY d.id, l.id
   ON CONFLICT (dish_id, language_id) DO NOTHING;
 

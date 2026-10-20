@@ -13,21 +13,14 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Camera is used to scan QR codes at culinary locations.",
         "NSLocationWhenInUseUsageDescription": "Location is used to show nearby culinary places."
       }
     },
     "android": {
-      "permissions": ["CAMERA", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
       "adaptiveIcon": { "backgroundColor": "#e65100" }
     },
     "plugins": [
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to scan QR codes at culinary locations."
-        }
-      ],
       [
         "expo-location",
         {

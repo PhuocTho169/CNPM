@@ -36,6 +36,7 @@ function decoratePlace(row, lang) {
     has_audio: row.has_audio || false,
     has_qr: !!row.has_qr,
     qr_value: row.qr_value || null,
+    qr_image_url: row.qr_image_url || null,
     translation: row.t_name !== null && row.t_name !== undefined
       ? {
           name: row.t_name,
@@ -61,6 +62,7 @@ function listSelect(lang) {
       EXISTS (SELECT 1 FROM culinary_place_translations t3 JOIN audio_guides a ON a.translation_id = t3.id
         WHERE t3.culinary_place_id = p.id) AS has_audio,
       (SELECT qr.qr_value FROM qr_codes qr WHERE qr.culinary_place_id = p.id LIMIT 1) AS qr_value,
+      (SELECT qr.image_url FROM qr_codes qr WHERE qr.culinary_place_id = p.id LIMIT 1) AS qr_image_url,
       EXISTS (SELECT 1 FROM qr_codes qr2 WHERE qr2.culinary_place_id = p.id) AS has_qr,
       t.name AS t_name, t.short_description AS t_short_description, t.description AS t_description,
       t.history AS t_history, t.cultural_significance AS t_cultural_significance, t.tourist_tips AS t_tourist_tips
@@ -262,6 +264,14 @@ async function create(data) {
      data.is_recommended ?? false, data.status || 'DRAFT',
      data.zone_radius ?? 100, data.zone_exit_buffer ?? 20]
   );
+  // Tự động tạo QR code khi place được publish
+  if (row && row.status === 'PUBLISHED') {
+    try {
+      await media.generateQR(row.id, { regenerate: false });
+    } catch (err) {
+      console.warn(`[placeService] Failed to auto-generate QR for place ${row.id}:`, err.message);
+    }
+  }
   return row;
 }
 
@@ -297,6 +307,17 @@ async function remove(id) {
   const row = await db.getOne('DELETE FROM culinary_places WHERE id = $1 RETURNING id', [id]);
   if (!row) throw new ApiError(404, 'PLACE_NOT_FOUND', 'The culinary location could not be found.');
   return row;
+}
+
+async function getTranslation(placeId, lang) {
+  return db.getOne(
+    `SELECT t.id, t.culinary_place_id AS place_id, t.language_id, l.code AS language_code,
+            t.name, t.short_description, t.description, t.history, t.cultural_significance, t.tourist_tips
+     FROM culinary_place_translations t
+     JOIN languages l ON l.id = t.language_id
+     WHERE t.culinary_place_id = $1 AND l.code = $2`,
+    [placeId, lang]
+  );
 }
 
 async function listTranslations(placeId) {
@@ -394,6 +415,6 @@ async function nearby(lat, lng, radiusMeters = 2000, lang = 'vi', limit = 10) {
 
 module.exports = {
   list, getById, getFullDetail, create, update, setStatus, remove,
-  listTranslations, upsertTranslation, deleteTranslation,
+  getTranslation, listTranslations, upsertTranslation, deleteTranslation,
   listImages, addImage, updateImage, deleteImage, nearby, publicUrl,
 };

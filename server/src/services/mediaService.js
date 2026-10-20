@@ -9,6 +9,7 @@ const { measureAudioDuration } = require('../utils/audioDuration');
 const narration = require('../utils/narration');
 
 // ---------------- AUDIO ----------------
+
 async function getAudioForTranslation(translationId) {
   return db.getOne('SELECT * FROM audio_guides WHERE translation_id = $1 ORDER BY id DESC LIMIT 1', [translationId]);
 }
@@ -54,6 +55,7 @@ function deleteAudioFile(fileUrl) {
 }
 
 // ---------------- QR CODES ----------------
+
 async function getQR(placeId) {
   return db.getOne('SELECT * FROM qr_codes WHERE culinary_place_id = $1', [placeId]);
 }
@@ -77,13 +79,7 @@ function normalizeOrigin(url) {
   }
 }
 
-/**
- * Pick the best base URL for a scannable QR code:
- *   1. explicit override sent by the admin dashboard (base_url)
- *   2. PUBLIC_BASE_URL from .env — when set to a real (non-localhost) address
- *   3. the origin the admin's browser is using (works on LAN / docker)
- *   4. PUBLIC_BASE_URL as-is (localhost fallback)
- */
+/** Pick the best base URL for a scannable QR code. */
 function resolveQrBaseUrl({ baseUrl, originHint } = {}) {
   if (baseUrl) {
     const normalized = normalizeOrigin(baseUrl);
@@ -110,8 +106,8 @@ async function generateQR(placeId, { regenerate = false, baseUrl, originHint } =
   const qrValue = `${qrBase}/place/${placeId}`;
 
   const existing = await getQR(placeId);
-  // Only keep the current image when it already encodes the same URL —
-  // otherwise the PNG on disk would still point at the OLD address.
+  // Only keep the current image when it already encodes the same URL — otherwise
+  // the PNG on disk would still point at the OLD address.
   if (existing && !regenerate && existing.qr_value === qrValue) return existing;
 
   const fileName = `place-${placeId}-${crypto.randomBytes(4).toString('hex')}.png`;
@@ -144,17 +140,107 @@ async function generateQR(placeId, { regenerate = false, baseUrl, originHint } =
   );
 }
 
-// ---------------- Language → locale / voice ----------------
-// Every TTS path derives its locale and voice from the language registry
-// (languages.code / bcl / voice_note) instead of a code-side list, so a
-// language an admin adds from the dashboard narrates with no code change:
-//   1. `bcl`     — the BCP-47 locale the admin registered (e.g. fr-FR)
-//   2. `code`    — the locale itself when no bcl was given (e.g. fr)
-//   3. `voice_note` — optional per-provider voice override, e.g.
-//      "Edge: fr-FR-HenriNeural, Google: fr-FR-Neural2-A, ElevenLabs: <id>"
-//
-// The cache keeps the guide page off the DB for every request; the admin
-// language form invalidates it on create/update/delete.
+// ---------------- DISH QR CODES ----------------
+
+async function getDishQR(dishId) {
+  return db.getOne('SELECT * FROM dish_qr_codes WHERE dish_id = $1', [dishId]);
+}
+
+async function generateDishQR(dishId, { regenerate = false, baseUrl, originHint } = {}) {
+  const dish = await db.getOne('SELECT id, code, status FROM dishes WHERE id = $1', [dishId]);
+  if (!dish) throw new ApiError(404, 'DISH_NOT_FOUND', 'The dish could not be found.');
+
+  const qrBase = resolveQrBaseUrl({ baseUrl, originHint });
+  const qrValue = `${qrBase}/dish/${dishId}`;
+
+  const existing = await getDishQR(dishId);
+  if (existing && !regenerate && existing.qr_value === qrValue) return existing;
+
+  const fileName = `dish-${dishId}-${crypto.randomBytes(4).toString('hex')}.png`;
+  const dir = path.join(config.uploadDir, 'qr');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const filePath = path.join(dir, fileName);
+  await QRCode.toFile(filePath, qrValue, {
+    width: 512,
+    margin: 2,
+    color: { dark: '#212121', light: '#FFFFFF' },
+    errorCorrectionLevel: 'M',
+  });
+  const imageUrl = `/uploads/qr/${fileName}`;
+
+  if (existing) {
+    const oldName = existing.image_url.split('/uploads/qr/')[1];
+    if (oldName) {
+      const oldPath = path.join(config.uploadDir, 'qr', oldName);
+      if (fs.existsSync(oldPath)) { try { fs.unlinkSync(oldPath); } catch { /* ignore */ } }
+    }
+    return db.getOne(
+      `UPDATE dish_qr_codes SET qr_value=$2, image_url=$3, updated_at=now() WHERE id=$1 RETURNING *`,
+      [existing.id, qrValue, imageUrl]
+    );
+  }
+  return db.getOne(
+    `INSERT INTO dish_qr_codes (dish_id, qr_value, image_url) VALUES ($1,$2,$3) RETURNING *`,
+    [dishId, qrValue, imageUrl]
+  );
+}
+
+// ---------------- AUDIO (per place / per dish) ----------------
+
+/** GET /api/culinary-places/:placeId/audio — audio row for the requested language. */
+async function getAudioForPlace(placeId, language) {
+  const lang = String(language || 'vi').toLowerCase();
+  const translation = await db.getOne(
+    `SELECT t.id, t.name, t.description, l.code AS language_code
+     FROM culinary_place_translations t
+     JOIN languages l ON l.id = t.language_id
+     WHERE t.culinary_place_id = $1 AND l.code = $2`,
+    [placeId, lang]
+  );
+  if (!translation) {
+    throw new ApiError(404, 'NARRATION_UNAVAILABLE', `No ${lang} guide is available for this culinary place.`);
+  }
+  const audio = await db.getOne(
+    'SELECT file_url, duration FROM audio_guides WHERE translation_id = $1',
+    [translation.id]
+  );
+  return {
+    placeId,
+    language: lang,
+    title: translation.name,
+    audioUrl: audio?.file_url || null,
+    duration: audio?.duration ?? null,
+  };
+}
+
+/** GET /api/dishes/:dishId/audio — audio row for the requested language. */
+async function getAudioForDish(dishId, language) {
+  const lang = String(language || 'vi').toLowerCase();
+  const translation = await db.getOne(
+    `SELECT t.id, t.name, t.description, l.code AS language_code
+     FROM dish_translations t
+     JOIN languages l ON l.id = t.language_id
+     WHERE t.dish_id = $1 AND l.code = $2`,
+    [dishId, lang]
+  );
+  if (!translation) {
+    throw new ApiError(404, 'NARRATION_UNAVAILABLE', `No ${lang} audio is available for this dish.`);
+  }
+  const audio = await db.getOne(
+    'SELECT file_url, duration FROM dish_audio_guides WHERE translation_id = $1',
+    [translation.id]
+  );
+  return {
+    dishId,
+    language: lang,
+    title: translation.name,
+    audioUrl: audio?.file_url || null,
+    duration: audio?.duration ?? null,
+  };
+}
+
+// ---------------- Language meta / TTS (unchanged from original) ----------------
+
 let languageCache = new Map();
 const LANGUAGE_CACHE_MS = 30000;
 
@@ -184,44 +270,29 @@ async function localeForLanguage(code) {
   return locale.toLowerCase().includes('-') ? locale : locale.toLowerCase();
 }
 
-/**
- * `tl` for the keyless Google Translate endpoint. It accepts a primary subtag
- * for most languages (fr, de, es…); Chinese needs a region, so zh-CN/zh-TW are
- * normalised here rather than in a lookup table admins would have to extend.
- */
 function tlForLocale(locale) {
   const lower = String(locale || '').toLowerCase();
   if (lower.startsWith('zh')) return lower.includes('tw') ? 'zh-TW' : 'zh-CN';
   return lower.split('-')[0] || 'vi';
 }
 
-/**
- * Read an optional per-provider voice out of the admin's `voice_note` field.
- * "Edge: fr-FR-HenriNeural" → 'fr-FR-HenriNeural' for the edge provider.
- */
 function voiceFromNote(note, provider) {
   if (!note || !provider) return null;
   const match = String(note).match(new RegExp(`${provider}\\s*[:=]\\s*([A-Za-z0-9_.-]+)`, 'i'));
   return match ? match[1] : null;
 }
 
-// ---------------- TTS (optional) ----------------
+// ---------------- TTS (unchanged) ----------------
+
 async function generateSpeech(text, languageCode) {
   const provider = String(config.ttsProvider || '').trim().toLowerCase();
   if (provider === 'none') {
-    throw new ApiError(
-      501,
-      'TTS_NOT_CONFIGURED',
-      'Server TTS is disabled (TTS_PROVIDER=none). Upload audio files manually or use the browser voice.'
-    );
+    throw new ApiError(501, 'TTS_NOT_CONFIGURED', 'Server TTS is disabled (TTS_PROVIDER=none). Upload audio files manually or use the browser voice.');
   }
 
   const meta = await languageMeta(languageCode);
   const locale = await localeForLanguage(languageCode);
 
-  // Preferred provider first, then the keyless Google Translate voice as a
-  // safety net. A provider outage (edge-tts returns 403), a missing API key or
-  // a language it has no voice for must never leave a translation silent.
   const chain = [];
   if (provider === 'google') chain.push(['google', () => generateWithGoogle(text, locale, meta.voice_note)]);
   else if (provider === 'elevenlabs') chain.push(['elevenlabs', () => generateWithElevenLabs(text, locale, meta.voice_note)]);
@@ -242,10 +313,6 @@ async function generateSpeech(text, languageCode) {
   throw lastError || new ApiError(502, 'TTS_PROVIDER_ERROR', 'TTS provider returned no audio.');
 }
 
-// Built-in native voice per provider (edge-tts / google-cloud / elevenlabs) for
-// the languages this project ships with. It is a default, not a requirement:
-// an admin can override it per language through `voice_note`, and a language
-// with no entry here simply falls back to the keyless voice below.
 const VOICE_BY_TL = {
   vi: { edge: 'vi-VN-HoaiMyNeural', google: 'vi-VN-Neural-Female', elevenlabs: '21m00Tcm4TlvDq8ikWAM' },
   zh: { edge: 'zh-CN-XiaoxiaoNeural', google: 'zh-CN-Standard-A', elevenlabs: 'MF3mGyEYCl7XYWbV9V6O' },
@@ -254,13 +321,6 @@ const VOICE_BY_TL = {
   en: { edge: 'en-US-AriaNeural', google: 'en-US-Neural2-C', elevenlabs: '21m00Tcm4TlvDq8ikWAM' },
 };
 
-// Provider voice for a locale: the admin's `voice_note` wins, then the built-in
-// default matched on the primary subtag (so `zh-CN`, `zh-TW` and `zh` all hit
-// the Chinese voice), then '' when the provider takes no voice id
-// (google-translate returns a `tl` only).
-//
-// An empty string is not an error by itself — generateSpeech falls back to the
-// keyless provider when a provider has no voice for a language.
 function voiceForLanguage(locale, provider, voiceNote) {
   if (!provider) return '';
   const override = voiceFromNote(voiceNote, provider);
@@ -269,12 +329,11 @@ function voiceForLanguage(locale, provider, voiceNote) {
   return VOICE_BY_TL[primary]?.[provider] || '';
 }
 
-// Endpoint giới hạn ~200 ký tự/lần gọi → chia nhỏ theo câu rồi ghép MP3 lại.
 function chunkText(text, max = 190) {
   const clean = String(text).replace(/\s+/g, ' ').trim();
   if (!clean) return [];
   if (clean.length <= max) return [clean];
-  const sentences = clean.split(/(?<=[.!?。！？…])\s+/);
+  const sentences = clean.split(/(?<=[.!?。！？…])\\s+/);
   const chunks = [];
   let cur = '';
   const push = () => { if (cur.trim()) chunks.push(cur.trim()); cur = ''; };
@@ -333,9 +392,7 @@ async function generateWithGoogleTranslate(text, languageCode) {
   };
 }
 
-// ---- Background auto-TTS: guide mở mà bản dịch chưa có audio → tự tạo, lưu vào DB ----
 const ttsInFlight = new Set();
-
 const TTS_TIMEOUT_MS = 20000;
 
 function withTimeout(promise, ms, label) {
@@ -345,7 +402,6 @@ function withTimeout(promise, ms, label) {
       const timedOut = new Error(`${label || 'TTS'} timed out after ${ms}ms`);
       reject(timedOut);
     }, ms);
-    // reset timeout on settle so a slow-but-successful audio is not killed
     promise.then(() => {
       if (timer.refresh) clearTimeout(timer.refresh);
       timer.refresh = undefined;
@@ -360,20 +416,14 @@ function withTimeout(promise, ms, label) {
 
 function scheduleTranslationAudio(translation) {
   if (!translation?.id || ttsInFlight.has(translation.id)) return false;
-  // ~30s clip: core fields in full, then history/culture/tips while time allows
-  // (see utils/narration). Every entry point builds the same text.
   const text = narration.placeNarration(translation, translation.language_code);
   if (!text) return false;
   ttsInFlight.add(translation.id);
-  setImmediate(() => {      // Each language is narrated by a native voice; Edge/Google have their own
-      // voice files, so the generated MP3 runs the full ~30s and is
-      // self-contained.
+  setImmediate(() => {
     withTimeout(
       generateSpeech(text, translation.language_code)
         .then((result) => attachAudio(translation.id, result))
         .catch((err) => {
-          // offline / provider lỗi → bỏ qua, browser TTS vẫn fallback
-          // but keep the message visible in the log so admins can react
           console.warn(`[audio] TTS failed for translation ${translation.id}:`, err.message);
         })
         .finally(() => ttsInFlight.delete(translation.id)),
@@ -385,8 +435,6 @@ function scheduleTranslationAudio(translation) {
 }
 
 async function generateWithEdgeTTS(text, locale, voiceNote) {
-  // Microsoft Edge TTS (free, no API key required).
-  // Uses the Python `edge-tts` package installed in the container.
   const voice = voiceForLanguage(locale, 'edge', voiceNote);
   if (!voice) {
     throw new ApiError(501, 'TTS_NOT_CONFIGURED', `Edge TTS has no voice for "${locale}" — set one in the language's voice_note field.`);
@@ -417,8 +465,6 @@ async function generateWithEdgeTTS(text, locale, voiceNote) {
           voice: `edge-${voice}`,
         });
       } else {
-        // edge-tts creates the target file before it fails, so a rejected run
-        // would otherwise leave a 0-byte mp3 behind for every retry.
         try { if (fs.existsSync(filePath) && fs.statSync(filePath).size === 0) fs.unlinkSync(filePath); } catch { /* ignore */ }
         reject(new ApiError(502, 'TTS_PROVIDER_ERROR', `Edge TTS failed: ${stderr || 'Unknown error'}`));
       }
@@ -427,20 +473,15 @@ async function generateWithEdgeTTS(text, locale, voiceNote) {
 }
 
 async function generateWithElevenLabs(text, locale, voiceNote) {
-  // ElevenLabs TTS via REST API. Requires TTS_API_KEY (xi-api-key) and internet access.
-  // Uses multilingual v2 model with voices that support multiple languages.
   if (!config.ttsApiKey) {
     throw new ApiError(501, 'TTS_NOT_CONFIGURED', 'TTS_API_KEY (ElevenLabs xi-api-key) is missing.');
   }
-  // Voice mapping for target languages (using ElevenLabs voices optimized for each language).
-  // Replace these voice IDs with your preferred voices from https://elevenlabs.io/app/voice-library
-  // Override per language from the dashboard via `voice_note` = "ElevenLabs: <voice-id>".
   const voiceMap = {
-    vi: '21m00Tcm4TlvDq8ikWAM',  // Rachel - multilingual v2, good for Vietnamese
-    zh: 'MF3mGyEYCl7XYWbV9V6O',  // Elli - Chinese (multilingual v2)
-    ko: 'MF3mGyEYCl7XYWbV9V6O',  // Elli - Korean (multilingual v2)
-    ja: 'MF3mGyEYCl7XYWbV9V6O',  // Elli - Japanese (multilingual v2)
-    en: '21m00Tcm4TlvDq8ikWAM',  // Rachel - English
+    vi: '21m00Tcm4TlvDq8ikWAM',
+    zh: 'MF3mGyEYCl7XYWbV9V6O',
+    ko: 'MF3mGyEYCl7XYWbV9V6O',
+    ja: 'MF3mGyEYCl7XYWbV9V6O',
+    en: '21m00Tcm4TlvDq8ikWAM',
   };
   const primary = String(locale || '').toLowerCase().split('-')[0];
   const voiceId = voiceFromNote(voiceNote, 'elevenlabs') || voiceMap[primary] || voiceMap.vi;
@@ -487,10 +528,6 @@ async function generateWithElevenLabs(text, locale, voiceNote) {
 }
 
 async function generateWithGoogle(text, locale, voiceNote) {
-  // Google Cloud TTS via REST API. Requires TTS_API_KEY (API key) and internet access.
-  // Each language is narrated by a native voice of that language; the locale
-  // comes from the language registry (`bcl` → `code`), so a newly added
-  // language works without touching this file.
   if (!config.ttsApiKey) {
     throw new ApiError(501, 'TTS_NOT_CONFIGURED', 'TTS_API_KEY is missing.');
   }
@@ -501,14 +538,11 @@ async function generateWithGoogle(text, locale, voiceNote) {
     input: { text },
     voice: voiceName
       ? { languageCode: languageCodeFull, name: voiceName, ssmlGender: 'FEMALE' }
-      // No known voice for this locale: let Google pick one for languageCode.
       : { languageCode: languageCodeFull, ssmlGender: 'FEMALE' },
     audioConfig: { audioEncoding: 'MP3', speakingRate: 1.0 },
   });
 
-  // First the configured voice, then Google's own choice for the locale.
   const attempts = [voice || null, null].filter((name, index, all) => all.indexOf(name) === index);
-
   let audioContent = null;
   let lastError = null;
   for (const voiceOfAttempt of attempts) {
@@ -554,7 +588,9 @@ async function generateWithGoogle(text, locale, voiceNote) {
 
 module.exports = {
   getAudioForTranslation, attachAudio, deleteAudio, deleteAudioFile,
-  getQR, generateQR, resolveQrBaseUrl,
+  getQR, generateQR,
+  getDishQR, generateDishQR,
+  getAudioForPlace, getAudioForDish,
   generateSpeech, scheduleTranslationAudio,
   localeForLanguage, invalidateLanguageCache,
 };

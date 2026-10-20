@@ -32,9 +32,7 @@ export default function PublicLayout() {
                 <option key={l.code} value={l.code}>{l.native_name}</option>
               ))}
             </select>
-            <button className="btn-scan" onClick={() => navigate('/explore?focus=scan')}>
-              ⟲ {t('scanQr')}
-            </button>
+
           </div>
         </div>
       </nav>

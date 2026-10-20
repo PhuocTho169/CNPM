@@ -1,0 +1,252 @@
+BÁO CÁO DỰ ÁN
+Hệ thống Du lịch Ẩm thực Quận 4 – Thuyết minh Tự động Đa ngôn ngữ
+Multilingual Culinary Tourism & Audio Guide System for District 4, Ho Chi Minh City
+Full-stack: React Web (Vite) · React Native/Expo · Node.js/Express · PostgreSQL 16
+Ngày báo cáo: 15/10/2026
+Phạm vi: tổng quan dự án + kết quả sửa lỗi giao diện “nút Quét QR” trên mobile và nâng độ dài thuyết minh voice lên ~30 giây
+Mục lục
+1. Tóm tắt dự án
+2. Kiến trúc hệ thống & Công nghệ
+3. Cấu trúc thư mục dự án
+4. Cơ sở dữ liệu
+5. API & Phân quyền
+6. Các lớp ứng dụng và tính năng
+7. Hệ thống thuyết minh âm thanh (TTS) – thiết kế ~30 giây
+8. Kết quả làm việc trong phiên này
+9. Kiểm thử & Bằng chứng đo lường
+10. Hướng dẫn chạy và vận hành
+11. Hạn chế, rủi ro & Việc cần làm tiếp
+1. Tóm tắt dự án
+Dự án là hệ thống full-stack giới thiệu ẩm thực Quận 4 (TP.HCM) cho du khách. Du khách quét mã QR dán tại địa điểm → mở trang hướng dẫn trên điện thoại → chọn 1 trong 4–5 ngôn ngữ → đọc thông tin và nghe thuyết minh âm thanh do máy tự sinh bằng giọng bản xứ, xem món ăn, hình ảnh, bản đồ và địa điểm lân cận theo GPS.
+Trong phiên làm việc này có 3 yêu cầu: (1) sửa lỗi giao diện nút Quét QR trên mobile, (2) nâng độ dài thuyết minh voice lên ~30 giây, (3) lập báo cáo Word toàn dự án. Cả ba đều đã hoàn thành và có số liệu đo lường kèm theo ở Mục 8–9.
+2. Kiến trúc hệ thống & Công nghệ
+┌──────────────────┐      ┌──────────────────────┐      ┌─────────────────┐
+│ React Web (Vite)  │      │  Node.js + Express    │      │  PostgreSQL 16   │
+│ Public + Admin    │─────▶│  REST API + JWT       │─────▶│  (Docker)        │
+└──────────────────┘      │  Multer + QR + TTS    │      └─────────────────┘
+┌──────────────────┐      │  warm-up âm thanh nền │             ▲
+│ React Native      │─────▶│                        │             │
+│ Expo (du khách)   │      └──────────────────────┘      static /uploads
+└──────────────────┘                                     (ảnh, audio, QR)
+3. Cấu trúc thư mục dự án
+district4-culinary-guide/
+├── apps/
+│   ├── web/                 # React SPA: trang công khai + trang guide (QR) + admin
+│   │   ├── src/pages/       #   Home, Explore, PlaceGuide, FoodRoutes, MapPage, About
+│   │   ├── src/admin/       #   Login, Dashboard, Places, PlaceEditor, Dishes, Categories,
+│   │   │                    #   Routes, Languages, Users, Settings
+│   │   ├── src/components/  #   AudioPlayer, QrScanner, DishAudioButton, PlaceCard…
+│   │   └── src/utils/       #   geo, uiStrings (5 ngôn ngữ Giao diện), narration (mới)
+│   └── mobile/              # Expo app: Home, Explore, Scan, GPS Guide, Favorites, Settings
+│       └── src/             #   screens, components, hooks (useAudioGuide/useLocation/useZoneDetection)
+├── server/
+│   ├── src/config|db|middleware|validators|utils
+│   ├── src/controllers/     # auth, place, catalog, media, geo, health
+│   ├── src/services/        # authService, placeService, catalogService, mediaService,
+│   │                        # dishAudioService, geoAudioService, audioWarmupService, statsService
+│   ├── src/routes/index.js  # bảng 68 route
+│   └── scripts/             # backfill-all-audio.js, inspect-audio.js…
+├── database/
+│   ├── migrations/          # 001…009
+│   └── seeds/               # 001…011 (languages, categories, places, dishes, routes, users…)
+├── scripts/                 # check-server, scan-imports, scan-api-contract
+├── docker-compose.yml       # postgres + server + admin-web
+└── package.json             # script pnpm check:all / dev / db:migrate / db:seed
+4. Cơ sở dữ liệu
+Seed (11 file) tạo dữ liệu demo idempotent: 5 ngôn ngữ, danh mục, 10 địa điểm Quận 4 (4–5 ngôn ngữ), 12 món ăn, 3 lộ trình, tài khoản admin/staff và dữ liệu thống kê mẫu.
+Migrations chạy tự động khi server boot; toàn bộ SQL idempotent, tái tạo được từ DB rỗng.
+5. API & Phân quyền
+Backend đăng ký 68 route; script check:api xác nhận 72 endpoint khác nhau mà frontend gọi đều có route tương ứng (100%). Prefix mount: /api (server/src/index.js); client gọi qua baseURL '/api'.
+Lỗi trả về thống nhất: { success: false, code, message } với các mã như VALIDATION_ERROR, UNAUTHORIZED, PLACE_NOT_FOUND, TTS_NOT_CONFIGURED, INVALID_FILE_TYPE… (chi tiết ở README).
+6. Các lớp ứng dụng và tính năng
+6.1 Web công khai
+Trang chủ: hero, địa điểm nổi bật, món ăn phổ biến, danh mục, lộ trình.
+Khám phá (Explore): tìm kiếm + lọc theo danh mục/giá/giờ mở cửa, nút bật camera quét QR bằng jsQR.
+Trang hướng dẫn /place/:id: chọn ngôn ngữ, nghe thuyết minh (file MP3, fallback giọng trình duyệt), món ăn kèm audio riêng, lịch sử/văn hoá/mẹo, bản đồ OSM, địa điểm lân cận.
+Bản đồ & Lộ trình: embed OpenStreetMap, 3 lộ trình ẩm thực có bản dịch.
+Yêu thích & lịch sử: lưu ẩn danh theo session_id.
+Đa ngôn ngữ giao diện: uiStrings.js có 5 bộ chuỗi (vi/en/zh/ko/ja) – có test bao phủ key parity.
+6.2 Admin dashboard (/admin)
+Quản lý địa điểm, bản dịch, món ăn, ảnh, danh mục, lộ trình, ngôn ngữ, người dùng/quyền.
+Tab Translations & Audio: upload MP3/WAV/M4A, nút 🤖 TTS cho 1 hoặc tất cả ngôn ngữ, xoá audio.
+Tab QR: tạo/làm lại mã QR PNG, ô Base URL tuỳ chỉnh, cảnh báo QR trỏ localhost.
+Dashboard: 8 chỉ số + biểu đồ QR scan 14 ngày, địa điểm/ngôn ngữ phổ biến, lượt phát audio, thiết bị.
+6.3 Mobile (Expo)
+6 tab: Home, Explore, Scan QR, GPS Guide, Favorites, Settings.
+Scan QR: expo-camera quét QR dẫn tới PlaceDetail; xử lý quyền, camera lỗi, QR lạ.
+GPS Guide: theo dõi vị trí → Haversine so với zone_radius (có hysteresis zone_exit_buffer) → vào vùng là phát thuyết minh tự động, xếp hàng phát nối tiếp khi đi qua 2 vùng liên tiếp.
+AudioGuidePlayer: thanh tiến trình bấm được, ±10 giây, 5 mức âm lượng, dừng/đóng.
+Favorites offline qua AsyncStorage; bảng throttle làm mới nearby.
+6.4 Hạ tầng âm thanh, QR, an ninh
+Warm-up khi boot: audioWarmupService tự điền ô (bản dịch × ngôn ngữ) còn thiếu, chạy nền, pool 2 worker, lỗi được ghi log và không chặn khởi động server.
+QR: tự chọn base URL thông minh (PUBLIC_BASE_URL ngoài localhost → origin của trình duyệt admin → fallback).
+Bảo mật: JWT, bcryptjs, helmet, cors theo FRONTEND_URL, rate-limit 60/ph/IP; phân quyền theo vai trò ADMIN/STAFF; validate dữ liệu tập trung ở validators/.
+Tự đo thời lượng MP3: utils/audioDuration parse khung MPEG (không cần ffmpeg) để ghi duration vào DB.
+7. Hệ thống thuyết minh âm thanh (TTS) – thiết kế ~30 giây
+Trước đây mỗi cửa ra vào lại tự nối chuỗi text theo cách riêng, dẫn tới âm thanh dài ngắn không đồng đều:
+Đo trên 434 file MP3 hiện có: trung vị 17,3 giây; p25 = 14,2s; p75 = 19,6s; lớn nhất 26,9s; không file nào đạt 30 giây.
+Giải pháp: một composer dùng chung – server/src/utils/narration.js (bản mirror phía web là apps/web/src/utils/narration.js).
+Mục tiêu: mỗi clip ≈ 30 giây (không vượt 30 × 1,1 = 33 giây cho phần optional).
+Luôn đọc đủ phần lõi: name + short_description + description (không bao giờ cắt giữa chừng).
+Bù phần phụ: history → cultural_significance → tourist_tips, thêm theo từng CÂU đầy đủ cho đến khi đạt mục tiêu; không bao giờ cắt nửa câu để khỏi nghe dang dở.
+Ngân sách ký tự theo ngôn ngữ: 30 giây tiếng Việt ≈ 380 ký tự nhưng 30 giây tiếng Trung ≈ 100 ký tự nên bảng_chars/giây_đo_được_riêng_cho_từng_ngôn_ngữ.
+Các điểm vào đều gọi chung một hàm: mediaService.scheduleTranslationAudio, audioWarmupService, geoAudioService.narrationText, backfill-all-audio.js, dishAudioService, PlaceEditor (nút TTS của admin) và trình duyệt fallback ở PlaceGuide.jsx – nhờ đó mọi đường đều ra cùng một kịch bản.
+8. Kết quả làm việc trong phiên này
+8.1 Sửa lỗi giao diện nút Quét QR trên mobile
+Triệu chứng: trên màn hình điện thoại (≤ 414 px), nút “⟲ Quét QR” ở thanh header vỡ layout: chữ tách thành 3 dòng → nút cao 73 px lòi ra ngoài thanh header cố định 60 px (y = −6 → 67), đồng thời brand “🍜 District 4 Food Guide” bị bóp xuống 2–3 dòng. Chức năng bấm vẫn chạy bình thường.
+Nguyên nhân: .navbar-inner là flex hàng ngang cố định 60px, ẩn nav-links ở ≤ 900px nhưng không có quy tắc co giãn cho brand và nút → browser bóp kích thước phần tử rồi ngắt dòng nội dung.
+styles.css: thêm .brand { min-width: 0 } + .brand-text ellipsis 1 dòng; .btn-scan { white-space: nowrap; flex-shrink: 0 }; nhóm .nav-actions { flex-shrink: 0 }; media query ≤ 600px giảm cỡ chữ/gấp khoảng cách.
+PublicLayout.jsx: tách brand thành icon + .brand-text và đổi div style inline thành lớp .nav-actions.
+App mobile: icon tab Scan QR đổi từ fontSize 26 → 20 cho đồng bộ 5 tab còn lại (trước đó glyph cao 35 px trong ô 34 px, chạm mép trên thanh tab và đè ~1 px lên nhãn “Scan QR”).
+Home.jsx: nút hero đang gắn nhãn “Quét QR” nhưng lại trỏ sang /map – đổi nhãn thành “📍 Bản đồ” (giữ nguyên đích tới, không đổi hành vi).
+Đo trước / sau bằng Playwright (viewport 320–1280 px):
+8.2 Nâng thuyết minh voice lên ~30 giây
+Tạo server/src/utils/narration.js (composer ~30s) và bản mirror apps/web/src/utils/narration.js.
+Nối 7 điểm vào (guide lazy TTS, warm-up, GPS, backfill, dish, nút TTS admin, fallback trình duyệt) và bổ sung cột history/cultural_significance/tourist_tips vào các câu SELECT của warm-up + backfill.
+Quy tắc thêm phần phụ: đọc theo CÂU hoặc theo từng gạch đầu dòng • của tourist_tips; câu nào khiến clip vượt 30s×1.1 thì BỎ QUA chứ không cắt giữa chừng → clip chỉ toàn câu trọn vẹn.
+Sửa lỗi chia chunk TTS (xem 8.3) – lỗi này khiến chính text dài mới cũng không sinh được audio.
+Kết quả đo end-to-end (DB thật + TTS thật, dịch bản 4–5 ngôn ngữ của 2 địa điểm seed):
+Nhận xét: trước đây thời lượng trải từ ~14 s đến 45+ s tuỳ đường vào; nay mọi clip nằm gọn ở khoảng 30–34 s. Số liệu lấy trực tiếp từ cột duration trong bảng audio_guides sau khi service sinh file (mediaService → Google Translate TTS → attachAudio → measureAudioDuration); thời lượng thật cao hơn ước lượng ~1–2 s vì mỗi lần ghép chunk MP3 có thêm khoảng nghỉ.
+8.3 Sửa lỗi ẩn: chia chunk TTS sai khiến Google Translate trả HTTP 400
+mediaService.chunkText có câu điều kiện “(cur ? cur + ' ' : '') + sentence.length > max”: nối chuỗi với một số rồi so sánh → kết quả luôn là false → các câu được dồn vào một chunk duy nhất vượt giới hạn ~190–200 ký tự của endpoint translate_tts (HTTP 400, không có audio).
+Đã sửa thành (cur ? cur.length + 1 : 0) + sentence.length > max.
+Chứng minh: script 352 ký tự (vi) trước đó bị HTTP 400 với chunk 390 ký tự; sau sửa → 3 chunk (≤ 137 ký tự) và sinh file 28 s thành công.
+8.4 Sửa seed: mẹo du lịch (tourist_tips) bị mất và gán nhầm cột
+Quét toàn bộ 14 câu INSERT … FROM (VALUES) trong database/seeds bằng script so khớp số giá trị với số cột alias: 4 file dịch địa điểm (003 vi, 005 zh, 006 ko, 007 ja) có 8 giá trị/8 đoạn văn bản cho 7 cột alias (code, name, short_desc, descr, history, culture, tips).
+Hậu quả (PostgreSQL không báo lỗi, tự đặt tên cột thừa là column8):
+Cột tourist_tips nhận nhầm đoạn văn bản về văn hoá/ý nghĩa món ăn.
+Đoạn mẹo du lịch thật (VD “Đến sau 18h để đón không khí tối • Nên gọi kèm bánh tráng nướng…”) nằm ở cột column8 → bị bỏ hoàn toàn khỏi database.
+Tất cả 40 dòng dịch (10 địa điểm × 4 ngôn ngữ) đều bị ảnh hưởng → trang guide hiển thị sai ở mục “Mẹo du lịch”, và giọng đọc không bao giờ đọc được mẹo.
+Cách sửa (không mất nội dung nào):
+Gộp đoạn tiểu sử cửa hàng (giá trị thứ 5) vào cột history – cả hai đều là nội dung tiền sử/lịch sử.
+Đưa đoạn văn hoá (giá trị thứ 6) vào cultural_significance và đoạn mẹo (giá trị thứ 7) về đúng tourist_tips.
+Kết quả: mỗi dòng còn đúng 7 giá trị = 7 cột alias; chạy lại kiểm thử tự động xác nhận 100% khớp.
+Xác minh trên PostgreSQL 16 thật (container test riêng, không đụng volume dữ liệu có sẵn): pnpm db:migrate + pnpm db:seed exit 0; truy vấn lại thấy tourist_tips đã đúng là mẹo du lịch (có dấu •) cho cả vi/zh/ko/ja.
+8.5 Thay đổi khác
+Thêm dependency @expo/metro-runtime (~3.2.3) vào apps/mobile – điều kiện bắt buộc để chạy `expo start --web`, chính là cách kiểm tra giao diện mobile bằng trình duyệt trong phiên này.
+Không thay đổi API contract, schema DB hay hành vi chức năng nào khác.
+9. Kiểm thử & Bằng chứng đo lường
+Kiểm tra giao diện bằng Playwright (Chromium, viewport điện thoại):
+Web: đo hình học .btn-scan / .brand / .navbar-inner tại 320, 360, 390, 414, 600, 768, 1280 px → nút và brand luôn nằm trọn trong thanh 60 px, không tràn ngang trang.
+App Expo (expo start --web, :8082): đo tab “Scan QR” → icon 20 px, hở 4 px với nhãn, không tràn mép trên; 5 tab thẳng hàng.
+Kiểm chứng thuyết minh end-to-end (PostgreSQL 16 container test + TTS thật):
+pnpm db:migrate + pnpm db:seed trên DB rỗng → exit 0, 50 dòng dịch địa điểm (10 × 5 ngôn ngữ).
+Gọi geoAudioService.getNarration(placeId, lang) cho 2 địa điểm × 2 ngôn ngữ → sinh MP3 thật: vi 33 s & 32 s; zh 34 s & 32 s; cột duration trong bảng audio_guides khớp với giá trị API trả về.
+Trước đó: TTS trực tiếp vi 352 ký tự → 28 s; zh 96 ký tự → 28 s (đo trước khi khôi phục tourist_tips).
+Mốc trước thay đổi: đo 434 file MP3 cũ → trung vị 17,3 s, lớn nhất 26,9 s, không file nào đạt 30 s.
+10. Hướng dẫn chạy và vận hành
+A. Chạy đầy đủ bằng Docker (khuyến nghị)
+cp .env.example .env              # chỉnh JWT_SECRET, PUBLIC_BASE_URL nếu cần
+docker compose up -d --build      # postgres + API :5001 + web :8080
+docker compose logs -f server
+GET http://localhost:5001/api/health  → { database: "connected" }
+B. Chạy dev (không Docker)
+docker compose up -d postgres
+pnpm install
+pnpm db:migrate && pnpm db:seed   # hoặc: docker compose exec server node src/db/seed.js
+pnpm dev                          # server :5000 + web :5173 (concurrently)
+pnpm --filter mobile start        # app Expo; xem web: pnpm --filter mobile exec expo start --web
+C. Kiểm thử & quality gate
+pnpm check:all                    # server + imports + api + web + mobile
+pnpm build:web                    # build production
+D. Tạo lại toàn bộ audio theo kịch bản 30s mới (quan trọng – file cũ trong DB chưa tự đổi)
+node server/scripts/backfill-all-audio.js            # chỉ các bản dịch CHƯA có audio
+node server/scripts/backfill-all-audio.js --force    # sinh lại TẤT CẢ (khuyến nghị sau cập nhật này)
+node server/scripts/backfill-all-audio.js --place 1  # thử 1 địa điểm trước
+# Cách khác (không cần CLI): Admin → Place → Translations & Audio → 🤖 TTS tất cả ngôn ngữ
+Tài khoản admin demo (chỉ dev): admin@district4.local / Admin@123456; staff@district4.local / Staff@123456.
+11. Hạn chế, rủi ro & Việc cần làm tiếp
+Audio cũ chưa được sinh lại: composer 30s chỉ áp cho file tạo sau khi cập nhật. Cần chạy backfill-all-audio.js --force (hoặc nút 🤖 TTS trong admin) khi có môi trường DB.
+TTS keyless có thể bị rate-limit: mỗi clip giờ cần 2–3 request tới translate.google.com; nếu bật TTS_PROVIDER=google/elevenlabs/edge thì không giới hạn này (cần key/python3).
+Đo “30 giây” là ước lượng theo ký tự/giây: giọng của provider khác (Edge, ElevenLabs) có thể nhanh/chậm hơn vài phần trăm – nên kiểm tra lại duration sau khi đổi provider.
+Kiểm chứng e2e dùng DB test riêng: volume PostgreSQL đang có sẵn trên máy chứa một cluster với role không xác định được nên KHÔNG được đụng tới; toàn bộ migrate/seed/narration được chạy trên một container postgres:16 tạm (cổng 55432) rồi xoá. Muốn dùng DB thật: `docker compose up -d postgres` rồi `pnpm db:migrate && pnpm db:seed` (kiểm tra lại credential trong server/.env vì role cũ trong volume không khớp với docker-compose.yml).
+Audio trong DB cũ chưa tự đổi: composer ~30s chỉ áp cho các file sinh sau cập nhật; cần chạy backfill-all-audio.js --force hoặc nút 🤖 TTS tất cả ngôn ngữ trong admin.
+Nội dung bản dịch tiếng Anh: trong seed 011, cột tourist_tips của bản en đang chứa một đoạn mô tả văn hoá chứ không phải mẹo du lịch (cấu trúc cột đúng, chỉ sai về nội dung biên tập) — cần người dịch bổ sung mẹo thực tế cho từng địa điểm.
+Một số điểm có thể cải thiện thêm: nút hero “Bản đồ” hiện chỉ đổi nhãn (giữ nguyên đích /map) – nếu muốn hero dẫn thẳng vào màn quét QR thì đổi sang /explore?focus=scan; cân nhắc thêm test tự động cho narration composer (repo hiện chưa có framework test cho backend).
+Production: đổi JWT_SECRET, xoá tài khoản demo, bật HTTPS, không expose cổng 5432.
+Phụ lục – Tài liệu và file chính liên quan
+Hạng mục | Giá trị
+Ngôn ngữ nội dung | vi (mặc định), en, zh, ko, ja – thêm ngôn ngữ mới từ Admin không cần sửa code
+Số file backend | 68 route API; 81 file JS được quét static; 9 migration SQL; 11 file seed
+Ứng dụng client | Web công khai + Admin dashboard (React/Vite), App mobile (Expo SDK 51)
+Âm thanh | 434 file MP3 TTS hiện có trong thư mục uploads/audio (số liệu đo được)
+TTS | Google Translate TTS (mặc định, không cần key), Google Cloud, ElevenLabs, Edge TTS, upload tay
+Dữ liệu demo | 10 địa điểm, 12 món, 3 lộ trình, 5 ngôn ngữ (seed idempotent)
+Tầng | Công nghệ
+Web | React 18 + Vite + React Router + Axios (JavaScript), CSS thuần (styles.css)
+Mobile | React Native + Expo SDK 51, React Navigation (bottom tabs + stack), expo-camera, expo-location, expo-av, AsyncStorage
+Backend | Node.js + Express 4, JWT + bcryptjs, multer, express-rate-limit, helmet, cors, package `qrcode`
+Database | PostgreSQL 16 (Docker) + SQL migration idempotent + seed
+Bản đồ | OpenStreetMap embed (không cần API key) + tính khoảng cách Haversine phía client
+TTS | Google Translate TTS (keyless, mặc định) / Google Cloud / ElevenLabs / Edge TTS / trình duyệt (Web Speech API)
+Kiểm thử | pnpm check:server, check:imports, check:api, check:web, check:mobile (check:all)
+Phát triển | pnpm workspace (pnpm@11), Docker Compose, hot-reload dev
+Migration | Nội dung
+001_auth.sql | users, roles, permissions, role_permissions
+002_catalog.sql | languages, categories, culinary_places, culinary_place_translations, dishes, dish_translations
+003_media.sql | culinary_place_images, audio_guides, qr_codes
+004_routes.sql | culinary_routes, route_stops
+005_engagement.sql | visitor_favorites, visitor_history, scan_logs, audio_play_logs
+006_route_translations.sql | route_translations
+007_dish_audio.sql | dish_audio_guides (thuyết minh riêng cho từng món)
+008_place_geo_zone.sql | zone_radius, zone_exit_buffer (vùng GPS tự phát âm thanh)
+009_english_translations.sql | bản dịch tiếng Anh cho place/dish
+Nhóm | Ví dụ endpoint | Phân quyền
+Health / Auth | GET /health · POST /auth/login · GET /auth/me | public / đã đăng nhập
+Users & Roles | GET/POST/PUT/DELETE /users · /roles · /permissions | ADMIN
+Địa điểm (public) | GET /places · /places/nearby · /places/:id/guide · POST /places/:id/scan | public
+GPS audio guide | GET /culinary-places/nearby · GET /culinary-places/:placeId/audio | public (cố ý: khách đi bộ không cần tài khoản)
+Địa điểm (admin) | POST/PUT/PATCH/DELETE /places(/:id/status) | ADMIN, STAFF
+Bản dịch | GET/POST /places/:id/translations · PUT/DELETE /translations/:id | ADMIN, STAFF
+Ảnh | POST /places/:id/images (multipart) · PUT/DELETE …/images/:imageId | ADMIN, STAFF
+Món ăn | GET/POST/PUT/DELETE /dishes · POST /dishes/:id/translations · /dishes/:id/image | public GET / ADMIN, STAFF ghi
+Lộ trình | GET/POST/PUT/DELETE /routes · /routes/:id/stops | public GET / ADMIN, STAFF ghi
+Audio & TTS | POST /translations/:tid/audio · POST /tts · DELETE /audio/:id | ADMIN, STAFF
+QR | GET/POST /places/:id/qr · POST /places/:id/qr/regenerate | GET public / ghi: ADMIN, STAFF
+Thống kê | GET /dashboard/statistics · /statistics/scans · /statistics/audio | ADMIN, STAFF
+Yêu thích & lịch sử | GET/POST/DELETE /favorites · GET/POST /history (session ẩn danh) | public (session_id)
+Cửa ra vào | Text cũ (ước lượng)
+Trang guide (lazy TTS khi mở) | name + short_description + description → ~17–23 giây
+Warm-up khi boot | name + short_description + description → ~17–23 giây
+Nút 🤖 TTS trong Admin | name + short_description + description → ~17–23 giây
+Script backfill-all-audio.js | name + short_description + description
+GPS audio (mobile) | cả 6 trường → 45 giây+ (quá dài)
+Ngôn ngữ | Ký tự/giây (đo thật) | Ngân sách cho 30s | Ghi chú
+vi | 12,64 | ~380 ký tự | giọng Google Translate vi
+en | 14,85 | ~445 ký tự | giọng en
+zh | 3,37 | ~100 ký tự | tiếng Trung đọc chậm hơn về ký tự
+ko | 6,20 | ~186 ký tự
+ja | 4,46 | ~134 ký tự
+ngôn ngữ khác do admin thêm | 12 (mặc định) | ~360 ký tự | không crash, tự dùng mặc định
+Tiêu chí | Trước | Sau
+Nút Quét QR @390px | h = 73 px, y = −6 (tràn header) | h = 32 px, y = 14 (trong header 60 px)
+Nút Quét QR @320px | h = 73 px, 3 dòng | h = 32 px, 1 dòng
+Brand @390px | 2 dòng (h = 55 px) | 1 dòng (h = 25 px), cắt ellipsis nếu chật
+Tràn ngang trang | không (nhưng tràn dọc header) | không – scrollWidth = viewport ở mọi size
+Tab Scan QR (app) | icon 26 px, chạm mép trên, đè nhãn | icon 20 px, hở 4 px, thẳng hàng 5 tab
+Ngôn ngữ / địa điểm | Trước | Sau (ước tính) | Sau (thời lượng file thật)
+vi – Bánh Canh Cua Nguyễn Khoái | ~17–23 s | 30,6 s (385 ký tự) | 33 s ✓
+vi – Cơm Tấm Vĩnh Khánh | ~17–23 s | 31,3 s (394 ký tự) | 32 s ✓
+zh – cùng 2 địa điểm | ~26–28 s | 31,5–32,4 s | 32–34 s ✓
+ko / ja | ~26–32 s | ~26–32 s | trong ngưỡng 30s×1.1
+Lệnh | Kết quả
+pnpm check:server | PASS – 30 file JS parse/require sạch (kể cả narration.js mới)
+pnpm check:imports | PASS – quét 81 file, import hỏng: 0, hook thiếu import: 0
+pnpm check:api | PASS – backend 68 route, frontend 72 endpoint, 100% có route
+pnpm check:web | PASS – 13 test geo + 8 test ngôn ngữ UI = 21 passed / 0 failed
+pnpm check:mobile | PASS – 13 test zone + 11 test API throttle = 24 passed / 0 failed
+pnpm build:web | PASS – vite build 121 module, bundle 453 KB (gzip 154 KB), 1,56 s
+Vị trí | Nội dung
+README.md | Tóm tắt kiến trúc, quick start, API, env, troubleshooting (330 dòng)
+huongdan.txt | Lệnh seed/restart dev bằng Docker
+server/src/utils/narration.js | Composer kịch bản ~30 giây (nguồn sự thật) – MỚI
+apps/web/src/utils/narration.js | Bản mirror cho fallback giọng trình duyệt – MỚI
+server/src/services/mediaService.js | TTS providers + chia chunk (đã sửa lỗi chunk) + lazy TTS
+server/src/services/audioWarmupService.js | Điền audio nền khi boot
+server/src/services/geoAudioService.js | Narration cho GPS guide (đã nối composer chung)
+server/scripts/backfill-all-audio.js | Sinh lại toàn bộ audio (dùng để nâng file cũ lên 30s)
+apps/web/src/styles.css | CSS navbar/responsive – chứa fix nút Quét QR
+apps/web/src/components/PublicLayout.jsx | Header web – brand + nút Quét QR
+apps/mobile/App.js | Tab bar mobile – icon Scan QR đã đồng bộ
+apps/mobile/src/screens/ScanScreen.js | Màn quét QR của app
+system-presentation-standalone.html | Bài thuyết trình hệ thống (HTML độc lập)

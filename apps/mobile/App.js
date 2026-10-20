@@ -7,7 +7,6 @@ import { Text } from 'react-native';
 
 import HomeScreen from './src/screens/HomeScreen';
 import ExploreScreen from './src/screens/ExploreScreen';
-import ScanScreen from './src/screens/ScanScreen';
 import PlaceDetailScreen from './src/screens/PlaceDetailScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
@@ -35,17 +34,6 @@ function Tabs() {
         name="Explore"
         component={ExploreScreen}
         options={{ tabBarLabel: 'Explore', tabBarIcon: () => <Text style={{ fontSize: 20 }}>🧭</Text> }}
-      />
-      <Tab.Screen
-        name="Scan"
-        component={ScanScreen}
-        options={{
-          tabBarLabel: 'Scan QR',
-          // Same optical size as the other tab icons: at 26px the camera glyph
-          // was taller than the icon slot, touching the bar's top edge and
-          // crowding the "Scan QR" label.
-          tabBarIcon: () => <Text style={{ fontSize: 20 }}>📷</Text>,
-        }}
       />
       <Tab.Screen
         name="GPS Guide"

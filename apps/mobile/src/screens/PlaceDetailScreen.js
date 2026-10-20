@@ -8,10 +8,13 @@ import { api, getLanguage, getSessionId, apiErrorMessage } from '../api';
 import { isFavorite, toggleFavoriteLocal, pushHistory } from '../services/favorites';
 import useLanguages from '../hooks/useLanguages';
 import { t } from '../utils/i18n';
-const currentLocale = React.useMemo(() => languages.find((l) => l.code === lang)?.code || lang || 'vi', [languages, lang]);
-      <Text style={styles.h2}>📜 {t('historyTitle', currentLocale)}</Text>
+        {current?.history && (
+          <>
+            <Text style={styles.h2}>📜 {t('historyTitle', currentLocale)}</Text>
             <Text style={styles.body}>{current.history}</Text>
           </>
+        )}
+
         )}
 
         {current?.cultural_significance && (
@@ -248,28 +251,12 @@ export default function PlaceDetailScreen({ route }) {
         </View>
 
         {current?.description && (
-          <>
-            <Text style={styles.h2}>ℹ️ About this place</Text>
-            <Text style={styles.body}>{current.description}</Text>
-          </>
+          <Text style={styles.h2}>ℹ️ About this place</Text>
+          <Text style={styles.body}>{current.description}</Text>
         )}
 
-        {current?.history && (
-          <>
-            <Text style={styles.h2}>📜 {t('historyTitle', currentLocale)}</Text>
-            <Text style={styles.body}>{current.history}</Text>
-          </>
-        )}
 
-        {current?.cultural_significance && (
-          <>
-            <Text style={styles.h2}>🍜 {t('foodCulture', currentLocale)}</Text>
-            <Text style={styles.body}>{current.cultural_significance}</Text>
-          </>
-        )}
 
-        {current?.tourist_tips && (
-          <>
             <Text style={styles.h2}>💡 {t('touristTips', currentLocale)}</Text>
             {current.tourist_tips.split(' \u2022 ').filter(Boolean).map((tip) => (
               <Text key={tip} style={styles.body}>✔ {tip}</Text>

@@ -1,22 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
 import PlaceCard from '../components/PlaceCard';
-import QrScanner from '../components/QrScanner';
 
 export default function Explore() {
   const { lang, t } = useApp();
-  const [params, setParams] = useSearchParams();
-  const [scanning, setScanning] = useState(params.get('focus') === 'scan');
-
-  function closeScanner() {
-    setScanning(false);
-    if (params.get('focus') === 'scan') {
-      params.delete('focus');
-      setParams(params, { replace: true });
-    }
-  }
   const [categories, setCategories] = useState([]);
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,12 +38,6 @@ export default function Explore() {
       <h2 className="section-title">{t('explorePlaces')}</h2>
       <p className="section-sub">{t('exploreSub')}</p>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <button className="btn-scan" onClick={() => setScanning((s) => !s)}>
-          📷 {scanning ? t('close') : t('scanQr')}
-        </button>
-      </div>
-
       <div className="filter-bar" role="search">
         <input
           type="search"
@@ -85,8 +67,6 @@ export default function Explore() {
           ⭐ {t('recommended')}
         </label>
       </div>
-
-      {scanning && <QrScanner onClose={closeScanner} />}
 
       {loading ? (
         <div className="spinner" />

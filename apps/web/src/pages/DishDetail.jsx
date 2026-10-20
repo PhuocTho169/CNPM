@@ -44,6 +44,8 @@ export default function DishDetail() {
   const name = dish.name || dish.code;
   const audio = dish.audio;
   const narrationText = dishNarration(dish, lang);
+  const qrLink = dish.qr_value || null;
+  const hasQr = !!dish.qr_value;
 
   return (
     <div>
@@ -101,6 +103,23 @@ export default function DishDetail() {
           <section className="guide-section">
             <h2>{t('culturalInfo') || 'Thông tin văn hóa'}</h2>
             <div className="prose">{dish.cultural_information}</div>
+          </section>
+        )}
+
+        {/* QR mã (dành cho quét) */}
+        {hasQr && (
+          <section className="guide-section" style={{ marginBottom: '0.4rem', textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <strong style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>📱 Quét mã QR để xem hướng dẫn món này:</strong>
+              {dish.qr_image_url && (
+                <a href={dish.qr_image_url} download className="btn btn-ghost btn-sm" title="Tải PNG mã QR">
+                  ⬇ Tải QR
+                </a>
+              )}
+              <a className="btn btn-ghost btn-sm" href={qrLink} target="_blank" rel="noreferrer">
+                🔳 Mở /dish/{dish.id}
+              </a>
+            </div>
           </section>
         )}
 

@@ -179,6 +179,16 @@ export default function PlaceGuide() {
           audioPending={currentTranslation?.audio_pending}
         />
 
+        {/* QR code — hiển thị ảnh QR ngay trên phần nghe thuyết minh */}
+        {place.has_qr && place.qr_image_url && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <strong style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>{t('scanQrGuide')}</strong>
+              <img src={place.qr_image_url} alt="QR code" style={{ width: 72, height: 72, borderRadius: 6, border: '1px solid var(--border)' }} />
+            </div>
+          </div>
+        )}
+
         {/* About this place */}
         {currentTranslation?.description && (
           <section className="guide-section">

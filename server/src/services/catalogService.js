@@ -135,7 +135,10 @@ async function listDishes({ placeId, lang, q, status, page, limit, offset }) {
             p.code AS place_code, dt.name, dt.description, dt.ingredients,
             da.id AS audio_id, da.file_url, da.duration, da.source,
             (SELECT array_agg(l2.code ORDER BY l2.code) FROM dish_translations dt2
-              JOIN languages l2 ON l2.id = dt2.language_id WHERE dt2.dish_id = d.id) AS language_codes
+              JOIN languages l2 ON l2.id = dt2.language_id WHERE dt2.dish_id = d.id) AS language_codes,
+            (SELECT qr.qr_value FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_value,
+            (SELECT qr.image_url FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_image_url,
+            EXISTS (SELECT 1 FROM dish_qr_codes qr2 WHERE qr2.dish_id = d.id) AS has_qr
      FROM dishes d
      LEFT JOIN categories c ON c.id = d.category_id
      LEFT JOIN culinary_places p ON p.id = d.culinary_place_id
@@ -164,6 +167,9 @@ async function listDishes({ placeId, lang, q, status, page, limit, offset }) {
         description: r.description,
         ingredients: r.ingredients,
         language_codes: r.language_codes || [],
+        has_qr: !!r.has_qr,
+        qr_value: r.qr_value || null,
+        qr_image_url: r.qr_image_url || null,
       };
       item.audio = r.audio_id
         ? { id: r.audio_id, file_url: r.file_url, duration: r.duration, source: r.source }
@@ -171,6 +177,28 @@ async function listDishes({ placeId, lang, q, status, page, limit, offset }) {
       return item;
     }),
     meta: { page, limit, total: total?.c || 0, total_pages: Math.ceil((total?.c || 0) / limit) },
+  };
+}
+
+async function getDishTranslation(dishId, lang) {
+  const row = await db.getOne(
+    `SELECT t.id, t.dish_id, t.language_id, l.code AS language_code,
+            t.name, t.description, t.ingredients, t.cultural_information
+     FROM dish_translations t
+     JOIN languages l ON l.id = t.language_id
+     WHERE t.dish_id = $1 AND l.code = $2`,
+    [dishId, lang]
+  );
+  if (!row) return null;
+  return {
+    id: row.id,
+    dish_id: row.dish_id,
+    language_id: row.language_id,
+    language_code: row.language_code,
+    name: row.name,
+    description: row.description,
+    ingredients: row.ingredients,
+    cultural_information: row.cultural_information,
   };
 }
 
@@ -182,7 +210,10 @@ async function getDish(id, lang) {
             da.id AS audio_id, da.file_url, da.duration, da.source,
             p.latitude, p.longitude, p.address, p.opening_time, p.closing_time,
             p.price_range AS place_price_range,
-            pi.image_url AS place_image_url
+            pi.image_url AS place_image_url,
+            (SELECT qr.qr_value FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_value,
+            (SELECT qr.image_url FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_image_url,
+            EXISTS (SELECT 1 FROM dish_qr_codes qr2 WHERE qr2.dish_id = d.id) AS has_qr
      FROM dishes d
      LEFT JOIN categories c ON c.id = d.category_id
      LEFT JOIN dish_translations dt ON dt.dish_id = d.id
@@ -222,6 +253,9 @@ async function getDish(id, lang) {
       price_range: row.place_price_range,
       primary_image: row.place_image_url,
     } : null,
+    has_qr: !!row.has_qr,
+    qr_value: row.qr_value || null,
+    qr_image_url: row.qr_image_url || null,
   };
   dish.audio = row.audio_id
     ? { id: row.audio_id, file_url: row.file_url, duration: row.duration, source: row.source }
@@ -230,11 +264,20 @@ async function getDish(id, lang) {
 }
 
 async function createDish(data) {
-  return db.getOne(
+  const dish = await db.getOne(
     `INSERT INTO dishes (code, culinary_place_id, category_id, price, image_url, is_signature, status)
      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
     [data.code, data.culinary_place_id, data.category_id, data.price, data.image_url, data.is_signature ?? false, data.status || 'PUBLISHED']
   );
+  // Auto-generate QR code for the new dish if it's published
+  if (dish && dish.status === 'PUBLISHED') {
+    try {
+      await media.generateDishQR(dish.id, { regenerate: false });
+    } catch (err) {
+      console.warn(`[catalog] Failed to auto-generate QR for dish ${dish.id}:`, err.message);
+    }
+  }
+  return dish;
 }
 
 async function updateDish(id, data) {
@@ -368,5 +411,6 @@ module.exports = {
   listCategories, createCategory, updateCategory, deleteCategory,
   listLanguages, createLanguage, updateLanguage, deleteLanguage,
   listDishes, getDish, createDish, updateDish, deleteDish, upsertDishTranslation,
+  getDishTranslation,
   listRoutes, getRoute, createRoute, updateRoute, deleteRoute, addStop, updateStop, deleteStop,
 };

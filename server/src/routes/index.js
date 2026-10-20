@@ -1,12 +1,13 @@
 const express = require('express');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { runUpload } = require('../middleware/upload');
+const media = require('../controllers/mediaController');
+const placeController = require('../controllers/placeController');
+const catalog = require('../controllers/catalogController');
+const guest = require('../routes/guest');
+const payment = require('../routes/payment');
 const health = require('../controllers/healthController');
 const auth = require('../controllers/authController');
-const places = require('../controllers/placeController');
-const catalog = require('../controllers/catalogController');
-const media = require('../controllers/mediaController');
-const geo = require('../controllers/geoController');
 
 const router = express.Router();
 
@@ -32,34 +33,48 @@ router.get('/languages', catalog.listLanguages);
 router.get('/categories', catalog.listCategories);
 
 // ---------- Public: places discovery ----------
-router.get('/places', places.list);
-router.get('/places/nearby', places.nearby);
-router.get('/places/:id/guide', places.publicGuide);
-router.post('/places/:id/scan', places.logScan);
-router.get('/places/:id', places.getOne);
+router.get('/places', placeController.list);
+router.get('/places/nearby', placeController.nearby);
+router.get('/places/:id/guide', placeController.publicGuide);
+router.post('/places/:id/scan', placeController.logScan);
+router.get('/places/:id', placeController.getOne);
 
-// ---------- Public: mobile GPS audio guide ----------
-// Geo-zone dataset and per-language narration. Public on purpose (spec rule
-// 13): walking up to a stall must not require an account.
-router.get('/culinary-places/nearby', geo.nearbyZones);
-router.get('/culinary-places/:placeId/audio', geo.narration);
+// ---------- Public: dishes ----------
+router.get('/dishes', catalog.listDishes);
+router.get('/dishes/:id', catalog.getDish);
+router.get('/dishes/:id/translation', media.dishTranslationAccess);
+router.post('/dishes', authenticate, requireRole('ADMIN', 'STAFF'), catalog.createDish);
+router.put('/dishes/:id', authenticate, requireRole('ADMIN', 'STAFF'), catalog.updateDish);
+router.post('/dishes/:id/image', authenticate, requireRole('ADMIN', 'STAFF'), runUpload('image'), catalog.uploadDishImage);
+router.delete('/dishes/:id', authenticate, requireRole('ADMIN', 'STAFF'), catalog.deleteDish);
+router.post('/dishes/:id/translations', authenticate, requireRole('ADMIN', 'STAFF'), catalog.upsertDishTranslation);
+
+// ---------- Public: audio & translations (guests may read, paywalled) ----------
+// GET /api/culinary-places/:placeId/audio?language=vi
+router.get('/culinary-places/:placeId/audio', media.audioAccess);
+// GET /api/dishes/:dishId/audio?language=vi
+router.get('/dishes/:dishId/audio', media.audioAccess);
+// GET /api/culinary-places/:placeId/translation?language=vi
+router.get('/culinary-places/:placeId/translation', media.translationAccess);
+// GET /api/dishes/:dishId/translation?language=vi
+router.get('/dishes/:dishId/translation', media.translationAccess);
 
 // ---------- Places admin CRUD ----------
-router.post('/places', authenticate, requireRole('ADMIN', 'STAFF'), places.create);
-router.put('/places/:id', authenticate, requireRole('ADMIN', 'STAFF'), places.update);
-router.patch('/places/:id/status', authenticate, requireRole('ADMIN', 'STAFF'), places.setStatus);
-router.delete('/places/:id', authenticate, requireRole('ADMIN'), places.remove);
+router.post('/places', authenticate, requireRole('ADMIN', 'STAFF'), placeController.create);
+router.put('/places/:id', authenticate, requireRole('ADMIN', 'STAFF'), placeController.update);
+router.patch('/places/:id/status', authenticate, requireRole('ADMIN', 'STAFF'), placeController.setStatus);
+router.delete('/places/:id', authenticate, requireRole('ADMIN'), placeController.remove);
 
 // Place translations (admin)
-router.get('/places/:id/translations', authenticate, requireRole('ADMIN', 'STAFF'), places.listTranslations);
-router.post('/places/:id/translations', authenticate, requireRole('ADMIN', 'STAFF'), places.upsertTranslation);
-router.put('/translations/:translationId', authenticate, requireRole('ADMIN', 'STAFF'), places.upsertTranslation);
-router.delete('/translations/:translationId', authenticate, requireRole('ADMIN', 'STAFF'), places.deleteTranslation);
+router.get('/places/:id/translations', authenticate, requireRole('ADMIN', 'STAFF'), placeController.listTranslations);
+router.post('/places/:id/translations', authenticate, requireRole('ADMIN', 'STAFF'), placeController.upsertTranslation);
+router.put('/translations/:translationId', authenticate, requireRole('ADMIN', 'STAFF'), placeController.upsertTranslation);
+router.delete('/translations/:translationId', authenticate, requireRole('ADMIN', 'STAFF'), placeController.deleteTranslation);
 
 // Place images (admin)
-router.post('/places/:id/images', authenticate, requireRole('ADMIN', 'STAFF'), runUpload('image'), places.addImage);
-router.put('/places/:id/images/:imageId', authenticate, requireRole('ADMIN', 'STAFF'), places.updateImage);
-router.delete('/places/:id/images/:imageId', authenticate, requireRole('ADMIN', 'STAFF'), places.deleteImage);
+router.post('/places/:id/images', authenticate, requireRole('ADMIN', 'STAFF'), runUpload('image'), placeController.addImage);
+router.put('/places/:id/images/:imageId', authenticate, requireRole('ADMIN', 'STAFF'), placeController.updateImage);
+router.delete('/places/:id/images/:imageId', authenticate, requireRole('ADMIN', 'STAFF'), placeController.deleteImage);
 
 // ---------- Languages admin ----------
 router.post('/languages', authenticate, requireRole('ADMIN'), catalog.createLanguage);
@@ -70,15 +85,6 @@ router.delete('/languages/:id', authenticate, requireRole('ADMIN'), catalog.dele
 router.post('/categories', authenticate, requireRole('ADMIN', 'STAFF'), catalog.createCategory);
 router.put('/categories/:id', authenticate, requireRole('ADMIN', 'STAFF'), catalog.updateCategory);
 router.delete('/categories/:id', authenticate, requireRole('ADMIN'), catalog.deleteCategory);
-
-// ---------- Dishes ----------
-router.get('/dishes', catalog.listDishes);
-router.get('/dishes/:id', catalog.getDish);
-router.post('/dishes', authenticate, requireRole('ADMIN', 'STAFF'), catalog.createDish);
-router.put('/dishes/:id', authenticate, requireRole('ADMIN', 'STAFF'), catalog.updateDish);
-router.post('/dishes/:id/image', authenticate, requireRole('ADMIN', 'STAFF'), runUpload('image'), catalog.uploadDishImage);
-router.delete('/dishes/:id', authenticate, requireRole('ADMIN', 'STAFF'), catalog.deleteDish);
-router.post('/dishes/:id/translations', authenticate, requireRole('ADMIN', 'STAFF'), catalog.upsertDishTranslation);
 
 // ---------- Culinary routes ----------
 router.get('/routes', catalog.listRoutes);
@@ -101,6 +107,17 @@ router.post('/tts', authenticate, requireRole('ADMIN', 'STAFF'), media.ttsGenera
 router.get('/places/:id/qr', media.getQR);
 router.post('/places/:id/qr', authenticate, requireRole('ADMIN', 'STAFF'), media.createQR);
 router.post('/places/:id/qr/regenerate', authenticate, requireRole('ADMIN', 'STAFF'), media.regenerateQR);
+
+// ---------- QR for dishes (admin) ----------
+router.get('/dishes/:id/qr', media.getDishQR);
+router.post('/dishes/:id/qr', authenticate, requireRole('ADMIN', 'STAFF'), media.createDishQR);
+router.post('/dishes/:id/qr/regenerate', authenticate, requireRole('ADMIN', 'STAFF'), media.regenerateDishQR);
+
+// ---------- Guest entitlements ----------
+router.use('/guest-sessions', guest);
+
+// ---------- Payments ----------
+router.use('/payments', payment);
 
 // ---------- Statistics ----------
 router.get('/dashboard/statistics', authenticate, requireRole('ADMIN', 'STAFF'), media.dashboardStats);
