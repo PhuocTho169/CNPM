@@ -2,7 +2,7 @@ import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 export default function PublicLayout() {
-  const { languages, lang, setLang, t } = useApp();
+  const { languages, lang, setLang, t, user, logout } = useApp();
   const navigate = useNavigate();
 
   return (
@@ -33,6 +33,25 @@ export default function PublicLayout() {
               ))}
             </select>
 
+            {user ? (
+              <span
+                className="btn btn-ghost btn-sm"
+                title={t('logout')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', cursor: 'default' }}
+              >
+                👤 {user.full_name || user.email}
+                <button
+                  type="button"
+                  onClick={() => { logout(); navigate('/'); }}
+                  style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--primary-dark)', fontWeight: 700, padding: '0 0.2rem' }}
+                  aria-label={t('logout')}
+                >
+                  ✕
+                </button>
+              </span>
+            ) : (
+              <Link to="/login" className="btn btn-ghost btn-sm">{t('login')} · {t('register')}</Link>
+            )}
           </div>
         </div>
       </nav>

@@ -6,18 +6,35 @@ export default function AdminDishes() {
   const [dishes, setDishes] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [qrBusy, setQrBusy] = useState(null);
+
+  const loadDishes = () => {
+    const qs = new URLSearchParams({ limit: 50, lang: 'vi' });
+    return api.get(`/dishes?${qs}`).then((res) => setDishes(res.data.data || []));
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(true);
-      const qs = new URLSearchParams({ limit: 50, lang: 'vi' });
-      api.get(`/dishes?${qs}`)
-        .then((res) => setDishes(res.data.data || []))
+      loadDishes()
         .catch((e) => setError(apiErrorMessage(e)))
         .finally(() => setLoading(false));
     }, 300);
     return () => clearTimeout(timer);
   }, []);
+
+  const regenerateDishQR = async (id) => {
+    setError(null);
+    setQrBusy(id);
+    try {
+      await api.post(`/dishes/${id}/qr/regenerate`);
+      await loadDishes();
+    } catch (e) {
+      setError(apiErrorMessage(e));
+    } finally {
+      setQrBusy(null);
+    }
+  };
 
   return (
     <>
@@ -47,9 +64,16 @@ export default function AdminDishes() {
                     {d.has_qr ? (
                       <>
                         <a className="btn btn-ghost btn-sm" href={d.qr_value} target="_blank" rel="noreferrer" title="Mở trang hướng dẫn">🔳 Xem</a>
-                        <a className="btn btn-ghost btn-sm" href={d.qr_image_url} download title="Tải PNG">⬇ PNG</a>
+                        <a className="btn btn-ghost btn-sm" href={d.qr_image_url} download title="Tải mã QR">⬇ QR</a>
+                        <button className="btn btn-ghost btn-sm" onClick={() => regenerateDishQR(d.id)} disabled={qrBusy === d.id} title="Tạo lại QR với địa chỉ hiện tại">
+                          {qrBusy === d.id ? '…' : '🔄'}
+                        </button>
                       </>
-                    ) : <span style={{ color: 'var(--text-2)' }}>—</span>}
+                    ) : (
+                      <button className="btn btn-sm btn-ghost" onClick={() => regenerateDishQR(d.id)} disabled={qrBusy === d.id} title="Tạo mã QR">
+                        {qrBusy === d.id ? '…' : 'QR'}
+                      </button>
+                    )}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
@@ -107,7 +131,7 @@ function DishQRDetail({ dishes }) {
                 )}
               </div>
               {d.has_qr && d.qr_image_url && (
-                <a className="btn btn-ghost btn-sm" href={d.qr_image_url} download title="Tải PNG">⬇ PNG</a>
+                <a className="btn btn-ghost btn-sm" href={d.qr_image_url} download title="Tải mã QR">⬇ QR</a>
               )}
             </div>
           </div>

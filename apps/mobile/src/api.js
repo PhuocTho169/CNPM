@@ -6,6 +6,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // on the same local network.
 export const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+// Base of the web guide website (nginx :8080 proxies /api + /uploads).
+// Overridable via EXPO_PUBLIC_WEB_URL for when the web runs elsewhere.
+export const WEB_BASE = process.env.EXPO_PUBLIC_WEB_URL
+  || API_BASE.replace(/\/api\/?$/, '').replace(/(:\d+)\b$/, ':8080');
+
 export const isUnsafeBaseUrl = API_BASE.includes('localhost') || API_BASE.includes('127.0.0.1');
 
 export const api = axios.create({ baseURL: API_BASE, timeout: 15000 });

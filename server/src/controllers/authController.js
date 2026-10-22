@@ -30,6 +30,25 @@ async function me(req, res, next) {
   }
 }
 
+// Public visitor sign-up. Keeps the same response shape as login so the
+// frontend can treat both flows identically.
+async function register(req, res, next) {
+  const { ApiError } = require('../utils/errors');
+  try {
+    const { email, password, full_name } = req.body || {};
+    requireFields(req.body, ['email', 'password']);
+    if (!isValidEmail(email)) {
+      throw new ApiError(400, 'VALIDATION_ERROR', 'Invalid email format.');
+    }
+    if (typeof password !== 'string' || password.length < 6) {
+      throw new ApiError(400, 'VALIDATION_ERROR', 'Password must be at least 6 characters.');
+    }
+    return created(res, await authService.register({ email, password, full_name }));
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function listUsers(req, res, next) {
   try { return success(res, await authService.listUsers()); } catch (err) { return next(err); }
 }
@@ -81,4 +100,4 @@ async function setRolePermissions(req, res, next) {
   } catch (err) { return next(err); }
 }
 
-module.exports = { login, me, listUsers, createUser, updateUser, resetPassword, deleteUser, listRoles, listPermissions, setRolePermissions };
+module.exports = { login, register, me, listUsers, createUser, updateUser, resetPassword, deleteUser, listRoles, listPermissions, setRolePermissions };

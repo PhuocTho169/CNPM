@@ -3,10 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { api, getSessionId } from '../api/client';
 import { useApp } from '../context/AppContext';
 import AudioPlayer from '../components/AudioPlayer';
-import DishAudioButton from '../components/DishAudioButton';
-import { dishBanner } from '../utils/dishBanner';
+import DishCard from '../components/DishCard';
 import { directionsUrl, osmMapUrl, distanceMeters, formatDistance, getCurrentPosition } from '../utils/geo';
-import { placeNarration, dishNarration } from '../utils/narration';
+import { placeNarration } from '../utils/narration';
+import BaseMap from '../components/BaseMap';
 
 export default function PlaceGuide() {
   const { id } = useParams();
@@ -118,7 +118,6 @@ export default function PlaceGuide() {
   // Same ~30s script the server writes into the MP3 (utils/narration), so the
   // browser-voice fallback says what the generated file says.
   const narrationText = placeNarration(currentTranslation, lang);
-  const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${place.longitude - 0.004},${place.latitude - 0.003},${place.longitude + 0.004},${place.latitude + 0.003}&layer=mapnik&marker=${place.latitude},${place.longitude}`;
 
   // Straight-line distance from the visitor, once they have allowed GPS. Shown
   // so they can tell at a glance whether walking is worth it.
@@ -138,18 +137,30 @@ export default function PlaceGuide() {
       </div>
 
       <div className="container">
-        {/* Header */}
-        <header className="guide-header">
-          <h1>{name}</h1>
-          <div className="badge-row">
-            {place.category && <span className="chip">{place.category.icon} {place.category.name}</span>}
-            {place.is_recommended && <span className="chip chip-teal">⭐ {t('recommended')}</span>}
-            {place.price_range && <span className="chip chip-outline">💰 {place.price_range}</span>}
+        {/* Header — QR góc phải, ngang hàng với title */}
+        <header
+          className="guide-header"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <h1>{name}</h1>
+            <div className="badge-row">
+              {place.category && <span className="chip">{place.category.icon} {place.category.name}</span>}
+              {place.is_recommended && <span className="chip chip-teal">⭐ {t('recommended')}</span>}
+              {place.price_range && <span className="chip chip-outline">💰 {place.price_range}</span>}
+            </div>
+            <p style={{ color: 'var(--text-2)', fontSize: '0.92rem', marginTop: '0.5rem' }}>
+              📍 {place.address}
+              {place.opening_time && place.closing_time && <> · 🕐 {place.opening_time.slice(0, 5)} – {place.closing_time.slice(0, 5)}</>}
+            </p>
           </div>
-          <p style={{ color: 'var(--text-2)', fontSize: '0.92rem', marginTop: '0.5rem' }}>
-            📍 {place.address}
-            {place.opening_time && place.closing_time && <> · 🕐 {place.opening_time.slice(0, 5)} – {place.closing_time.slice(0, 5)}</>}
-          </p>
+
+          {place.has_qr && place.qr_image_url && (
+            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', paddingTop: '0.4rem' }}>
+              <strong style={{ fontSize: '0.82rem', color: 'var(--text-2)', maxWidth: '8.5rem', textAlign: 'right' }}>{t('scanQrGuide')}</strong>
+              <img src={place.qr_image_url} alt="QR code" style={{ width: 96, height: 96, borderRadius: 6, border: '1px solid var(--border)' }} />
+            </div>
+          )}
         </header>
 
         {/* Language selector */}
@@ -179,16 +190,6 @@ export default function PlaceGuide() {
           audioPending={currentTranslation?.audio_pending}
         />
 
-        {/* QR code — hiển thị ảnh QR ngay trên phần nghe thuyết minh */}
-        {place.has_qr && place.qr_image_url && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.8rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <strong style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>{t('scanQrGuide')}</strong>
-              <img src={place.qr_image_url} alt="QR code" style={{ width: 72, height: 72, borderRadius: 6, border: '1px solid var(--border)' }} />
-            </div>
-          </div>
-        )}
-
         {/* About this place */}
         {currentTranslation?.description && (
           <section className="guide-section">
@@ -211,30 +212,8 @@ export default function PlaceGuide() {
         {place.dishes?.length > 0 && (
           <section className="guide-section">
             <h2>{t('whatToTry')}</h2>
-            <div style={{ display: 'grid', gap: '0.8rem' }}>
-              {place.dishes.map((d) => (
-                <Link to={`/dish/${d.id}`} key={d.id} className="card dish-card-link">
-                  {d.image_url ? (
-                    <img className="dish-img" src={d.image_url} alt={d.name || d.code} loading="lazy" />
-                  ) : (
-                    <img className="dish-img" src={dishBanner(d.category_code)} alt={d.name || d.code} loading="lazy" />
-                  )}
-                  <div className="dish-body">
-                    {d.is_signature && <div className="signature-tag">⭐ Signature</div>}
-                    <h4>{d.name || d.code}</h4>
-                    <p>{d.description}</p>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                      {d.price && <span className="chip chip-outline">💰 {d.price}</span>}
-                      <DishAudioButton
-                        audioUrl={d.audio?.file_url}
-                        pending={d.audio_pending}
-                        label={d.name || d.code}
-                        narrationText={dishNarration(d, lang)}
-                      />
-                    </div>
-                  </div>
-                </Link>
-              ))}
+            <div className="try-grid">
+              {place.dishes.map((d) => <DishCard key={d.id} d={d} lang={lang} />)}
             </div>
           </section>
         )}
@@ -270,7 +249,11 @@ export default function PlaceGuide() {
           <section className="guide-section">
             <h2>{t('location')}</h2>
             <div className="map-wrap">
-              <iframe className="map-embed" title="map" src={osmUrl} loading="lazy" />
+              <BaseMap
+                center={[place.latitude, place.longitude]}
+                zoom={16}
+                markers={[{ latitude: place.latitude, longitude: place.longitude, name }]}
+              />
               <div className="map-actions">
                 <button
                   type="button"

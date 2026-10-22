@@ -11,11 +11,25 @@ const app = express();
 
 app.set('trust proxy', 1);
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-// CORS: allow the configured frontend origin plus the usual local dev ports.
-// `credentials` stays on; `origin` may be a list because we are not using cookies
-// for the public guide, but the admin dashboard does send a bearer token.
+// CORS: allow the configured frontend origin, local dev ports, and any private
+// LAN address — a guest phone on the same wifi scans the QR (pointing at
+// http://<lan-ip>:8080) and must be able to call the API from that origin.
 app.use(cors({
-  origin: [config.frontendUrl, 'http://localhost:5173', 'http://localhost:8080'].filter(Boolean),
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // curl / mobile app / same-origin
+    let hostname = '';
+    try {
+      hostname = new URL(origin).hostname;
+    } catch { /* fallthrough to reject */ }
+    const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(hostname);
+    const isPrivateLan =
+      /^192\.168\.\d+\.\d+$/.test(hostname) ||
+      /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname);
+    const allowed = [config.frontendUrl, config.publicBaseUrl].filter(Boolean);
+    if (isLocalhost || isPrivateLan || allowed.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '2mb' }));

@@ -507,9 +507,150 @@ def fig_wire_admin():
     c.save("hinh_3_9_wireframe_admin.png")
 
 
+# ------------------------------------------------------------------ 3.2 component
+def _comp(c, x, y, w, h, name, desc=None, fill=WHITE, outline=BLUE, size=14.5):
+    """UML component box: small component icon top-left + name + description."""
+    c.rect(x, y, w, h, fill=fill, outline=outline, width=2, radius=7)
+    c.rect(x + 12, y - 7, 16, 7, fill=outline, outline=outline, width=1)
+    c.rect(x + 12, y, 16, 6, fill=WHITE, outline=outline, width=1)
+    c.rect(x + 20, y - 7, 16, 7, fill=outline, outline=outline, width=1)
+    c.rect(x + 20, y, 16, 6, fill=WHITE, outline=outline, width=1)
+    cy = y + (24 if desc else h / 2 + 6)
+    c.text_box(x + w / 2 + 12, cy, name, size, color=NAVY_D, bold=True, max_width=w - 30)
+    if desc:
+        c.text_box(x + w / 2 + 12, y + 24 + (h - 24) / 2, desc, 12, color=GREY, max_width=w - 26)
+
+
+def fig_component():
+    c = Canvas(1500, 1030)
+
+    # ---- client layer
+    c.rect(30, 46, 336, 592, fill=(246, 249, 252), outline=BORDER, width=1, radius=8)
+    c.text(52, 68, "Phía khách hàng (client)", 15, color=NAVY, bold=True)
+    _comp(c, 60, 100, 276, 116, "«component» Web công khai",
+          "React 18 + Vite\nQuét QR, chọn ngôn ngữ,\nvideo hướng dẫn, bản đồ")
+    _comp(c, 60, 280, 276, 116, "«component» Ứng dụng di động",
+          "Expo / React Native\nQuét QR (expo-camera),\nGPS, audio guide")
+    _comp(c, 60, 460, 276, 116, "«component» Trang quản trị",
+          "React + Dashboard\nQuản lý nội dung, QR,\nngôn ngữ, thống kê")
+
+    # ---- api server
+    _comp(c, 500, 120, 320, 400, "«component» Máy chủ API (Express)",
+          None)
+    c.text_box(660, 190, "Routers: auth · places · dishes\nadmin · payments · guest-session\nhealth · tts",
+               12.5, color=NAVY_D, max_width=290)
+    c.line((540, 244), (780, 244), BORDER, 1)
+    c.text_box(660, 278, "JwtGuard — kiểm tra JWT,\ngiới hạn vai trò ADMIN/STAFF",
+               12.5, color=GREY, max_width=280)
+    c.text_box(660, 342, "Zod/Error handler — chuẩn\nbáo lỗi {code, message}\n(không rò thông tin nội bộ)",
+               12.5, color=GREY, max_width=280)
+    c.text_box(660, 418, "docx/report — xuất báo cáo\nkết quả cho quản trị", 12.5, color=GREY, max_width=280)
+    c.text_box(660, 478, "Podman compose / Docker\n(JWT_SECRET, DATABASE_URL)", 12.5, color=GREY, max_width=280)
+
+    # ---- services layer
+    c.rect(950, 96, 520, 476, fill=(246, 249, 252), outline=BORDER, width=1, radius=8)
+    c.text(972, 118, "Tầng nghiệp vụ (services)", 15, color=NAVY, bold=True)
+    _comp(c, 972, 150, 230, 84, "ContentService", "địa điểm · món ăn", fill=LIGHT)
+    _comp(c, 1218, 150, 230, 84, "TranslationService", "bản dịch · quyền ngôn ngữ", fill=LIGHT)
+    _comp(c, 972, 260, 230, 84, "MediaService", "upload · audio · TTS · QR", fill=LIGHT)
+    _comp(c, 1218, 260, 230, 84, "AnalyticsService", "thống kê lượt xem/nghe", fill=LIGHT)
+    _comp(c, 1095, 380, 230, 84, "PaymentService", "gói · entitlement · webhook", fill=LIGHT, outline=INDIGO)
+
+    # ---- static files
+    _comp(c, 500, 640, 320, 120, "«component» Phục vụ tệp tĩnh",
+          "GET /uploads: MP3 · ảnh · PNG QR", fill=(250, 247, 240), outline=TEAL)
+
+    # ---- data access + db
+    _comp(c, 500, 820, 320, 120, "«component» Truy cập dữ liệu (pg)",
+          "pg.Pool · migrations · seeds", fill=LIGHT)
+    cx, cy = 1010, 880
+    c.rect(cx - 90, cy - 18, 180, 96, fill=WHITE, outline=NAVY, width=2)
+    c.ellipse(cx, cy + 78 + 0, 90, 18, fill=WHITE, outline=NAVY, width=2)
+    c.rect(cx - 90, cy - 18, 180, 96, fill=WHITE, outline=(255, 255, 255), width=1)
+    c.ellipse(cx, cy - 18, 90, 18, fill=(240, 245, 251), outline=NAVY, width=2)
+    c.text_box(cx, cy + 34, "PostgreSQL 16", 15, color=NAVY_D, bold=True)
+    c.text_box(cx, cy + 60, "district4_food", 12, color=GREY)
+
+    # ---- dependency arrows (dashed)
+    c.arrow([(336, 158), (440, 158), (440, 200), (490, 200)], color=BLUE, width=2, dashed=True, label="HTTP/JSON")
+    c.arrow([(336, 338), (440, 338), (440, 300), (490, 300)], color=BLUE, width=2, dashed=True)
+    c.arrow([(336, 518), (440, 518), (440, 400), (490, 400)], color=BLUE, width=2, dashed=True)
+    c.arrow([(820, 210), (940, 210), (940, 190), (962, 190)], color=INDIGO, width=2, dashed=True, label="«use»")
+    c.arrow([(820, 240), (940, 300), (962, 300)], color=INDIGO, width=2, dashed=True)
+    c.arrow([(820, 300), (1050, 300)], color=INDIGO, width=2, dashed=True)
+    c.arrow([(1233, 464), (1100, 464), (1100, 480)], color=INDIGO, width=2, dashed=True)
+    c.arrow([(700, 520), (700, 630)], color=TEAL, width=2, dashed=True, label="«serve»")
+    c.arrow([(700, 760), (700, 810)], color=NAVY, width=2, label="SQL")
+    c.arrow([(1210, 440), (1290, 440), (1290, 880), (1110, 880)], color=GREY, width=1.5, dashed=True, label="«include»")
+
+    c.text(30, 996, "Mũi tên nét đứt = quan hệ phụ thuộc («use»); dữ liệu đi qua Data Access (pg) tới PostgreSQL; tệp tĩnh do máy chủ API phục vụ trực tiếp.",
+           12.5, color=GREY, italic=True)
+    c.save("hinh_3_2_component.png")
+
+
+# ------------------------------------------------------------------ 3.3 deployment
+def _node(c, x, y, w, h, name, fill=WHITE, outline=NAVY):
+    """Deployment node: main box + small 3D 'lid' on top."""
+    c.rect(x, y, w, h, fill=fill, outline=outline, width=2, radius=4)
+    c.line((x + 6, y), (x + 26, y - 14), outline, 2)
+    c.line((x + 26, y - 14), (x + w + 20, y - 14), outline, 2)
+    c.line((x + w + 20, y - 14), (x + w, y), outline, 2)
+    return y + 4
+
+def fig_deployment():
+    c = Canvas(1500, 1030)
+
+    # ---- client devices
+    _node(c, 40, 120, 300, 190, None, fill=(246, 249, 252), outline=BLUE)
+    c.text_box(190, 168, "«device» Máy tính / trình duyệt", 14.5, color=NAVY_D, bold=True)
+    c.text_box(190, 232, "Chrome / Edge / Safari\nKhách vãng lai · Quản trị viên", 12, color=GREY, max_width=270)
+
+    _node(c, 40, 420, 300, 190, None, fill=(246, 249, 252), outline=BLUE)
+    c.text_box(190, 468, "«device» Điện thoại Android", 14.5, color=NAVY_D, bold=True)
+    c.text_box(190, 520, "Ứng dụng Expo (QR, GPS)\ndự phòng cho web", 12, color=GREY, max_width=270)
+
+    # ---- deployment host
+    _node(c, 470, 80, 700, 900, None, fill=(253, 254, 255), outline=NAVY)
+    c.text_box(820, 112, "«node» Máy chủ triển khai — docker compose", 15, color=NAVY, bold=True)
+
+    _node(c, 500, 160, 300, 230, None, fill=WHITE, outline=TEAL)
+    c.text_box(650, 196, "«container» d4-web", 14.5, color=TEAL, bold=True)
+    c.text_box(650, 258, "nginx:alpine\nCổng host 8080 → 80\nPhục vụ bản build React\nReverse-proxy /api", 12, color=GREY, max_width=280)
+
+    _node(c, 840, 160, 300, 300, None, fill=WHITE, outline=BLUE)
+    c.text_box(990, 196, "«container» d4-server", 14.5, color=BLUE, bold=True)
+    c.text_box(990, 258, "node:20-alpine\nCổng host 5001 → 5000\nExpress API · JWT · TTS\nVolume ./server/uploads\n(MP3 · ảnh · PNG QR)", 12, color=GREY, max_width=280)
+
+    _node(c, 500, 470, 300, 230, None, fill=WHITE, outline=INDIGO)
+    c.text_box(650, 506, "«container» d4-postgres", 14.5, color=INDIGO, bold=True)
+    c.text_box(650, 556, "postgres:16-alpine\nCổng nội bộ 5432\nVolume pgdata (dữ liệu,\nmigration, seed)", 12, color=GREY, max_width=280)
+
+    c.rect(840, 560, 300, 140, fill=(250, 247, 240), outline=ACCENT, width=2, radius=6)
+    c.text_box(990, 596, "«artifact» Báo cáo SQLite/CSV", 13.5, color=ACCENT, bold=True)
+    c.text_box(990, 650, "doc/figures · docx xuất ra\ncho quản trị đối chiếu", 12, color=GREY, max_width=280)
+
+    c.rect(840, 740, 300, 150, fill=WHITE, outline=ACCENT, width=2, radius=6)
+    c.text_box(990, 776, "Cổng thanh toán (thiết kế)", 13.5, color=ACCENT, bold=True)
+    c.text_box(990, 830, "Webhook trả kết quả đéal\nkhông thuộc docker compose", 12, color=GREY, max_width=280)
+
+    # ---- connections
+    c.arrow([(340, 210), (470, 210), (490, 210)], color=NAVY, width=2, label="HTTP 8080")
+    c.arrow([(340, 510), (400, 510), (400, 240), (486, 240)], color=NAVY, width=2)
+    c.arrow([(800, 275), (836, 275)], color=NAVY, width=2, label="proxy /api :5000")
+    c.arrow([(800, 585), (470, 585)  ], color=GREY, width=1.5, dashed=True)
+    c.text(560, 572, "SQL chạy trong node nội bộ 5432", 11.5, color=GREY)
+    c.arrow([(1120, 740), (990, 464)], color=ACCENT, width=2, dashed=True, label="webhook (thiết kế)")
+
+    c.text(40, 1000, "Toàn bộ nút trong khung lớn chạy bằng Docker Compose trên một máy Linux; cổng công khai chỉ 8080 (web) và 5001 (API).",
+           12.5, color=GREY, italic=True)
+    c.save("hinh_3_3_deployment.png")
+
+
 if __name__ == "__main__":
     print("Chapter 3 figures:")
     fig_architecture()
+    fig_component()
+    fig_deployment()
     fig_erd_content()
     fig_erd_access()
     fig_seq_qr()

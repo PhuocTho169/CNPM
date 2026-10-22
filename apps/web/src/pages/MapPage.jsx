@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
+import BaseMap from '../components/BaseMap';
 
-const D4_BBOX = '106.6880,10.7480,106.7120,10.7640';
+const D4_CENTER = [10.7560, 106.7000];
 
 export default function MapPage() {
   const { lang, t } = useApp();
@@ -17,22 +18,33 @@ export default function MapPage() {
       .finally(() => setLoading(false));
   }, [lang]);
 
+  const markers = places
+    .filter((p) => p.latitude && p.longitude)
+    .map((p) => ({
+      latitude: p.latitude,
+      longitude: p.longitude,
+      name: p.translation?.name || p.code,
+      href: `/place/${p.id}`,
+    }));
+
   return (
     <section className="section container">
       <span className="eyebrow">Map</span>
       <h2 className="section-title">{t('mapTitle')}</h2>
       <p className="section-sub">{t('mapSub')}</p>
 
-      <iframe
-        className="map-embed"
-        title="district4-map"
-        style={{ aspectRatio: '16/8' }}
-        src={`https://www.openstreetmap.org/export/embed.html?bbox=${D4_BBOX}&layer=mapnik`}
-        loading="lazy"
-      />
+      <div className="map-wrap" style={{ position: 'relative' }}>
+        <BaseMap
+          center={D4_CENTER}
+          zoom={14}
+          markers={markers}
+          fit={markers.length > 1}
+          style={{ aspectRatio: '16/8', height: 380 }}
+        />
+      </div>
 
       {loading ? (
-        <div className="spinner" />
+        <div className="spinner" style={{ marginTop: '1.4rem' }} />
       ) : (
         <div className="card-grid" style={{ marginTop: '1.4rem' }}>
           {places.filter((p) => p.latitude && p.longitude).map((p) => (

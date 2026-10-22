@@ -6,6 +6,20 @@ import PlaceCard from '../components/PlaceCard';
 import { dishBanner } from '../utils/dishBanner';
 import { LANG_FLAG } from '../utils/langs';
 
+/* H1 with one highlighted word (t('heroAccent') = 'hương vị' / 'flavours' /
+   '美味' / '맛' / '味'). Falls back to plain h1 when the accent is absent. */
+function HeroTitle({ text, accent }) {
+  const idx = text && accent ? text.indexOf(accent) : -1;
+  if (!text || idx < 0) return <h1>{text}</h1>;
+  return (
+    <h1>
+      {text.slice(0, idx)}
+      <span className="hero-accent">{accent}</span>
+      {text.slice(idx + accent.length)}
+    </h1>
+  );
+}
+
 export default function Home() {
   const { languages, lang, t } = useApp();
   const [places, setPlaces] = useState([]);
@@ -41,19 +55,40 @@ export default function Home() {
       <section className="hero">
         <div className="hero-inner container">
           <div className="hero-copy">
-            <span className="hero-eyebrow">🍜 District 4 · TP.HCM</span>
-            <h1>{t('heroTitle')}</h1>
+            <span className="hero-eyebrow">
+              🍜 District 4 · TP. Hồ Chí Minh <span className="hero-dot">•</span> {t('heroTagline')}
+            </span>
+            <HeroTitle text={t('heroTitle')} accent={t('heroAccent')} />
             <p>{t('heroSubtitle')}</p>
             <div className="hero-actions">
-              <Link to="/explore" className="btn btn-primary">🧭 {t('explorePlaces')}</Link>
-              {/* Points at the map, so it must read "Bản đồ" — labelling it
-                  "Quét QR" sent visitors to a page with no scanner. */}
-              <Link to="/map" className="btn btn-outline">📍 {t('map')}</Link>
+              <Link to="/explore" className="btn btn-primary">🧭 {t('explorePlaces')} →</Link>
+              <Link to="/map" className="btn btn-dark">📍 {t('map')}</Link>
             </div>
+            {places.length > 0 && (
+              <div className="hero-suggest">
+                <span className="hero-suggest-label">{t('heroSuggest')}</span>
+                {places.slice(0, 3).map((p) => (
+                  <Link key={p.id} to={`/place/${p.id}`}>{p.name || p.code}</Link>
+                ))}
+              </div>
+            )}
           </div>
           <div className="hero-art">
-            <img src="/banners/hero-banner.svg" alt="" aria-hidden="true" />
-            <span className="hero-badge">🎧 {t('heroBadge')}</span>
+            <div className="hero-photo-card">
+              <div
+                className="hero-photo"
+                role="img"
+                aria-label="Hương vị Quận 4"
+                style={{ backgroundImage: "url('/images/hero/hero-pho.png')" }}
+              />
+              <div className="hero-photo-caption" aria-hidden="true">
+                <span className="cap-1">DISTRICT 4</span>
+                <span className="cap-2">ẨM THỰC • AUDIO GUIDE</span>
+              </div>
+            </div>
+            <span className="hero-badge">
+              🎧 {t('heroBadge')} <span className="badge-dot" />
+            </span>
           </div>
         </div>
       </section>
@@ -97,9 +132,6 @@ export default function Home() {
                     {d.is_signature && <span className="signature-tag">⭐ Signature</span>}
                     <p className="card-desc menu-desc">{d.description}</p>
                     {d.price && <span className="chip chip-outline" style={{ alignSelf: 'flex-start' }}>💰 {d.price}</span>}
-                    <span className="chip chip-teal" style={{ marginTop: '0.3rem', alignSelf: 'flex-start' }}>
-                      🎧 {t('listen')} ({d.audio?.file_url ? 'có' : 'chưa'})
-                    </span>
                   </div>
                 </Link>
               ))}

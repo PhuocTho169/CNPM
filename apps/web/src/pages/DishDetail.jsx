@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
 import AudioPlayer from '../components/AudioPlayer';
 import DishAudioButton from '../components/DishAudioButton';
+import DishCard from '../components/DishCard';
 import { dishBanner } from '../utils/dishBanner';
 import { dishNarration } from '../utils/narration';
 
@@ -13,6 +14,7 @@ export default function DishDetail() {
   const [dish, setDish] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [placeDishes, setPlaceDishes] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -26,6 +28,15 @@ export default function DishDetail() {
       .catch((e) => setError(e?.response?.data?.message || 'Network error'))
       .finally(() => setLoading(false));
   }, [id, lang]);
+
+  // Other dishes served at the same place — "Món nên thử tại quán này".
+  useEffect(() => {
+    if (!dish?.culinary_place_id) return undefined;
+    api.get(`/places/${dish.culinary_place_id}/guide?lang=${lang}`)
+      .then((res) => setPlaceDishes(res.data.data?.dishes || []))
+      .catch(() => setPlaceDishes([]));
+    return undefined;
+  }, [dish?.culinary_place_id, lang]);
 
   if (loading) return <div className="spinner" />;
 
@@ -44,8 +55,8 @@ export default function DishDetail() {
   const name = dish.name || dish.code;
   const audio = dish.audio;
   const narrationText = dishNarration(dish, lang);
-  const qrLink = dish.qr_value || null;
   const hasQr = !!dish.qr_value;
+  const otherDishes = placeDishes.filter((x) => x.id !== dish.id);
 
   return (
     <div>
@@ -71,9 +82,42 @@ export default function DishDetail() {
             {dish.is_signature && <span className="chip chip-teal">⭐ {t('signature')}</span>}
             {dish.price && <span className="chip chip-outline">💰 {dish.price}</span>}
           </div>
+          {dish.place?.address && (
+            <p style={{ color: 'var(--text-2)', fontSize: '0.92rem', marginTop: '0.5rem' }}>
+              📍 {dish.place.address}
+              {dish.place.opening_time && dish.place.closing_time && <> · 🕐 {dish.place.opening_time.slice(0, 5)} – {dish.place.closing_time.slice(0, 5)}</>}
+            </p>
+          )}
         </header>
 
-        {/* Audio player */}
+        {/* Language selector — giống trang quán */}
+        <div>
+          <label className="eyebrow" htmlFor="dish-lang-picker">{t('chooseLanguage')}</label>
+          <div className="lang-picker" id="dish-lang-picker" role="radiogroup" aria-label={t('chooseLanguage')}>
+            {languages.map((l) => (
+              <button
+                key={l.code}
+                role="radio"
+                aria-checked={l.code === lang}
+                className={`lang-pill ${l.code === lang ? 'active' : ''}`}
+                onClick={() => setLang(l.code)}
+              >
+                {l.native_name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* QR — góc phải, ngay trên phần nghe thuyết minh (giống trang quán) */}
+        {hasQr && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem', flexWrap: 'wrap' }}>
+            <strong style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>📱 {t('scanQrGuide')}</strong>
+            {dish.qr_image_url && (
+              <img src={dish.qr_image_url} alt="QR code" style={{ width: 96, height: 96, borderRadius: 6, border: '1px solid var(--border)' }} />
+            )}
+          </div>
+        )}
+
         <AudioPlayer
           audioUrl={audio?.file_url}
           duration={audio?.duration}
@@ -106,19 +150,12 @@ export default function DishDetail() {
           </section>
         )}
 
-        {/* QR mã (dành cho quét) */}
-        {hasQr && (
-          <section className="guide-section" style={{ marginBottom: '0.4rem', textAlign: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <strong style={{ fontSize: '0.82rem', color: 'var(--text-2)' }}>📱 Quét mã QR để xem hướng dẫn món này:</strong>
-              {dish.qr_image_url && (
-                <a href={dish.qr_image_url} download className="btn btn-ghost btn-sm" title="Tải PNG mã QR">
-                  ⬇ Tải QR
-                </a>
-              )}
-              <a className="btn btn-ghost btn-sm" href={qrLink} target="_blank" rel="noreferrer">
-                🔳 Mở /dish/{dish.id}
-              </a>
+        {/* Món nên thử tại quán (các món khác của cùng quán) */}
+        {dish.culinary_place_id && otherDishes.length > 0 && (
+          <section className="guide-section">
+            <h2>{t('moreAtPlace')}</h2>
+            <div className="try-grid">
+              {otherDishes.map((d) => <DishCard key={d.id} d={d} lang={lang} />)}
             </div>
           </section>
         )}

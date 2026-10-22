@@ -716,7 +716,7 @@ function QrTab({ placeId, onNotify }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <a className="btn btn-ghost btn-sm" href={qr.image_url} download>⬇ Tải PNG</a>
+            <a className="btn btn-ghost btn-sm" href={qr.image_url} download>⬇ Tải QR</a>
             <a className="btn btn-ghost btn-sm" href={qr.qr_value} target="_blank" rel="noreferrer">🔗 Kiểm tra QR</a>
             <button className="btn btn-ghost btn-sm" onClick={() => generate(true)} disabled={busy}>🔄 Tạo lại</button>
           </div>

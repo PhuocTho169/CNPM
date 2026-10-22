@@ -410,18 +410,25 @@ def add_front_matter(doc, figures, tables):
     set_run_font(r, size=16, bold=True, color=NAVY)
 
     abbr = [
+        ("AC", "Acceptance Criteria – tiêu chí chấp nhận (dạng Given–When–Then)"),
         ("API", "Application Programming Interface – giao diện lập trình ứng dụng"),
         ("BCP-47", "Mã định danh ngôn ngữ theo chuẩn Best Current Practice 47"),
+        ("BR", "Business Rule – quy tắc nghiệp vụ"),
         ("CRUD", "Create, Read, Update, Delete"),
         ("CSDL", "Cơ sở dữ liệu"),
         ("ERD", "Entity–Relationship Diagram – sơ đồ thực thể liên kết"),
         ("FK / PK", "Foreign Key / Primary Key – khoá ngoại / khoá chính"),
+        ("FR", "Functional Requirement – yêu cầu chức năng"),
         ("GPS", "Global Positioning System – hệ thống định vị toàn cầu"),
         ("JSON", "JavaScript Object Notation"),
         ("JWT", "JSON Web Token"),
+        ("NFR", "Non-functional Requirement – yêu cầu phi chức năng"),
         ("QR", "Quick Response – mã phản hồi nhanh"),
         ("REST", "Representational State Transfer"),
+        ("TC", "Test Case – trường hợp kiểm thử"),
         ("TTS", "Text-to-Speech – chuyển văn bản thành giọng nói"),
+        ("UC", "Use Case – trường hợp sử dụng"),
+        ("US", "User Story – câu chuyện người dùng"),
         ("UML", "Unified Modeling Language"),
         ("URL", "Uniform Resource Locator"),
     ]
@@ -769,7 +776,7 @@ def build():
             add_lead(doc, b[1])
         elif kind == "p":
             add_body(doc, b[1])
-        elif kind == "b":
+        elif kind == "b" or kind == "bullets":
             add_bullets(doc, b[1], numbered=False)
         elif kind == "num":
             add_bullets(doc, b[1], numbered=True)

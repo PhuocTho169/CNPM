@@ -35,6 +35,8 @@ import FoodRoutes from './pages/FoodRoutes';
 import MapPage from './pages/MapPage';
 import About from './pages/About';
 import DishDetail from './pages/DishDetail';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import AdminLogin from './admin/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import Dashboard from './admin/Dashboard';
@@ -71,6 +73,8 @@ export default function App() {
         <Route path="/routes" element={<FoodRoutes />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Route>
     </Routes>
     </ErrorBoundary>

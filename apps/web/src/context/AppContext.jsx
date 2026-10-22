@@ -21,6 +21,7 @@ const AppContext = createContext(null);
 export function AppProvider({ children }) {
   const [languages, setLanguages] = useState([]);
   const [lang, setLangState] = useState(getPreferredLanguage());
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     api.get('/languages?active_only=true')
@@ -29,6 +30,15 @@ export function AppProvider({ children }) {
         setLanguages(fromApi.length ? fromApi : FALLBACK_LANGUAGES);
       })
       .catch(() => setLanguages(FALLBACK_LANGUAGES));
+  }, []);
+
+  // Restore the signed-in account: the JWT survives in localStorage, so read
+  // /auth/me once on load. A stale token simply means "not signed in".
+  useEffect(() => {
+    if (!localStorage.getItem('d4_token')) return;
+    api.get('/auth/me')
+      .then((res) => setUser(res.data.data))
+      .catch(() => localStorage.removeItem('d4_token'));
   }, []);
 
   const setLang = useCallback((code) => {
@@ -44,8 +54,13 @@ export function AppProvider({ children }) {
     return str.replace(/\{(\w+)\}/g, (m, name) => (vars[name] ?? m));
   }, [lang]);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('d4_token');
+    setUser(null);
+  }, []);
+
   return (
-    <AppContext.Provider value={{ languages, lang, setLang, t }}>
+    <AppContext.Provider value={{ languages, lang, setLang, t, user, setUser, logout }}>
       {children}
     </AppContext.Provider>
   );

@@ -2,6 +2,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const db = require('../db');
+const { ApiError } = require('../utils/errors');
+
+function signToken(user) {
+  return jwt.sign(
+    { sub: user.id, email: user.email, role: user.role, name: user.full_name },
+    config.jwtSecret,
+    { expiresIn: '12h' }
+  );
+}
+
 
 async function login(email, password) {
   const user = await db.getOne(
@@ -21,15 +31,40 @@ async function login(email, password) {
     throw err;
   }
   await db.query('UPDATE users SET last_login_at = now() WHERE id = $1', [user.id]);
-  const token = jwt.sign(
-    { sub: user.id, email: user.email, role: user.role, name: user.full_name },
-    config.jwtSecret,
-    { expiresIn: '12h' }
-  );
+  const token = signToken(user);
   return {
     token,
     user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role },
   };
+}
+
+// Public sign-up for visitors. The password policy lives in the controller;
+// here we only care about uniqueness and the VISITOR role binding.
+async function register({ email, password, full_name }) {
+  const existing = await db.getOne(
+    'SELECT id FROM users WHERE lower(email) = lower($1)',
+    [email]
+  );
+  if (existing) {
+    throw new ApiError(409, 'EMAIL_IN_USE', 'This email is already registered.');
+  }
+
+  const roleRow = await db.getOne("SELECT id FROM roles WHERE code = 'VISITOR'");
+  if (!roleRow) {
+    // Migration 018 has not been applied — nothing we can fake client-side.
+    throw new ApiError(500, 'ROLE_NOT_READY', 'Visitor accounts are not available yet.');
+  }
+
+  const row = await db.getOne(
+    `INSERT INTO users (email, password_hash, full_name, role_id)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, email, full_name`,
+    [email.toLowerCase(), bcrypt.hashSync(password, 10), full_name?.trim() || null, roleRow.id]
+  );
+
+  // Auto-login right after sign-up: one request, no second form.
+  const user = { ...row, role: 'VISITOR' };
+  return { token: signToken(user), user };
 }
 
 async function getMe(userId) {
@@ -119,6 +154,6 @@ async function setRolePermissions(roleId, permissionIds) {
 }
 
 module.exports = {
-  login, getMe, listUsers, createUser, updateUser,
+  login, register, getMe, listUsers, createUser, updateUser,
   resetPassword, deleteUser, listRoles, listPermissions, setRolePermissions,
 };

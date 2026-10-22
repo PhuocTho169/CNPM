@@ -11,6 +11,7 @@ import PlaceDetailScreen from './src/screens/PlaceDetailScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import GPSAudioGuideScreen from './src/screens/GPSAudioGuideScreen';
+import ScanScreen from './src/screens/ScanScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -34,6 +35,11 @@ function Tabs() {
         name="Explore"
         component={ExploreScreen}
         options={{ tabBarLabel: 'Explore', tabBarIcon: () => <Text style={{ fontSize: 20 }}>🧭</Text> }}
+      />
+      <Tab.Screen
+        name="Scan"
+        component={ScanScreen}
+        options={{ tabBarLabel: 'Scan QR', tabBarIcon: () => <Text style={{ fontSize: 20 }}>📷</Text> }}
       />
       <Tab.Screen
         name="GPS Guide"

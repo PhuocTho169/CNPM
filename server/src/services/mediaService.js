@@ -110,11 +110,13 @@ async function generateQR(placeId, { regenerate = false, baseUrl, originHint } =
   // the PNG on disk would still point at the OLD address.
   if (existing && !regenerate && existing.qr_value === qrValue) return existing;
 
-  const fileName = `place-${placeId}-${crypto.randomBytes(4).toString('hex')}.png`;
+  const fileName = `place-${placeId}-${crypto.randomBytes(4).toString('hex')}.svg`;
   const dir = path.join(config.uploadDir, 'qr');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const filePath = path.join(dir, fileName);
+  // SVG (vector): nét ở mọi kích thước — ảnh PNG thu nhỏ 512→72px bị mờ viền module
   await QRCode.toFile(filePath, qrValue, {
+    type: 'svg',
     width: 512,
     margin: 2,
     color: { dark: '#212121', light: '#FFFFFF' },
@@ -156,11 +158,13 @@ async function generateDishQR(dishId, { regenerate = false, baseUrl, originHint 
   const existing = await getDishQR(dishId);
   if (existing && !regenerate && existing.qr_value === qrValue) return existing;
 
-  const fileName = `dish-${dishId}-${crypto.randomBytes(4).toString('hex')}.png`;
+  const fileName = `dish-${dishId}-${crypto.randomBytes(4).toString('hex')}.svg`;
   const dir = path.join(config.uploadDir, 'qr');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const filePath = path.join(dir, fileName);
+  // SVG (vector): nét ở mọi kích thước — ảnh PNG thu nhỏ 512→260px bị mờ viền module
   await QRCode.toFile(filePath, qrValue, {
+    type: 'svg',
     width: 512,
     margin: 2,
     color: { dark: '#212121', light: '#FFFFFF' },
