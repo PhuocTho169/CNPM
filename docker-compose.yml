@@ -35,9 +35,10 @@ services:
         condition: service_healthy
     volumes:
       # WORKDIR is /app/server and UPLOAD_DIR=uploads is relative, so the real
-      # path is /app/server/uploads. Mounting at /app/uploads silently kept the
-      # volume unused, so every QR PNG / audio file was lost on container rebuild.
-      - server_uploads:/app/server/uploads
+      # path is /app/server/uploads. Bind-mount the host dir instead of a named
+      # volume: the TTS files referenced by media_files live here, and a named
+      # volume shadows this dir, making every /uploads/audio URL 404 (no audio).
+      - ./server/uploads:/app/server/uploads
 
   admin-web:
     build:
@@ -52,5 +53,3 @@ services:
 volumes:
   postgres_data:
     name: district4_postgres_data
-  server_uploads:
-    name: district4_server_uploads

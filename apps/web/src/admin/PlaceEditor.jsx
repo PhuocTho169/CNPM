@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api, apiErrorMessage } from '../api/client';
 import { placeNarration } from '../utils/narration';
+import DishQrEditor from './DishQrEditor';
 
 const TABS = [
   ['info', 'Thông tin cơ bản'],
@@ -437,6 +438,7 @@ function TranslationsTab({ placeId, languages, onNotify }) {
 function DishesTab({ placeId, languages, categories, onNotify }) {
   const [dishes, setDishes] = useState([]);
   const [editing, setEditing] = useState(null); // dish draft or 'new'
+  const [qrDish, setQrDish] = useState(null); // dish whose QR editor is open
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -559,7 +561,15 @@ function DishesTab({ placeId, languages, categories, onNotify }) {
                 <td>{d.is_signature ? '⭐' : ''}</td>
                 <td style={{ fontSize: '0.8rem' }}>{(d.language_codes || []).map(languageLabel).join(', ') || '—'}</td>
                 <td>
-                  <div style={{ display: 'flex', gap: '0.3rem' }}>              <button className="btn btn-sm btn-ghost"
+                  <div style={{ display: 'flex', gap: '0.3rem' }}>
+                    <button
+                      className={`btn btn-sm ${qrDish?.id === d.id ? 'btn-orange' : 'btn-ghost'}`}
+                      onClick={() => setQrDish(qrDish?.id === d.id ? null : d)}
+                      title={d.has_qr ? 'Chỉnh sửa mã QR' : 'Tạo mã QR'}
+                    >
+                      {d.has_qr ? '🔳 Sửa QR' : '🔳 Tạo QR'}
+                    </button>
+                    <button className="btn btn-sm btn-ghost"
                 onClick={() => setEditing({ ...d, translations: {} })}>Sửa</button>
                     <button className="btn btn-sm btn-danger" onClick={() => removeDish(d.id)}>Xoá</button>
                   </div>
@@ -570,6 +580,17 @@ function DishesTab({ placeId, languages, categories, onNotify }) {
           </tbody>
         </table>
       </div>
+
+      {/* QR editor giống tab "Mã QR" của chính editor này */}
+      {qrDish && (
+        <div style={{ marginTop: '1.2rem', padding: '1rem', backgroundColor: '#faf6f1', border: '1px solid var(--border)', borderRadius: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+            <h3 style={{ fontSize: '1.05rem' }}>🔳 Mã QR — {qrDish.name || qrDish.code}</h3>
+            <button className="btn btn-sm btn-ghost" onClick={() => setQrDish(null)}>Đóng</button>
+          </div>
+          <DishQrEditor dish={qrDish} onNotify={onNotify} onRefresh={load} />
+        </div>
+      )}
     </>
   );
 }

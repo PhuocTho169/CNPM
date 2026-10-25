@@ -33,11 +33,11 @@ function variability(buf) {
 (async () => {
   const placeId = process.argv[2] ? Number(process.argv[2]) : 1;
   const rows = await db.getMany(
-    `SELECT t.culinary_place_id, l.code AS lang, a.file_url, a.file_size, a.created_at
-     FROM audio_guides a
-     JOIN culinary_place_translations t ON t.id = a.translation_id
+    `SELECT t.entity_id AS culinary_place_id, l.code AS lang, m.url AS file_url, m.file_size, m.created_at
+     FROM media_files m
+     JOIN translations t ON t.id = m.entity_id
      JOIN languages l ON l.id = t.language_id
-     WHERE t.culinary_place_id = $1
+     WHERE m.kind = 'audio' AND t.entity_type = 'place' AND t.entity_id = $1
      ORDER BY l.id`,
     [placeId]
   );

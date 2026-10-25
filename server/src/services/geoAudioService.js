@@ -63,8 +63,8 @@ async function findNearbyZones({ latitude, longitude, radius, limit, lang }) {
               + sin(radians($1)) * sin(radians(p.latitude))
             )))) AS distance_m
        FROM culinary_places p
-       LEFT JOIN culinary_place_translations t
-         ON t.culinary_place_id = p.id
+       LEFT JOIN translations t
+         ON t.entity_type = 'place' AND t.entity_id = p.id
         AND t.language_id = (SELECT id FROM languages WHERE code = $3)
        LEFT JOIN categories c ON c.id = p.category_id
       WHERE p.status = 'PUBLISHED'
@@ -107,9 +107,9 @@ async function getNarration(placeId, language) {
   const translation = await db.getOne(
     `SELECT t.id, t.name, t.short_description, t.description, t.history,
             t.cultural_significance, t.tourist_tips, l.code AS language_code
-       FROM culinary_place_translations t
+       FROM translations t
        JOIN languages l ON l.id = t.language_id
-      WHERE t.culinary_place_id = $1 AND l.code = $2`,
+      WHERE t.entity_type = 'place' AND t.entity_id = $1 AND l.code = $2`,
     [placeId, lang]
   );
 
@@ -122,7 +122,8 @@ async function getNarration(placeId, language) {
   }
 
   const audio = await db.getOne(
-    'SELECT file_url, duration FROM audio_guides WHERE translation_id = $1',
+    `SELECT url AS file_url, duration FROM media_files
+      WHERE entity_type = 'translation' AND entity_id = $1 AND kind = 'audio'`,
     [translation.id]
   );
 

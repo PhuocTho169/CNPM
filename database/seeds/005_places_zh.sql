@@ -1,6 +1,6 @@
 -- 005: Chinese (zh) translations for places & dishes
-INSERT INTO culinary_place_translations (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, l.id, v.name, v.short_desc, v.descr, v.history, v.culture, v.tips
+INSERT INTO translations (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, l.id, v.name, v.short_desc, v.descr, v.history, v.culture, v.tips
 FROM (VALUES
   ('oc-oanh', '欧安螺肉店', '第四郡著名的街头海鲜螺肉小店，傍晚开始营业，专门烤螺和炒螺肉，充满南方式浓郁风味。', '欧安螺肉店是第四郡居民熟悉的大排档式海鲜小吃店，主打烤螺、炒螺与香茅蒸蛤蜊等菜肴。塑料小桌摆在人行道上，最适合晚上与朋友一起小聚。店铺迎宾客从午后一直忙碌到深夜，任何时候都回荡着笑声与烤炭的声响。特别之处在于绝大部分菜品都是点单后立刻烹调，确保新鲜度与正宗手工味道。冰镇绿茶、浓稠的酸甜蘸酱、烤脆米纸都是不可或缺的配角，让食物整体更有层次。除了本地老顾客，现在也有越来越多的游客专程跑来，体验街道一侧的小店里举办的烤炉烟火气与市井氛围。人们常点螺肉配烤米纸、焦脆炒米或辛辣啤酒，让夜晚变得轻松欢畅。店里还供应其他小吃如烤蛋、爆米花，丰富了用餐体验。每逢周末，店里更是年轻朋友们聚会的热门场地，街道边小时光成为难忘记忆，闪烁的烤火光影在脑海中刻下无法抹去的味道。', '本店位于团文巨路 (Đoàn Văn Cự) ，从下午一直营业到深夜。菜单围绕每日新鲜到货的螺类展开，采用西贡经典做法：炭火烧烤、蒜蓉爆炒或香茅清蒸。 海鲜从早上开始就从海港和河道运进来，保证了活鲜度。炭炉整天燃烧，发出烧烤专属的香味。店里没有大大的招牌，全凭食物的美味和与顾客的长期情谊。如今，社交媒体上那些烤炉火苗的照片吸引了不少年轻客人，把这里变成美食探索的热门打卡点。虽然时间会改变很多事，但螺肉的味道仍然来自世代传下来的老味道，是美食故事里最亮的一部分。', '螺肉小吃是西贡街头饮食文化的代表，体现朋友下班后相聚的生活方式。第四郡被认为是全市螺肉店最集中的区域之一，数十年来一直保持着活力。烤螺的色泽诱人、能量十足、味道厚重，构成了街头美食的高光时刻，与沿海贸易的历史有关。对本地居民来说，螺肉店是下班后与朋友重逢、聊天、分享的非正式空间，虽不奢华但确实有温度。', '建议 18 点后来感受夜市氛围 • 搭配烤米纸或香脆锅巴一起享用 • 带好现金，因为很多摊位不收卡 • 试试盐椒烤大螺，配岩盐和柠檬叶 • 根据店员推荐搭配套餐，吃得尽兴'),
   ('com-tam-vinh-khanh', '永庆碎米饭', '位于永庆街的西贡风味碎米饭，配炭烤猪排、肉皮与蒸蛋，充分保留南方百姓餐风。', '这家碎米饭店供应炭烤猪排、肉皮与蒸蛋，淋上酸甜鱼露，是本区劳动者的日常午餐与晚餐。 碎米饭店是熟悉的饮食地点，主打越南传统碎米饭，窗户前总是洒满正午阳光。 突出的菜式是炭烤猪排，猪肉提前用料搅拌，直接放在红炭上烤，色泽诱人、烟香四溢，味道让人难以忘怀。 除此之外，店里还供应裹油的肉皮、软滑蒸蛋等配菜，让用餐者有更多挑选。 特别的酸甜鱼露调配使用自家秘方，盐甜酸三味之间的平衡，让菜品的味道更出色。 碎米饭撒上猪肉香肠卷、番茄和香葱，尝起来丰富复合。 这不仅是家普通的小店，更是劳动者和学生放学后约会的地方，在小塑料椅上围坐，阳光蒸烤着地面，偶尔弥漫焦炭香，构成独特气息。 自制的鱼露清淡清爽，这里的每道食物都透出店主人三十载努力的痕迹。 碎米饭曾经是穷人的口粮，如今却变成了每个来西贡的人都不能错过的街头美食。 站立的通道透露摊档主人多年的辛劳故事，因为味道而被世世代代顾客恋恋不舍。', '猪排在炭炉上烤至微焦，碎米饭粒粒分明，搭配炸脆肉皮与蒸蛋卷，鱼露酱汁中带有番茄与炒香的洋葱。 永庆街长期以来是第四郡最热闹的餐饮街，聚集了众多平价碎米饭店。 这家店最初备着一台电风扇、一口酱汁缸和几袋腌料肉，慢慢发展起来。 碎米饭原本是穷困人家的主食，如今却变成了万人知道的街头美食。 店的外面，蓝白墙已经褪了色，显示出岁月。 通风井下的烤炉一直有人值守，到了深夜还在忙碌，守着炭火。 熟客每周都来，老弱病残、远道来客，味道把他们留下。', '碎米饭被视为南部的国民美食，源于对碎米的巧妙利用，如今已成为西贡街头饮食的标志。 碎米饭折射创造力与生存智慧，使一粒米粒的缺憾变成了一道美味。 它浓缩了厨师的人情味、烤炉人的辛勤和味觉艺术至于街头巷尾。 大概是这种味道，使得每一碗碎米饭都仿佛承载了人间的一段深情，说不尽的街市风情。', '11 点至 13 点是高峰期，可能需要稍等 • 加煎蛋或肉皮蛋更添风味 • 尝试蘸小鱼露则能锁住初味 • 保持健康意识，适度享用街头名味'),
@@ -15,10 +15,10 @@ FROM (VALUES
 ) AS v(code, name, short_desc, descr, history, culture, tips)
 JOIN culinary_places p ON p.code = v.code
 JOIN languages l ON l.code = 'zh'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO dish_translations (dish_id, language_id, name, description, ingredients)
-SELECT d.id, l.id, v.name, v.descr, v.ingr
+INSERT INTO translations (entity_type, entity_id, language_id, name, description, ingredients)
+SELECT 'dish', d.id, l.id, v.name, v.descr, v.ingr
 FROM (VALUES
   ('oc-huong', '斑玉螺', '炭烤或蒜香黄油炒制，螺肉爽脆甘甜，是店里点单率最高的菜。', '新鲜斑玉螺、黄油、大蒜、辣椒、葱'),
   ('nghieu-hap-sa', '香茅蒸蛤蜊', '新鲜蛤蜊与香茅、辣椒同蒸，汤汁清甜，配柠檬椒盐蘸食。', '蛤蜊、香茅、辣椒、越南香菜'),
@@ -35,4 +35,4 @@ FROM (VALUES
 ) AS v(code, name, descr, ingr)
 JOIN dishes d ON d.code = v.code
 JOIN languages l ON l.code = 'zh'
-ON CONFLICT (dish_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;

@@ -1,9 +1,25 @@
-import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { api, getSessionId } from '../api/client';
+import { pingVisit } from '../utils/onlineTracker';
 
 export default function PublicLayout() {
-  const { languages, lang, setLang, t, user, logout } = useApp();
+  const { t, user, logout, guestSession } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // "Visitors online" tracking: one ping when a public page opens, then a
+  // heartbeat every 2 minutes (shorter than the dashboard's 5-minute window,
+  // and suppressed while the tab is hidden) so idling visitors still count.
+  useEffect(() => {
+    pingVisit(location.pathname);
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') pingVisit(location.pathname);
+    }, 120000);
+    return () => clearInterval(timer);
+  }, [location.pathname]);
+
 
   return (
     <>
@@ -22,39 +38,17 @@ export default function PublicLayout() {
             <li><NavLink to="/admin" title={t('adminPanel')}>⚙️</NavLink></li>
           </ul>
           <div className="nav-actions">
-            <select
-              className="lang-select"
-              value={lang}
-              onChange={(e) => setLang(e.target.value)}
-              aria-label={t('language')}
-            >
-              {(languages.length ? languages : [{ code: lang, native_name: lang }]).map((l) => (
-                <option key={l.code} value={l.code}>{l.native_name}</option>
-              ))}
-            </select>
-
-            {user ? (
-              <span
-                className="btn btn-ghost btn-sm"
-                title={t('logout')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', cursor: 'default' }}
-              >
-                👤 {user.full_name || user.email}
-                <button
-                  type="button"
-                  onClick={() => { logout(); navigate('/'); }}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--primary-dark)', fontWeight: 700, padding: '0 0.2rem' }}
-                  aria-label={t('logout')}
-                >
-                  ✕
-                </button>
-              </span>
+            {!guestSession && !user ? (
+              <span className="subtitle">{t('scanQrGuide')}</span>
+            ) : user ? (
+              <span className="subtitle">👤 {user.full_name || user.email}</span>
             ) : null}
           </div>
         </div>
       </nav>
 
       <Outlet />
+}
 
       <footer>
         <div className="container">

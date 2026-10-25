@@ -21,14 +21,17 @@ const isActive = true;
 
 async function missingTranslations(limit = 200) {
   return db.getMany(
-    `SELECT t.id AS translation_id, t.culinary_place_id, l.code AS language_code,
+    `SELECT t.id AS translation_id, t.entity_id AS culinary_place_id, l.code AS language_code,
             t.name, t.short_description, t.description,
             t.history, t.cultural_significance, t.tourist_tips
-     FROM culinary_place_translations t
+     FROM translations t
      JOIN languages l ON l.id = t.language_id
-     WHERE l.is_active = $1
-       AND NOT EXISTS (SELECT 1 FROM audio_guides a WHERE a.translation_id = t.id)
-     ORDER BY t.culinary_place_id, l.id
+     WHERE t.entity_type = 'place' AND l.is_active = $1
+       AND NOT EXISTS (
+         SELECT 1 FROM media_files m
+         WHERE m.entity_type = 'translation' AND m.entity_id = t.id AND m.kind = 'audio'
+       )
+     ORDER BY t.entity_id, l.id
      LIMIT $2`,
     [isActive, limit]
   );
@@ -73,13 +76,16 @@ async function ensureAllAudio({ concurrency = 2, log = console.log } = {}) {
 
 async function missingDishTranslations(limit = 500) {
   return db.getMany(
-    `SELECT dt.id AS translation_id, dt.dish_id, l.code AS language_code,
+    `SELECT dt.id AS translation_id, dt.entity_id AS dish_id, l.code AS language_code,
             dt.name, dt.description, dt.ingredients
-     FROM dish_translations dt
+     FROM translations dt
      JOIN languages l ON l.id = dt.language_id
-     WHERE l.is_active = $1
-       AND NOT EXISTS (SELECT 1 FROM dish_audio_guides a WHERE a.translation_id = dt.id)
-     ORDER BY dt.dish_id, l.id
+     WHERE dt.entity_type = 'dish' AND l.is_active = $1
+       AND NOT EXISTS (
+         SELECT 1 FROM media_files m
+         WHERE m.entity_type = 'translation' AND m.entity_id = dt.id AND m.kind = 'audio'
+       )
+     ORDER BY dt.entity_id, l.id
      LIMIT $2`,
     [isActive, limit]
   );

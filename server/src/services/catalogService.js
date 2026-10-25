@@ -72,28 +72,22 @@ async function updateLanguage(id, data) {
   return row;
 }
 
-// Tables that hold real content for a language: deleting the language would
-// destroy curated copy, so the API refuses with 409 instead.
-const LANGUAGE_CONTENT_TABLES = [
-  ['culinary_place_translations', 'place translations'],
-  ['dish_translations', 'dish translations'],
-  ['route_translations', 'route translations'],
-];
-
-// Analytics tables that only carry the language as a dimension. Their
-// `language_id` is nullable, so we clear it (keeping the scan/play/history row
-// itself) instead of letting the foreign key blow up as a 500.
-const LANGUAGE_LOG_TABLES = ['scan_logs', 'audio_play_logs', 'visitor_history'];
-
+// Deleting a language would destroy curated copy in `translations`, so the API
+// refuses with 409 instead. Analytics rows only carry the language as a
+// dimension; their `language_id` is nullable, so we clear it (keeping the
+// scan/play/history/favorite event itself) instead of letting the FK blow up.
 async function deleteLanguage(id) {
   const lang = await db.getOne('SELECT id, code FROM languages WHERE id = $1', [id]);
   if (!lang) throw new ApiError(404, 'LANGUAGE_NOT_FOUND', 'Language not found.');
 
-  const blockers = [];
-  for (const [table, label] of LANGUAGE_CONTENT_TABLES) {
-    const row = await db.getOne(`SELECT count(*)::int AS c FROM ${table} WHERE language_id = $1`, [id]);
-    if (row?.c) blockers.push(`${row.c} ${label}`);
-  }
+  const counts = await db.getMany(
+    `SELECT entity_type, count(*)::int AS c FROM translations
+     WHERE language_id = $1 GROUP BY entity_type`,
+    [id]
+  );
+  const blockers = counts
+    .map((c) => `${c.c} ${c.entity_type} translations`)
+    .filter(Boolean);
   if (blockers.length) {
     throw new ApiError(
       409,
@@ -102,8 +96,17 @@ async function deleteLanguage(id) {
     );
   }
 
-  for (const table of LANGUAGE_LOG_TABLES) {
-    await db.query(`UPDATE ${table} SET language_id = NULL WHERE language_id = $1`, [id]);
+  await db.query('UPDATE activity_logs SET language_id = NULL WHERE language_id = $1', [id]);
+  await db.query('UPDATE guest_sessions SET free_language_id = NULL WHERE free_language_id = $1', [id]);
+  const rows = await db.getMany(
+    'SELECT id FROM guest_sessions WHERE $1 = ANY(purchased_languages)',
+    [id]
+  );
+  for (const g of rows) {
+    await db.query(
+      'UPDATE guest_sessions SET purchased_languages = array_remove(purchased_languages, $1) WHERE id = $2',
+      [id, g.id]
+    );
   }
 
   const row = await db.getOne('DELETE FROM languages WHERE id = $1 RETURNING id', [id]);
@@ -125,7 +128,7 @@ async function listDishes({ placeId, lang, q, status, page, limit, offset }) {
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const total = await db.getOne(
     `SELECT count(*)::int AS c FROM dishes d
-     LEFT JOIN dish_translations dt ON dt.dish_id = d.id
+     LEFT JOIN translations dt ON dt.entity_type = 'dish' AND dt.entity_id = d.id
        AND dt.language_id = (SELECT id FROM languages WHERE code = $1) ${whereSql}`,
     params
   );
@@ -133,18 +136,23 @@ async function listDishes({ placeId, lang, q, status, page, limit, offset }) {
     `SELECT d.id, d.code, d.culinary_place_id, d.price, d.image_url, d.is_signature, d.status,
             c.code AS category_code, c.name AS category_name,
             p.code AS place_code, dt.name, dt.description, dt.ingredients,
-            da.id AS audio_id, da.file_url, da.duration, da.source,
-            (SELECT array_agg(l2.code ORDER BY l2.code) FROM dish_translations dt2
-              JOIN languages l2 ON l2.id = dt2.language_id WHERE dt2.dish_id = d.id) AS language_codes,
-            (SELECT qr.qr_value FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_value,
-            (SELECT qr.image_url FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_image_url,
-            EXISTS (SELECT 1 FROM dish_qr_codes qr2 WHERE qr2.dish_id = d.id) AS has_qr
+            da.id AS audio_id, da.url AS file_url, da.duration, da.source,
+            (SELECT array_agg(l2.code ORDER BY l2.code) FROM translations dt2
+              JOIN languages l2 ON l2.id = dt2.language_id
+              WHERE dt2.entity_type = 'dish' AND dt2.entity_id = d.id) AS language_codes,
+            (SELECT qr.metadata->>'qr_value' FROM media_files qr
+              WHERE qr.entity_type = 'dish' AND qr.entity_id = d.id AND qr.kind = 'qr' LIMIT 1) AS qr_value,
+            (SELECT qr.url FROM media_files qr
+              WHERE qr.entity_type = 'dish' AND qr.entity_id = d.id AND qr.kind = 'qr' LIMIT 1) AS qr_image_url,
+            EXISTS (SELECT 1 FROM media_files qr2
+              WHERE qr2.entity_type = 'dish' AND qr2.entity_id = d.id AND qr2.kind = 'qr') AS has_qr
      FROM dishes d
      LEFT JOIN categories c ON c.id = d.category_id
      LEFT JOIN culinary_places p ON p.id = d.culinary_place_id
-     LEFT JOIN dish_translations dt ON dt.dish_id = d.id
+     LEFT JOIN translations dt ON dt.entity_type = 'dish' AND dt.entity_id = d.id
        AND dt.language_id = (SELECT id FROM languages WHERE code = $1)
-     LEFT JOIN dish_audio_guides da ON da.translation_id = dt.id
+     LEFT JOIN media_files da
+       ON da.entity_type = 'translation' AND da.entity_id = dt.id AND da.kind = 'audio'
      ${whereSql}
      ORDER BY d.culinary_place_id, d.is_signature DESC, d.id
      LIMIT ${Number(limit)} OFFSET ${Number(offset)}`,
@@ -182,11 +190,11 @@ async function listDishes({ placeId, lang, q, status, page, limit, offset }) {
 
 async function getDishTranslation(dishId, lang) {
   const row = await db.getOne(
-    `SELECT t.id, t.dish_id, t.language_id, l.code AS language_code,
+    `SELECT t.id, t.entity_id AS dish_id, t.language_id, l.code AS language_code,
             t.name, t.description, t.ingredients, t.cultural_information
-     FROM dish_translations t
+     FROM translations t
      JOIN languages l ON l.id = t.language_id
-     WHERE t.dish_id = $1 AND l.code = $2`,
+     WHERE t.entity_type = 'dish' AND t.entity_id = $1 AND l.code = $2`,
     [dishId, lang]
   );
   if (!row) return null;
@@ -207,22 +215,26 @@ async function getDish(id, lang) {
     `SELECT d.id, d.code, d.culinary_place_id, d.price, d.image_url, d.is_signature, d.status,
             c.code AS category_code, c.name AS category_name,
             dt.name, dt.description, dt.ingredients, dt.cultural_information,
-            da.id AS audio_id, da.file_url, da.duration, da.source,
+            da.id AS audio_id, da.url AS file_url, da.duration, da.source,
             p.latitude, p.longitude, p.address, p.opening_time, p.closing_time,
             p.price_range AS place_price_range,
-            pi.image_url AS place_image_url,
-            (SELECT qr.qr_value FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_value,
-            (SELECT qr.image_url FROM dish_qr_codes qr WHERE qr.dish_id = d.id LIMIT 1) AS qr_image_url,
-            EXISTS (SELECT 1 FROM dish_qr_codes qr2 WHERE qr2.dish_id = d.id) AS has_qr
+            pi.url AS place_image_url,
+            (SELECT qr.metadata->>'qr_value' FROM media_files qr
+              WHERE qr.entity_type = 'dish' AND qr.entity_id = d.id AND qr.kind = 'qr' LIMIT 1) AS qr_value,
+            (SELECT qr.url FROM media_files qr
+              WHERE qr.entity_type = 'dish' AND qr.entity_id = d.id AND qr.kind = 'qr' LIMIT 1) AS qr_image_url,
+            EXISTS (SELECT 1 FROM media_files qr2
+              WHERE qr2.entity_type = 'dish' AND qr2.entity_id = d.id AND qr2.kind = 'qr') AS has_qr
      FROM dishes d
      LEFT JOIN categories c ON c.id = d.category_id
-     LEFT JOIN dish_translations dt ON dt.dish_id = d.id
+     LEFT JOIN translations dt ON dt.entity_type = 'dish' AND dt.entity_id = d.id
        AND dt.language_id = (SELECT id FROM languages WHERE code = $2)
-     LEFT JOIN dish_audio_guides da ON da.translation_id = dt.id
+     LEFT JOIN media_files da
+       ON da.entity_type = 'translation' AND da.entity_id = dt.id AND da.kind = 'audio'
      LEFT JOIN culinary_places p ON p.id = d.culinary_place_id
      LEFT JOIN LATERAL (
-       SELECT image_url FROM culinary_place_images pi
-       WHERE pi.culinary_place_id = d.culinary_place_id
+       SELECT url FROM media_files pi
+       WHERE pi.entity_type = 'place' AND pi.entity_id = d.culinary_place_id AND pi.kind = 'image'
        ORDER BY pi.is_primary DESC, pi.sort_order ASC LIMIT 1
      ) pi ON true
      WHERE d.id = $1`,
@@ -303,9 +315,9 @@ async function upsertDishTranslation(dishId, { language_id, name, description, i
     throw new ApiError(400, 'VALIDATION_ERROR', 'language_id and name are required.');
   }
   return db.getOne(
-    `INSERT INTO dish_translations (dish_id, language_id, name, description, ingredients, cultural_information)
-     VALUES ($1,$2,$3,$4,$5,$6)
-     ON CONFLICT (dish_id, language_id) DO UPDATE SET
+    `INSERT INTO translations (entity_type, entity_id, language_id, name, description, ingredients, cultural_information)
+     VALUES ('dish', $1, $2, $3, $4, $5, $6)
+     ON CONFLICT (entity_type, entity_id, language_id) DO UPDATE SET
        name = EXCLUDED.name, description = EXCLUDED.description,
        ingredients = EXCLUDED.ingredients, cultural_information = EXCLUDED.cultural_information
      RETURNING *`,
@@ -317,7 +329,8 @@ async function upsertDishTranslation(dishId, { language_id, name, description, i
 async function listRoutes({ status, lang }) {
   const rows = await db.getMany(
     `SELECT r.*, t.name AS t_name, t.description AS t_description FROM culinary_routes r
-     LEFT JOIN route_translations t ON t.route_id = r.id
+     LEFT JOIN translations t
+       ON t.entity_type = 'route' AND t.entity_id = r.id
        AND t.language_id = (SELECT id FROM languages WHERE code = $1)
      ${status ? 'WHERE r.status = $2' : ''}
      ORDER BY r.id`,
@@ -325,14 +338,16 @@ async function listRoutes({ status, lang }) {
   );
   const stops = await db.getMany(
     `SELECT s.route_id, s.position, s.note, p.id AS place_id, p.code AS place_code,
-            t.name AS place_name, prim.image_url AS place_image, c.name AS category_name
+            t.name AS place_name, prim.url AS place_image, c.name AS category_name
      FROM route_stops s
      JOIN culinary_places p ON p.id = s.culinary_place_id
-     LEFT JOIN culinary_place_translations t ON t.culinary_place_id = p.id
+     LEFT JOIN translations t
+       ON t.entity_type = 'place' AND t.entity_id = p.id
        AND t.language_id = (SELECT id FROM languages WHERE code = $1)
      LEFT JOIN categories c ON c.id = p.category_id
      LEFT JOIN LATERAL (
-       SELECT image_url FROM culinary_place_images pi WHERE pi.culinary_place_id = p.id
+       SELECT url FROM media_files pi
+       WHERE pi.entity_type = 'place' AND pi.entity_id = p.id AND pi.kind = 'image'
        ORDER BY pi.is_primary DESC, pi.sort_order ASC LIMIT 1
      ) prim ON true
      ORDER BY s.route_id, s.position`,
@@ -340,8 +355,8 @@ async function listRoutes({ status, lang }) {
   );
   return rows.map((r) => ({
     ...r,
-    name: r.t_name || r.name,
-    description: r.t_description || r.description,
+    name: r.t_name || null,
+    description: r.t_description || null,
     stops: stops.filter((s) => s.route_id === r.id),
   }));
 }
@@ -354,23 +369,63 @@ async function getRoute(id, lang) {
 }
 
 async function createRoute(data) {
-  return db.getOne(
-    `INSERT INTO culinary_routes (code, name, description, estimated_duration, distance, difficulty, cover_image_url, status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-    [data.code, data.name, data.description, data.estimated_duration, data.distance, data.difficulty || 'EASY', data.cover_image_url, data.status || 'DRAFT']
+  const route = await db.getOne(
+    `INSERT INTO culinary_routes (code, estimated_duration, distance, difficulty, cover_image_url, status)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [data.code, data.estimated_duration, data.distance, data.difficulty || 'EASY', data.cover_image_url, data.status || 'DRAFT']
   );
+  const merged = await upsertRouteTranslation(route, data);
+  return merged;
 }
 
 async function updateRoute(id, data) {
-  const row = await db.getOne(
-    `UPDATE culinary_routes SET code = COALESCE($2, code), name = COALESCE($3, name), description = COALESCE($4, description),
-       estimated_duration = COALESCE($5, estimated_duration), distance = COALESCE($6, distance),
-       difficulty = COALESCE($7, difficulty), cover_image_url = COALESCE($8, cover_image_url), status = COALESCE($9, status)
+  const route = await db.getOne(
+    `UPDATE culinary_routes SET code = COALESCE($2, code),
+       estimated_duration = COALESCE($3, estimated_duration), distance = COALESCE($4, distance),
+       difficulty = COALESCE($5, difficulty), cover_image_url = COALESCE($6, cover_image_url),
+       status = COALESCE($7, status)
      WHERE id = $1 RETURNING *`,
-    [id, data.code, data.name, data.description, data.estimated_duration, data.distance, data.difficulty, data.cover_image_url, data.status]
+    [id, data.code, data.estimated_duration, data.distance, data.difficulty, data.cover_image_url, data.status]
   );
-  if (!row) throw new ApiError(404, 'ROUTE_NOT_FOUND', 'Culinary route not found.');
-  return row;
+  if (!route) throw new ApiError(404, 'ROUTE_NOT_FOUND', 'Culinary route not found.');
+  return upsertRouteTranslation(route, data);
+}
+
+// Route names/descriptions live in the unified `translations` table now. The
+// admin API keeps accepting `name` / `description` (optionally `language_id` so
+// a per-language editor can target a row); default language is Vietnamese.
+async function upsertRouteTranslation(route, data) {
+  if (data.name === undefined && data.description === undefined) return route;
+  if (data.name === null && data.description === null) return route;
+  let langId = data.language_id || null;
+  if (!langId) {
+    const vi = await db.getOne(`SELECT id FROM languages WHERE code = 'vi'`);
+    langId = vi?.id;
+  }
+  if (!langId) return route;
+  const existing = await db.getOne(
+    `SELECT id, name FROM translations
+     WHERE entity_type = 'route' AND entity_id = $1 AND language_id = $2`,
+    [route.id, langId]
+  );
+  const name = data.name !== undefined && data.name !== null
+    ? data.name
+    : (existing?.name ?? `Route ${route.code}`);
+  const description = data.description !== undefined ? data.description : null;
+  const trow = await db.getOne(
+    `INSERT INTO translations (entity_type, entity_id, language_id, name, description)
+     VALUES ('route', $1, $2, $3, $4)
+     ON CONFLICT (entity_type, entity_id, language_id) DO UPDATE SET
+       name = EXCLUDED.name, description = EXCLUDED.description
+     RETURNING *`,
+    [route.id, langId, name, description]
+  );
+  return {
+    ...route,
+    name: trow?.name ?? null,
+    description: trow?.description ?? null,
+    language_id: langId,
+  };
 }
 
 async function deleteRoute(id) {

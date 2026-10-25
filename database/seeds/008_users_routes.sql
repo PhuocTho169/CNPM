@@ -1,30 +1,34 @@
--- 008: Demo accounts, culinary routes, system settings
+-- 008: Demo accounts, culinary routes (names live in translations)
 -- pgcrypto provides bcrypt-compatible password hashes usable by bcryptjs
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- DEVELOPMENT-ONLY demo accounts (see README)
-INSERT INTO users (email, password_hash, full_name, role_id)
-SELECT 'admin@district4.local', crypt('Admin@123456', gen_salt('bf', 10)), 'System Administrator', r.id
-FROM roles r WHERE r.code = 'ADMIN'
+INSERT INTO users (email, password_hash, full_name, role)
+VALUES ('admin@district4.local', crypt('Admin@123456', gen_salt('bf', 10)), 'System Administrator', 'ADMIN')
 ON CONFLICT (email) DO NOTHING;
 
-INSERT INTO users (email, password_hash, full_name, role_id)
-SELECT 'staff@district4.local', crypt('Staff@123456', gen_salt('bf', 10)), 'Content Staff', r.id
-FROM roles r WHERE r.code = 'STAFF'
+INSERT INTO users (email, password_hash, full_name, role)
+VALUES ('staff@district4.local', crypt('Staff@123456', gen_salt('bf', 10)), 'Content Staff', 'STAFF')
 ON CONFLICT (email) DO NOTHING;
 
 -- Culinary routes
-INSERT INTO culinary_routes (code, name, description, estimated_duration, distance, difficulty, status) VALUES
-  ('tour-toi-quan-4', 'Tour Ẩm Thực Tối Quận 4',
-   'Lộ trình trải nghiệm Quận 4 về đêm: bắt đầu với món ăn vặt đường phố, tiếp tục với hải sản, tráng miệng ngọt ngào và khép lại trên phố ăn đêm sầm uất.',
-   '3–4 giờ', '≈ 2,5 km', 'EASY', 'PUBLISHED'),
-  ('buoi-sang-kieu-saigon', 'Bữa Sáng Kiểu Sài Gòn',
-   'Khám phá các quán ăn sáng địa phương: bánh canh cua, bún riêu, hủ tiếu, chợ truyền thống và ly cà phê sữa đá ven sông.',
-   '2–3 giờ', '≈ 2 km', 'EASY', 'PUBLISHED'),
-  ('vinh-khanh-dong-chay-dem', 'Vĩnh Khánh — Dòng Chảy Đêm',
-   'Dạo dọc tuyến phố Vĩnh Khánh từ cơm tấm buổi chiều đến phố ẩm thực đêm nhộn nhịp, với ốc và chè chặng cuối.',
-   '3 giờ', '≈ 1,8 km', 'EASY', 'PUBLISHED')
+INSERT INTO culinary_routes (code, estimated_duration, distance, difficulty, status) VALUES
+  ('tour-toi-quan-4', '3–4 giờ', '≈ 2,5 km', 'EASY', 'PUBLISHED'),
+  ('buoi-sang-kieu-saigon', '2–3 giờ', '≈ 2 km', 'EASY', 'PUBLISHED'),
+  ('vinh-khanh-dong-chay-dem', '3 giờ', '≈ 1,8 km', 'EASY', 'PUBLISHED')
 ON CONFLICT (code) DO NOTHING;
+
+-- Vietnamese route content moved from the old culinary_routes columns
+INSERT INTO translations (entity_type, entity_id, language_id, name, description)
+SELECT 'route', r.id, l.id, v.name, v.descr
+FROM (VALUES
+  ('tour-toi-quan-4', 'Tour Ẩm Thực Tối Quận 4', 'Lộ trình trải nghiệm Quận 4 về đêm: bắt đầu với món ăn vặt đường phố, tiếp tục với hải sản, tráng miệng ngọt ngào và khép lại trên phố ăn đêm sầm uất.'),
+  ('buoi-sang-kieu-saigon', 'Bữa Sáng Kiểu Sài Gòn', 'Khám phá các quán ăn sáng địa phương: bánh canh cua, bún riêu, hủ tiếu, chợ truyền thống và ly cà phê sữa đá ven sông.'),
+  ('vinh-khanh-dong-chay-dem', 'Vĩnh Khánh — Dòng Chảy Đêm', 'Dạo dọc tuyến phố Vĩnh Khánh từ cơm tấm buổi chiều đến phố ẩm thực đêm nhộn nhịp, với ốc và chè chặng cuối.')
+) AS v(code, name, descr)
+JOIN culinary_routes r ON r.code = v.code
+JOIN languages l ON l.code = 'vi'
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
 INSERT INTO route_stops (route_id, culinary_place_id, position, note)
 SELECT r.id, p.id, v.pos, v.note
@@ -47,9 +51,4 @@ JOIN culinary_routes r ON r.code = v.route
 JOIN culinary_places p ON p.code = v.place
 ON CONFLICT (route_id, position) DO NOTHING;
 
-INSERT INTO system_settings (key, value) VALUES
-  ('site_name', 'District 4 Culinary Guide'),
-  ('default_language', 'vi'),
-  ('tts_enabled', 'true'),
-  ('audio_default_speed', '1')
-ON CONFLICT (key) DO NOTHING;
+

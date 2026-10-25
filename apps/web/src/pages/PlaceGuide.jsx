@@ -163,24 +163,6 @@ export default function PlaceGuide() {
           )}
         </header>
 
-        {/* Language selector */}
-        <div>
-          <label className="eyebrow" htmlFor="lang-picker">{t('chooseLanguage')}</label>
-          <div className="lang-picker" id="lang-picker" role="radiogroup" aria-label={t('chooseLanguage')}>
-            {languages.map((l) => (
-              <button
-                key={l.code}
-                role="radio"
-                aria-checked={l.code === lang}
-                className={`lang-pill ${l.code === lang ? 'active' : ''}`}
-                onClick={() => setLang(l.code)}
-              >
-                {l.native_name}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Audio player */}
         <AudioPlayer
           audioUrl={audio?.file_url}

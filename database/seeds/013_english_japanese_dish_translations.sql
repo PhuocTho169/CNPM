@@ -1,14 +1,8 @@
 -- English + Japanese dish translations for all 12 dishes.
 -- dish_id is resolved via dish.code; id NOT IN subquery avoids re-inserts.
--- Deploys to dish_translations for en (lang_id=1) and ja (lang_id=5).
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM schema_migrations WHERE name = '013_english_japanese_dish_translations.sql') THEN
-    RETURN;
-  END IF;
-
-  INSERT INTO dish_translations (dish_id, language_id, name, description, ingredients, cultural_information)
-  SELECT d.id,
+-- Inserted into the unified translations table for en and ja.
+INSERT INTO translations (entity_type, entity_id, language_id, name, description, ingredients, cultural_information)
+SELECT 'dish', d.id,
          l.id,
          COALESCE(NULLIF(v.name, ''), k.name),
          COALESCE(NULLIF(v.description, ''), k.description),
@@ -16,8 +10,8 @@ BEGIN
          NULL
   FROM dishes d
   JOIN languages l ON l.code IN ('en', 'ja')
-         AND l.id NOT IN (SELECT dt.language_id FROM dish_translations dt WHERE dt.dish_id = d.id)
-  JOIN dish_translations k ON k.dish_id = d.id AND k.language_id = (SELECT id FROM languages WHERE code = 'ko')
+         AND l.id NOT IN (SELECT dt.language_id FROM translations dt WHERE dt.entity_type = 'dish' AND dt.entity_id = d.id)
+  JOIN translations k ON k.entity_type = 'dish' AND k.entity_id = d.id AND k.language_id = (SELECT id FROM languages WHERE code = 'ko')
   LEFT JOIN LATERAL (
     SELECT t.name, t.description, t.ingredients
     FROM (VALUES
@@ -51,9 +45,5 @@ BEGIN
   ) v ON true
   WHERE v.name IS NOT NULL
   ORDER BY d.id, l.id
-  ON CONFLICT (dish_id, language_id) DO NOTHING;
-
-  INSERT INTO schema_migrations (name) VALUES ('013_english_japanese_dish_translations.sql');
-END
-$$;
+  ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 

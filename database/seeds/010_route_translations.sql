@@ -1,6 +1,6 @@
 -- 010: Route translations (vi/zh/ko/ja)
-INSERT INTO route_translations (route_id, language_id, name, description)
-SELECT r.id, l.id, v.name, v.descr
+INSERT INTO translations (entity_type, entity_id, language_id, name, description)
+SELECT 'route', r.id, l.id, v.name, v.descr
 FROM (VALUES
   ('tour-toi-quan-4', 'Tour Ẩm Thực Tối Quận 4',
    'Lộ trình trải nghiệm Quận 4 về đêm: bắt đầu với món ăn vặt đường phố, tiếp tục với hải sản, tráng miệng ngọt ngào và khép lại trên phố ăn đêm sầm uất.'),
@@ -11,10 +11,10 @@ FROM (VALUES
 ) AS v(code, name, descr)
 JOIN culinary_routes r ON r.code = v.code
 JOIN languages l ON l.code = 'vi'
-ON CONFLICT (route_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO route_translations (route_id, language_id, name, description)
-SELECT r.id, l.id, v.name, v.descr
+INSERT INTO translations (entity_type, entity_id, language_id, name, description)
+SELECT 'route', r.id, l.id, v.name, v.descr
 FROM (VALUES
   ('tour-toi-quan-4', '第四郡夜游美食路线',
    '体验第四郡夜晚的路线：从街头小吃开始，接着品尝海鲜与甜品，最后在热闹的夜食街结束旅程。'),
@@ -25,10 +25,10 @@ FROM (VALUES
 ) AS v(code, name, descr)
 JOIN culinary_routes r ON r.code = v.code
 JOIN languages l ON l.code = 'zh'
-ON CONFLICT (route_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO route_translations (route_id, language_id, name, description)
-SELECT r.id, l.id, v.name, v.descr
+INSERT INTO translations (entity_type, entity_id, language_id, name, description)
+SELECT 'route', r.id, l.id, v.name, v.descr
 FROM (VALUES
   ('tour-toi-quan-4', '4군 밤 미식 투어',
    '4군의 밤을 경험하는 코스: 길거리 간식으로 시작해 해산물과 디저트를 즐기고, 활기찬 야식 거리로 마무리합니다.'),
@@ -39,10 +39,10 @@ FROM (VALUES
 ) AS v(code, name, descr)
 JOIN culinary_routes r ON r.code = v.code
 JOIN languages l ON l.code = 'ko'
-ON CONFLICT (route_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO route_translations (route_id, language_id, name, description)
-SELECT r.id, l.id, v.name, v.descr
+INSERT INTO translations (entity_type, entity_id, language_id, name, description)
+SELECT 'route', r.id, l.id, v.name, v.descr
 FROM (VALUES
   ('tour-toi-quan-4', '4区ナイトグルメツアー',
    '4区の夜を体験するコース：屋台の軽食から始まり、海鮮とデザートを楽しみ、賑やかな夜食街で締めくくります。'),
@@ -53,4 +53,4 @@ FROM (VALUES
 ) AS v(code, name, descr)
 JOIN culinary_routes r ON r.code = v.code
 JOIN languages l ON l.code = 'ja'
-ON CONFLICT (route_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;

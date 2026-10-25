@@ -3,7 +3,7 @@ const { ApiError } = require('../utils/errors');
 const media = require('./mediaService');
 const dishAudio = require('./dishAudioService');
 
-const TRANSLATION_COLS = `t.id, t.culinary_place_id AS place_id, t.language_id, l.code AS language_code,
+const TRANSLATION_COLS = `t.id, t.entity_id AS place_id, t.language_id, l.code AS language_code,
   t.name, t.short_description, t.description, t.history, t.cultural_significance, t.tourist_tips`;
 
 function publicUrl(req, filePath) {
@@ -18,8 +18,7 @@ function decoratePlace(row, lang) {
     address: row.address,
     latitude: row.latitude,
     longitude: row.longitude,
-    // GPS audio-zone geometry (migration 008). Admin-editable per place so the
-    // mobile guide never hard-codes a single radius for everywhere.
+    // GPS audio-zone geometry (migration 002, per-place admin values)
     zone_radius: row.zone_radius ?? 100,
     zone_exit_buffer: row.zone_exit_buffer ?? 20,
     phone: row.phone,
@@ -54,25 +53,32 @@ function decoratePlace(row, lang) {
 function listSelect(lang) {
   return `
     SELECT p.*, c.code AS category_code, c.name AS category_name, c.icon AS category_icon,
-      prim.image_url AS primary_image,
-      (SELECT count(*) FROM culinary_place_images i WHERE i.culinary_place_id = p.id) AS image_count,
+      prim.url AS primary_image,
+      (SELECT count(*) FROM media_files i
+        WHERE i.entity_type = 'place' AND i.entity_id = p.id AND i.kind = 'image') AS image_count,
       (SELECT count(*) FROM dishes d WHERE d.culinary_place_id = p.id) AS dish_count,
-      (SELECT array_agg(l2.code ORDER BY l2.code) FROM culinary_place_translations t2
-        JOIN languages l2 ON l2.id = t2.language_id WHERE t2.culinary_place_id = p.id) AS language_codes,
-      EXISTS (SELECT 1 FROM culinary_place_translations t3 JOIN audio_guides a ON a.translation_id = t3.id
-        WHERE t3.culinary_place_id = p.id) AS has_audio,
-      (SELECT qr.qr_value FROM qr_codes qr WHERE qr.culinary_place_id = p.id LIMIT 1) AS qr_value,
-      (SELECT qr.image_url FROM qr_codes qr WHERE qr.culinary_place_id = p.id LIMIT 1) AS qr_image_url,
-      EXISTS (SELECT 1 FROM qr_codes qr2 WHERE qr2.culinary_place_id = p.id) AS has_qr,
+      (SELECT array_agg(l2.code ORDER BY l2.code) FROM translations t2
+        JOIN languages l2 ON l2.id = t2.language_id
+        WHERE t2.entity_type = 'place' AND t2.entity_id = p.id) AS language_codes,
+      EXISTS (SELECT 1 FROM translations t3 JOIN media_files a
+        ON a.entity_type = 'translation' AND a.entity_id = t3.id AND a.kind = 'audio'
+        WHERE t3.entity_type = 'place' AND t3.entity_id = p.id) AS has_audio,
+      (SELECT qr.metadata->>'qr_value' FROM media_files qr
+        WHERE qr.entity_type = 'place' AND qr.entity_id = p.id AND qr.kind = 'qr' LIMIT 1) AS qr_value,
+      (SELECT qr.url FROM media_files qr
+        WHERE qr.entity_type = 'place' AND qr.entity_id = p.id AND qr.kind = 'qr' LIMIT 1) AS qr_image_url,
+      EXISTS (SELECT 1 FROM media_files qr2
+        WHERE qr2.entity_type = 'place' AND qr2.entity_id = p.id AND qr2.kind = 'qr') AS has_qr,
       t.name AS t_name, t.short_description AS t_short_description, t.description AS t_description,
       t.history AS t_history, t.cultural_significance AS t_cultural_significance, t.tourist_tips AS t_tourist_tips
     FROM culinary_places p
     LEFT JOIN categories c ON c.id = p.category_id
-    LEFT JOIN culinary_place_translations t
-      ON t.culinary_place_id = p.id
+    LEFT JOIN translations t
+      ON t.entity_type = 'place' AND t.entity_id = p.id
       AND t.language_id = (SELECT id FROM languages WHERE code = $1)
     LEFT JOIN LATERAL (
-      SELECT image_url FROM culinary_place_images pi WHERE pi.culinary_place_id = p.id
+      SELECT url FROM media_files pi
+      WHERE pi.entity_type = 'place' AND pi.entity_id = p.id AND pi.kind = 'image'
       ORDER BY pi.is_primary DESC, pi.sort_order ASC LIMIT 1
     ) prim ON true`;
 }
@@ -104,9 +110,12 @@ async function list({ lang, category, q, status, price, openNow, recommended, pa
     const idx = params.length;
     where.push(`(
       t.name ILIKE $${idx} OR c.name ILIKE $${idx}
-      OR EXISTS (SELECT 1 FROM culinary_place_translations t2 WHERE t2.culinary_place_id = p.id AND t2.name ILIKE $${idx})
-      OR EXISTS (SELECT 1 FROM dish_translations dt JOIN dishes d ON d.id = dt.dish_id
-                 WHERE d.culinary_place_id = p.id AND (dt.name ILIKE $${idx} OR COALESCE(dt.ingredients,'') ILIKE $${idx}))
+      OR EXISTS (SELECT 1 FROM translations t2
+        WHERE t2.entity_type = 'place' AND t2.entity_id = p.id AND t2.name ILIKE $${idx})
+      OR EXISTS (SELECT 1 FROM translations dt JOIN dishes d
+                   ON d.id = dt.entity_id AND dt.entity_type = 'dish'
+                 WHERE d.culinary_place_id = p.id
+                   AND (dt.name ILIKE $${idx} OR COALESCE(dt.ingredients, '') ILIKE $${idx}))
     )`);
   }
 
@@ -117,7 +126,8 @@ async function list({ lang, category, q, status, price, openNow, recommended, pa
   const total = await db.getOne(
     `SELECT count(*)::int AS c FROM culinary_places p
      LEFT JOIN categories c ON c.id = p.category_id
-     LEFT JOIN culinary_place_translations t ON t.culinary_place_id = p.id
+     LEFT JOIN translations t
+       ON t.entity_type = 'place' AND t.entity_id = p.id
        AND t.language_id = (SELECT id FROM languages WHERE code = $1)
      ${whereSql}`,
     params
@@ -144,16 +154,17 @@ async function getFullDetail(id, lang) {
   const place = await getById(id, lang);
 
   const translations = await db.getMany(
-    `SELECT ${TRANSLATION_COLS} FROM culinary_place_translations t JOIN languages l ON l.id = t.language_id
-     WHERE t.culinary_place_id = $1 ORDER BY t.language_id`,
+    `SELECT ${TRANSLATION_COLS} FROM translations t JOIN languages l ON l.id = t.language_id
+     WHERE t.entity_type = 'place' AND t.entity_id = $1 ORDER BY t.language_id`,
     [id]
   );
 
   const audioRows = await db.getMany(
-    `SELECT a.id, a.translation_id, a.file_url, a.duration, a.file_size, a.mime_type, a.source, a.created_at
-     FROM audio_guides a
-     JOIN culinary_place_translations t ON t.id = a.translation_id
-     WHERE t.culinary_place_id = $1`,
+    `SELECT a.id, t.id AS translation_id, a.url AS file_url, a.duration, a.file_size, a.mime_type, a.source, a.created_at
+     FROM media_files a
+     JOIN translations t ON t.id = a.entity_id
+     WHERE a.entity_type = 'translation' AND a.kind = 'audio'
+       AND t.entity_type = 'place' AND t.entity_id = $1`,
     [id]
   );
   const audioByTranslation = {};
@@ -194,8 +205,10 @@ async function getFullDetail(id, lang) {
   }
 
   place.images = await db.getMany(
-    `SELECT id, image_url, alt_text, sort_order, is_primary FROM culinary_place_images
-     WHERE culinary_place_id = $1 ORDER BY is_primary DESC, sort_order ASC`,
+    `SELECT id, url AS image_url, alt_text, sort_order, is_primary
+     FROM media_files
+     WHERE entity_type = 'place' AND entity_id = $1 AND kind = 'image'
+     ORDER BY is_primary DESC, sort_order ASC`,
     [id]
   );
 
@@ -203,23 +216,27 @@ async function getFullDetail(id, lang) {
     `SELECT d.id, d.code, d.price, d.image_url, d.is_signature, d.status,
             c.code AS category_code, c.name AS category_name,
             dt.id AS translation_id, dt.name, dt.description, dt.ingredients,
-            da.file_url AS audio_url, da.duration AS audio_duration, da.source AS audio_source
+            da.url AS audio_url, da.duration AS audio_duration, da.source AS audio_source
      FROM dishes d
      LEFT JOIN categories c ON c.id = d.category_id
-     LEFT JOIN dish_translations dt ON dt.dish_id = d.id
+     LEFT JOIN translations dt
+       ON dt.entity_type = 'dish' AND dt.entity_id = d.id
        AND dt.language_id = (SELECT id FROM languages WHERE code = $2)
-     LEFT JOIN dish_audio_guides da ON da.translation_id = dt.id
+     LEFT JOIN media_files da
+       ON da.entity_type = 'translation' AND da.entity_id = dt.id AND da.kind = 'audio'
      WHERE d.culinary_place_id = $1 AND d.status = 'PUBLISHED'
      ORDER BY d.is_signature DESC, d.id ASC`,
     [id, lang]
   );
 
-  // Dish fallback: if the requested language has no dish translation, use the
-  // Vietnamese translation so the dish card is never empty.
+  // Dish fallback: nếu ngôn ngữ yêu cầu chưa có bản dịch món, dùng bản tiếng Việt
+  // để card món không bao giờ trống.
   const dishFallbacks = await db.getMany(
-    `SELECT dt.dish_id, dt.name, dt.description FROM dish_translations dt
-     JOIN languages l ON l.id = dt.language_id WHERE l.code = 'vi'
-       AND dt.dish_id IN (SELECT id FROM dishes WHERE culinary_place_id = $1)`,
+    `SELECT dt.entity_id AS dish_id, dt.name, dt.description
+     FROM translations dt
+     JOIN languages l ON l.id = dt.language_id
+     WHERE dt.entity_type = 'dish' AND l.code = 'vi'
+       AND dt.entity_id IN (SELECT id FROM dishes WHERE culinary_place_id = $1)`,
     [id]
   );
   const fbMap = {};
@@ -311,19 +328,19 @@ async function remove(id) {
 
 async function getTranslation(placeId, lang) {
   return db.getOne(
-    `SELECT t.id, t.culinary_place_id AS place_id, t.language_id, l.code AS language_code,
+    `SELECT t.id, t.entity_id AS place_id, t.language_id, l.code AS language_code,
             t.name, t.short_description, t.description, t.history, t.cultural_significance, t.tourist_tips
-     FROM culinary_place_translations t
+     FROM translations t
      JOIN languages l ON l.id = t.language_id
-     WHERE t.culinary_place_id = $1 AND l.code = $2`,
+     WHERE t.entity_type = 'place' AND t.entity_id = $1 AND l.code = $2`,
     [placeId, lang]
   );
 }
 
 async function listTranslations(placeId) {
   return db.getMany(
-    `SELECT ${TRANSLATION_COLS} FROM culinary_place_translations t JOIN languages l ON l.id = t.language_id
-     WHERE t.culinary_place_id = $1 ORDER BY t.language_id`,
+    `SELECT ${TRANSLATION_COLS} FROM translations t JOIN languages l ON l.id = t.language_id
+     WHERE t.entity_type = 'place' AND t.entity_id = $1 ORDER BY t.language_id`,
     [placeId]
   );
 }
@@ -336,10 +353,10 @@ async function upsertTranslation(placeId, { language_id, name, short_description
   if (!lang) throw new ApiError(404, 'LANGUAGE_NOT_FOUND', 'The language could not be found.');
 
   return db.getOne(
-    `INSERT INTO culinary_place_translations
-       (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-     ON CONFLICT (culinary_place_id, language_id) DO UPDATE SET
+    `INSERT INTO translations
+       (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+     VALUES ('place', $1, $2, $3, $4, $5, $6, $7, $8)
+     ON CONFLICT (entity_type, entity_id, language_id) DO UPDATE SET
        name = EXCLUDED.name, short_description = EXCLUDED.short_description, description = EXCLUDED.description,
        history = EXCLUDED.history, cultural_significance = EXCLUDED.cultural_significance, tourist_tips = EXCLUDED.tourist_tips
      RETURNING *`,
@@ -348,42 +365,52 @@ async function upsertTranslation(placeId, { language_id, name, short_description
 }
 
 async function deleteTranslation(translationId) {
-  await db.query('DELETE FROM culinary_place_translations WHERE id = $1', [translationId]);
+  await db.query("DELETE FROM translations WHERE id = $1 AND entity_type = 'place'", [translationId]);
 }
 
 async function listImages(placeId) {
   return db.getMany(
-    `SELECT id, image_url, alt_text, sort_order, is_primary, created_at FROM culinary_place_images
-     WHERE culinary_place_id = $1 ORDER BY is_primary DESC, sort_order ASC`,
+    `SELECT id, url AS image_url, alt_text, sort_order, is_primary, created_at FROM media_files
+     WHERE entity_type = 'place' AND entity_id = $1 AND kind = 'image'
+     ORDER BY is_primary DESC, sort_order ASC`,
     [placeId]
   );
 }
 
 async function addImage(placeId, { image_url, alt_text, is_primary }) {
   if (is_primary) {
-    await db.query('UPDATE culinary_place_images SET is_primary = false WHERE culinary_place_id = $1', [placeId]);
+    await db.query(
+      "UPDATE media_files SET is_primary = false WHERE entity_type = 'place' AND entity_id = $1 AND kind = 'image'",
+      [placeId]
+    );
   }
   return db.getOne(
-    `INSERT INTO culinary_place_images (culinary_place_id, image_url, alt_text, is_primary)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
+    `INSERT INTO media_files (entity_type, entity_id, kind, url, alt_text, is_primary)
+     VALUES ('place', $1, 'image', $2, $3, $4) RETURNING *`,
     [placeId, image_url, alt_text || null, !!is_primary]
   );
 }
 
 async function updateImage(placeId, imageId, { alt_text, sort_order, is_primary }) {
   if (is_primary) {
-    await db.query('UPDATE culinary_place_images SET is_primary = false WHERE culinary_place_id = $1', [placeId]);
+    await db.query(
+      "UPDATE media_files SET is_primary = false WHERE entity_type = 'place' AND entity_id = $1 AND kind = 'image'",
+      [placeId]
+    );
   }
   return db.getOne(
-    `UPDATE culinary_place_images SET
+    `UPDATE media_files SET
        alt_text = COALESCE($3, alt_text), sort_order = COALESCE($4, sort_order), is_primary = COALESCE($5, is_primary)
-     WHERE id = $2 AND culinary_place_id = $1 RETURNING *`,
+     WHERE id = $2 AND entity_type = 'place' AND entity_id = $1 AND kind = 'image' RETURNING *`,
     [placeId, imageId, alt_text ?? null, sort_order ?? null, is_primary ?? null]
   );
 }
 
 async function deleteImage(placeId, imageId) {
-  await db.query('DELETE FROM culinary_place_images WHERE id = $2 AND culinary_place_id = $1', [placeId, imageId]);
+  await db.query(
+    "DELETE FROM media_files WHERE id = $2 AND entity_type = 'place' AND entity_id = $1 AND kind = 'image'",
+    [placeId, imageId]
+  );
 }
 
 async function nearby(lat, lng, radiusMeters = 2000, lang = 'vi', limit = 10) {
@@ -391,17 +418,19 @@ async function nearby(lat, lng, radiusMeters = 2000, lang = 'vi', limit = 10) {
     `SELECT p.id, p.code, p.address, p.latitude, p.longitude, p.price_range, p.is_recommended,
             p.zone_radius, p.zone_exit_buffer,
             c.code AS category_code, c.name AS category_name, c.icon AS category_icon,
-            prim.image_url AS primary_image, t.name, t.short_description,
+            prim.url AS primary_image, t.name, t.short_description,
             (6371000 * acos(least(1.0, greatest(-1.0,
               cos(radians($1)) * cos(radians(p.latitude)) * cos(radians(p.longitude) - radians($2))
               + sin(radians($1)) * sin(radians(p.latitude))
             )))) AS distance_m
      FROM culinary_places p
      LEFT JOIN categories c ON c.id = p.category_id
-     LEFT JOIN culinary_place_translations t ON t.culinary_place_id = p.id
+     LEFT JOIN translations t
+       ON t.entity_type = 'place' AND t.entity_id = p.id
        AND t.language_id = (SELECT id FROM languages WHERE code = $3)
      LEFT JOIN LATERAL (
-       SELECT image_url FROM culinary_place_images pi WHERE pi.culinary_place_id = p.id
+       SELECT url FROM media_files pi
+       WHERE pi.entity_type = 'place' AND pi.entity_id = p.id AND pi.kind = 'image'
        ORDER BY pi.is_primary DESC, pi.sort_order ASC LIMIT 1
      ) prim ON true
      WHERE p.status = 'PUBLISHED' AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL

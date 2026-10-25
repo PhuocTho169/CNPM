@@ -315,16 +315,6 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; }
 }
 .filter-bar input[type="search"] { flex: 1; min-width: 200px; }
 
-/* ---------- Language picker on guide page ---------- */
-.lang-picker { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
-.lang-pill {
-  border: 1.5px solid var(--border); background: var(--surface); border-radius: 20px;
-  padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 600; color: var(--text-2);
-  transition: all .15s;
-}
-.lang-pill.active { border-color: var(--primary); background: #fff3e6; color: var(--primary-dark); }
-.lang-pill:hover { border-color: var(--primary-light); }
-
 /* ---------- Route timeline ---------- */
 .route-stops { position: relative; padding-left: 1.8rem; margin: 1.2rem 0; }
 .route-stops::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; background: #ffd8b5; }

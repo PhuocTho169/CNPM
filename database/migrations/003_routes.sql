@@ -1,9 +1,10 @@
--- 004: Culinary routes
+-- 003: Routes — culinary_routes (metadata only) + route_stops.
+-- Names/descriptions moved to the unified `translations` table
+-- (entity_type = 'route'), so the table itself only carries operational data.
+
 CREATE TABLE IF NOT EXISTS culinary_routes (
   id SERIAL PRIMARY KEY,
   code VARCHAR(80) UNIQUE NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
   estimated_duration VARCHAR(80),
   distance VARCHAR(80),
   difficulty VARCHAR(20) NOT NULL DEFAULT 'EASY'
@@ -28,3 +29,4 @@ CREATE TABLE IF NOT EXISTS route_stops (
   UNIQUE (route_id, position)
 );
 CREATE INDEX IF NOT EXISTS idx_stops_route ON route_stops(route_id);
+CREATE INDEX IF NOT EXISTS idx_stops_place ON route_stops(culinary_place_id);

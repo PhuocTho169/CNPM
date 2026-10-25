@@ -1,11 +1,12 @@
 const express = require('express');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { attachGuestSession, requireLanguageUnlock } = require('../middleware/entitlement');
 const { runUpload } = require('../middleware/upload');
 const media = require('../controllers/mediaController');
 const placeController = require('../controllers/placeController');
 const catalog = require('../controllers/catalogController');
 const guest = require('../routes/guest');
-const payment = require('../routes/payment');
+const geo = require('../controllers/geoController');
 const health = require('../controllers/healthController');
 const auth = require('../controllers/authController');
 
@@ -42,7 +43,7 @@ router.get('/places/:id', placeController.getOne);
 // ---------- Public: dishes ----------
 router.get('/dishes', catalog.listDishes);
 router.get('/dishes/:id', catalog.getDish);
-router.get('/dishes/:id/translation', media.dishTranslationAccess);
+router.get('/dishes/:id/translation', attachGuestSession, requireLanguageUnlock, media.dishTranslationAccess);
 router.post('/dishes', authenticate, requireRole('ADMIN', 'STAFF'), catalog.createDish);
 router.put('/dishes/:id', authenticate, requireRole('ADMIN', 'STAFF'), catalog.updateDish);
 router.post('/dishes/:id/image', authenticate, requireRole('ADMIN', 'STAFF'), runUpload('image'), catalog.uploadDishImage);
@@ -50,14 +51,14 @@ router.delete('/dishes/:id', authenticate, requireRole('ADMIN', 'STAFF'), catalo
 router.post('/dishes/:id/translations', authenticate, requireRole('ADMIN', 'STAFF'), catalog.upsertDishTranslation);
 
 // ---------- Public: audio & translations (guests may read, paywalled) ----------
-// GET /api/culinary-places/:placeId/audio?language=vi
-router.get('/culinary-places/:placeId/audio', media.audioAccess);
-// GET /api/dishes/:dishId/audio?language=vi
-router.get('/dishes/:dishId/audio', media.audioAccess);
-// GET /api/culinary-places/:placeId/translation?language=vi
-router.get('/culinary-places/:placeId/translation', media.translationAccess);
-// GET /api/dishes/:dishId/translation?language=vi
-router.get('/dishes/:dishId/translation', media.translationAccess);
+// GPS zone detection for the mobile app: GET /api/culinary-places/nearby
+router.get('/culinary-places/nearby', geo.nearbyZones);
+// GET /api/culinary-places/:placeId/audio?language=vi — paywalled per guest language
+router.get('/culinary-places/:placeId/audio', attachGuestSession, requireLanguageUnlock, media.audioAccess);
+// GET /api/dishes/:dishId/audio?language=vi — paywalled per guest language
+router.get('/dishes/:dishId/audio', attachGuestSession, requireLanguageUnlock, media.dishAudioAccess);
+// GET /api/culinary-places/:placeId/translation?language=vi — paywalled per guest language
+router.get('/culinary-places/:placeId/translation', attachGuestSession, requireLanguageUnlock, media.translationAccess);
 
 // ---------- Places admin CRUD ----------
 router.post('/places', authenticate, requireRole('ADMIN', 'STAFF'), placeController.create);
@@ -116,11 +117,9 @@ router.post('/dishes/:id/qr/regenerate', authenticate, requireRole('ADMIN', 'STA
 // ---------- Guest entitlements ----------
 router.use('/guest-sessions', guest);
 
-// ---------- Payments ----------
-router.use('/payments', payment);
-
 // ---------- Statistics ----------
 router.get('/dashboard/statistics', authenticate, requireRole('ADMIN', 'STAFF'), media.dashboardStats);
+router.get('/dashboard/online-users', authenticate, requireRole('ADMIN', 'STAFF'), media.onlineUsers);
 router.get('/statistics/scans', authenticate, requireRole('ADMIN', 'STAFF'), media.scansStats);
 router.get('/statistics/audio', authenticate, requireRole('ADMIN', 'STAFF'), media.audioStats);
 
@@ -130,5 +129,8 @@ router.post('/favorites', media.addFavorite);
 router.delete('/favorites', media.removeFavorite);
 router.get('/history', media.listHistory);
 router.post('/history', media.logHistory);
+
+// Public: the website pings this so the dashboard can show "users online".
+router.post('/activity/ping', media.logVisit);
 
 module.exports = router;

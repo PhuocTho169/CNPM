@@ -7,10 +7,10 @@
 -- ON CONFLICT DO NOTHING everywhere: the seed boots on every start and an admin
 -- may already have edited these rows, so re-runs must never overwrite them.
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
 SELECT
-  p.id,
+  'place', p.id,
   (SELECT id FROM languages WHERE code = 'en'),
   'Oc Oanh',
   'A well-known District 4 seafood snail stall on the pavement that opens from late afternoon, specialising in charcoal-grilled and wok-fried snails with rich southern seasoning.',
@@ -19,11 +19,11 @@ SELECT
   'Snails belong to the Saigon pavement drinking-and-eating culture, the easy side of the city where friends gather after work. District 4 has long counted as one of the densest snail-stall pockets in the city, and that has held for decades. Charcoal snails are bright, energetic and loud in flavour, and that is what turns a street corner into a little highlight of pavement food history, tied as it is to Saigon’s long shoreline trade life. For the people who live here, the snail stall is the place to meet friends again after a shift, talk, joke and share something informal that is modest without being cheap.',
   'Come after 6pm to catch the full night-time buzz • Order snails with grilled rice paper or crispy fried rice • Bring cash, because many stalls do not take cards • Try the salted-chilli grilled ốc bươu with lime leaf • Ask the staff for a combination that suits the table'
 FROM culinary_places p WHERE p.code = 'oc-oanh'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Com Tam Vinh Khanh',
   'A Vĩnh Khánh street com tam shop with charcoal-grilled ribs, crispy cracklings and steamed egg, carrying the everyday taste of the southern table.',
   'This com tam stall serves charcoal-grilled ribs, fried cracklings and steamed egg over broken rice, finished with a sweet-and-sour fish sauce. It is the kind of lunch and dinner that people in the area eat again and again. The standout dish is the charcoal-rib com tam, with rib meat marinated in seasoning, grilled directly over red charcoal, and finished with a colour and smoky fragrance that makes the flavour hard to walk away from. Alongside it, the stall has side dishes such as thich- mixed cracklings and soft steamed egg, so each person can build a plate that suits them. The fish sauce is mixed from a house formula, balancing salty, sweet and sour in a way that lifts the whole dish without shouting. The broken rice gets a second layer of flavour from pork sausage, tomato and spring onion. This is not just a noodle-less rice bowl on a tray; it is the place workers and students drift towards after work or class, with low plastic chairs, bright midday sun and a floor that still carries a trace of charcoal. The house-made fish sauce stays light, and every item on the table feels like the product of nearly thirty years of effort from the people running it. What used to be a poor man''s rice has become one of the street dishes no one visiting Saigon can skip.',
@@ -31,11 +31,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Com tam is regarded as a national dish of southern Vietnam, born from making use of broken rice, and it is now a defining part of Saigon''s street food culture. Com tam shows a habit of turning what was left over into something worth repeating, which is the small, stubborn inventiveness of the street. The story belongs to the kitchen hand, the grill keeper and the quiet craft in every rice plate on the pavement. That is why each bowl still feels like a piece of the people of the street.',
   '11am–1pm is peak time and you may wait a little • Add a fried egg on top or extra cracklings to lift the plate • Try the fish sauce first and finish with a tiny kick of chilli to keep the flavour close • Enjoy the street-food side of life without forgetting the basics of staying well'
 FROM culinary_places p WHERE p.code = 'com-tam-vinh-khanh'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Banh Xeo Hoa Gia',
   'Crisp turmeric pancakes fried on a charcoal stove, wrapped with fresh greens and dipped in fish sauce, in the classic southern street-food manner.',
   'Bánh xèo here has a thin, brittle crust filled with shrimp, pork and bean sprouts, and it is fried in a small pan the moment an order comes in so the crispness stays. It is eaten wrapped in lettuce, herbs and rice paper, with the sweet-and-sour fish sauce tucked in beside everything else. The base is rice flour, turmeric, shrimp, pork, bean sprouts and fresh greens, and the colour and fragrance come straight from turmeric and the herbs that give the pancake its southern personality. When the first bite goes in, the sound, the shrimp and pork, and the gentle turmeric perfume all land together. The Saigon way of eating it is to wrap it up with mustard greens, mint and any picked greens at hand, then dip it into fish sauce carrying grated carrot and pickled daikon for a balanced sweet-sour lift. More than a simple dish, bánh xèo is part of the happy street atmosphere it helps create - part joke, part family feeling, part easy sharing. In that sense it is a fair summary of what southern everyday food is trying to be: plain, close and warm, the kind of thing people build a memory around.',
@@ -43,11 +43,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Bánh xèo reflects southern Vietnamese culinary exchange, with its signature yellow colour coming from turmeric and its fresh herbs from home gardens. The dish also carries a small story of turning a humble grain into a plate that is still remembered warmly, which is one way street food keeps its human side.',
   'Eat it right out of the pan if you can, while it is still crisp • Roll small bites so the sauce is easy to manage • Bring cash, because many stalls still prefer it • Wear something comfortable if you want to enjoy the open-air charcoal atmosphere'
 FROM culinary_places p WHERE p.code = 'banh-xeo-hoa-gia'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Bun Rieu Ben Van Don',
   'Crab rice-noodle soup with a clear, sweet broth, served with fresh greens and pickled shrimp, a riverside breakfast from District 4.',
   'The bowl is built around crab paste set into a layer, a clear sweet broth, and fresh rice noodles eaten with tofu, tomato and a mix of greens. It is the kind of breakfast and lunch that appears all along the riverside area, carrying the clean, balanced feel of water-side cooking. Field crab is pounded and strained for the paste, then stewed with tomato for the broth''s natural red tone. The bowl is rounded out with pickled shrimp, sliced morning glory, bean sprouts and shredded banana blossom. The Ben Vân Đồn stretch has long been close to the river, and that has drawn breakfast stalls serving the nearby neighbourhood for years. Bún riêu is one of the Mekong Delta''s everyday breakfasts, and it carries the lighter, more delicate seasoning that river cooking tends to favour. Come in the morning to catch the bowl at its freshest, or later in the day for the full riverside atmosphere. The stall keeps its own rhythm: queue at the counter or take a seat and let the stomach set the pace.',
@@ -55,11 +55,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Bún riêu is a representative Mekong Delta breakfast, showing the light, balanced seasoning of river-and-water cooking. It is also one of those dishes that knows the quiet side of a river morning: the fog, the empty stove that is still sitting there, the kind of small history you taste before you think about it. The dish carries the river close to the table in a way that younger, faster dishes rarely manage, which is part of why people keep coming back for it year after year.',
   'Add extra crab paste if you like a richer bowl • Squeeze in a little calamansi to sharpen the flavour • Bring cash, since many stalls will not take cards • Enjoy the quiet morning beside the river as much as the bowl itself • Try it both in broth and dry if you want the full range of the dish'
 FROM culinary_places p WHERE p.code = 'bun-rieu-ben-van-don'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Pho An Vinh Khanh',
   'District 4''s liveliest late-night food street, with seafood, snails and grilling hotpot, the whole strip waking up when dusk falls.',
   'As night falls, Vĩnh Khánh turns into a late-night eating street: rows of plastic tables and chairs stretch along the road, and the smell of grilled seafood and bubbling hotpot fills the air. It is the easiest place in the area to feel the rhythm of Saigon after dark. The street-side stalls serve grilled seafood, all kinds of snails, fish hotpot and seafood congee. The busiest hours run from 7pm to 11pm. The street grew out of the late-night appetite of the people living around the river port, and over time it became a dining address known well beyond the neighbourhood. The late-night eating culture along Vĩnh Khánh shows the open, sociable side of Saigon: plastic stools, fresh food and conversation that keeps going deep into the night. Walk in without a plan and let the stalls you pass decide the menu, because that is how the street works best. The smoke, the noise and the conversation make the whole strip feel larger than the space it takes up.',
@@ -67,11 +67,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Vĩnh Khánh grew first out of the late-night needs of the people around the river port, then slowly became a late-night food destination that people from across the city now seek out. The street is full of the energy, lights, noise and smell that make pavement food feel alive, and the people here have been sharing that easy street-food energy for forty or fifty years and more. It is one of the rare streets where the night does not feel like a separate city; it just keeps the same people going a little longer and louder.',
   'Go in a group and order several dishes to share • Bring cash, because many stalls only take it • Let the night unfold slowly here, with the laughter at the table carrying on long after the food is gone • Walk in without a plan and let the stalls you pass decide the menu'
 FROM culinary_places p WHERE p.code = 'pho-an-vinh-khanh'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Cho Quan 4',
   'A bustling traditional market of food stalls, fruit and Mekong Delta specialities, the kind of place that still feels local.',
   'District 4 market gathers breakfast stalls, fresh fruit, cakes and dried seafood in one old-style market space. The traditional Saigon-market atmosphere suits anyone wanting to explore local food from the ground up. Inside, the stalls sell bún mắm, hủ tiếu, bánh canh, Mekong Delta fruit and dried goods. The morning is when the market is most alive. For decades the market has been District 4''s food-shopping hub, and it has kept supplying fresh ingredients to the surrounding wards. A traditional market like this preserves the local way of buying, cooking and eating, in sharp contrast to a modern shopping mall. Walk slowly through the aisles and let the smells guide you first, because the best finds are usually the ones you notice by scent before you see them. The market opens early and fills up by the time the sun is fully up, so an early start gets the cleanest, most alive version of the place.',
@@ -79,11 +79,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'The traditional market in District 4 has been the steady food hub of the area for years, and at the same time it keeps the original shape of local trading, cooking and eating alive. Even as years pass, the place still holds onto the human smell, the tarps, the gathered chatter and the morning fruit light that give a market its own native feel. The market is part of the way this area eats: direct, unpolished, and deeply connected to the people who grow, cook and sell the food.',
   'Have small change ready to make buying easier • Ask a stallholder to suggest a breakfast dish you can eat there right away • Go early for the liveliest version of the market • Follow the smell of a stall you like, because it is usually the best sign'
 FROM culinary_places p WHERE p.code = 'cho-quan-4'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Cafe Ben Van Don',
   'A riverside coffee shop looking out onto the Bến Vân Đồn canal, good for cool mornings and slow afternoons in District 4.',
   'The space is open to the water and serves iced coffee with condensed milk, coconut coffee and fruit tea. It is an easy pause in the middle of all the food density that District 4 carries. The shop stands along the Bến Vân Đồn stretch and looks out over the canal, with seating out front for watching boats come and go. Bến Vân Đồn was once a busy river wharf for the area and is now a busy road linking District 4 with District 1. Saigon''s pavement coffee culture shows a slower rhythm of life in the middle of a crowded city.',
@@ -91,11 +91,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Saigon''s pavement coffee culture shows a slower rhythm of life in the middle of a crowded city. A place like this matters because it offers a pause in the middle of a food-dense street - a moment to sit, watch the water and the boats, and let the pace of the day drop a little.',
   'Early morning is cooler and gives you the best view of the boats moving by • Try the traditional phin drip iced coffee with condensed milk'
 FROM culinary_places p WHERE p.code = 'cafe-ben-van-don'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Che Heo Quay',
   'A street sweet-soup shop with mixed dessert and cooling bánh bột lọc, the kind of place that makes an afternoon on the alley feel sweet.',
   'A bowl of mixed dessert brings together mung bean, taro, tapioca pearls and coconut cream, with bánh bột lọc and fruit salad alongside. It is the sort of late-afternoon treat the neighbourhood keeps coming back for. The sweets here are cooked fresh every day and served from late afternoon into the night. Each variety carries the gently sweet Mekong Delta character, with light coconut cream that keeps the flavour rich without feeling heavy. These sweet-soup stalls are tucked into alley corners and have been loved by local residents for years. Chè is part of the southern Vietnamese dessert tradition, and it reflects the richness of river-delta ingredients such as beans, taro and coconut.',
@@ -103,11 +103,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Chè is a southern Vietnamese dessert tradition, reflecting the richness of river-delta ingredients such as beans, taro and coconut. A bowl of chè is also a good reminder that southern dessert culture is built from seasonal ingredients and ordinary local taste, which is why the sweetness in it lasts in the memory a little longer than the bowl itself.',
   'Ask for less ice if you are eating this in the evening • A sprinkle of roasted peanuts makes the bowl tastier and a little crunchier'
 FROM culinary_places p WHERE p.code = 'che-heo-quay'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Banh Canh Cua Nguyen Khoai',
   'Crab noodle soup with a sweet, thickened broth - a breakfast speciality of the Nguyen Khoai area and one of the richer morning bowls in District 4.',
   'The bánh canh noodles are made from rice flour and tapioca starch, the broth is simmered with field crab and pork bones, and the bowl is finished with crab cake, shrimp and pork sausage. It is a strongly flavoured District 4 breakfast. The crab meat gives a firm sweetness, and the stock simmered with crab and bones gives the soup its natural thickness. The bowl comes with bean sprouts, spring onion, freshly ground pepper and a little chilli. The bánh canh cua stalls along Nguyễn Khoai have served local residents for years in the style of a family breakfast stall. Bánh canh cua is widely associated with the breakfast food culture of this riverside neighbourhood.',
@@ -115,11 +115,11 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Bánh canh cua bắp is widely associated with the breakfast food culture of this riverside neighbourhood. The dish carries a whole riverside morning in it: the firm sweetness from the crab, the patient stock, and the fact that this is one of those morning bowls people in this part of town keep coming back to because it feels like the area itself.',
   'Add a pork sausage round if you like • A side of pickled tomato helps cut the richness'
 FROM culinary_places p WHERE p.code = 'banh-canh-cua-nguyen-khoai'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO culinary_place_translations
-  (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
+INSERT INTO translations
+  (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Hu Tieu My Tho',
   'Clear-broth rice noodles with fresh shrimp, served with pickled greens and fried garlic, a familiar My Tho-style bowl in District 4.',
   'A bowl of hủ tiếu here has firm noodles, fresh shrimp, pork, liver and sweet mustard greens in a clear, sweet pork-bone broth. It is one of the best-known hủ tiếu shops in District 4. The noodles are made from rice flour mixed with shrimp for a light pink colour, and the clear broth is simmered from pork bones with sour tamarind for balance. The shop follows the My Tho hủ tiếu style and has served residents of the Đoàn Như Hài area for years. Hủ tiếu shows the Viet–Chinese–Khmer culinary exchange in the Mekong Delta, and it is eaten either in broth or dry.',
@@ -127,4 +127,4 @@ SELECT p.id, (SELECT id FROM languages WHERE code = 'en'),
   'Hủ tiếu shows the Viet–Chinese–Khmer culinary exchange in the Mekong Delta, and is eaten either in broth or dry. The flavour here - the noodle colour, the clean broth, the shrimp, the liver, the greens - is one of the local answers to a very old mixed-food story, which is part of why the bowl keeps a following in this part of town.',
   'Try the dish both in broth and dry • Add a little chilli vinegar to give the broth more depth'
 FROM culinary_places p WHERE p.code = 'hutieu-ca-men'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;

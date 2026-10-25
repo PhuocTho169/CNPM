@@ -1,8 +1,12 @@
 const db = require('../db');
-const { ApiError } = require('../utils/errors');
 
 /**
- * Guest sessions
+ * Guest sessions + language paywall.
+ *
+ * One table now: guest_sessions holds the single free_language_id and the
+ * purchased_languages INT[] array. No language_entitlements / access_packages /
+ * payment rows — payments are granted sandbox-style by adding the language to
+ * the array. The partial-free-then-purchase flow lives on this one row.
  */
 
 async function createGuestSession() {
@@ -15,17 +19,20 @@ async function createGuestSession() {
     `INSERT INTO guest_sessions (id, token_hash, display_id)
      VALUES ($1, $2, $3)
      ON CONFLICT (display_id) DO UPDATE
-       SET updated_at = now(), token_hash = EXCLUDED.token_hash
-     RETURNING id, token, display_id`,
+       SET token_hash = EXCLUDED.token_hash,
+           expires_at = now() + interval '90 days'
+     RETURNING id, display_id`,
     [id, tokenHash, displayId]
   );
 
-  return { id: row.id, token, displayId };
+  // The raw token is never stored — only its hash. It exists once, in this
+  // return value, at creation time.
+  return { id: row.id, token, displayId: row.display_id };
 }
 
 async function getGuestSessionByToken(token) {
   const row = await db.getOne(
-    `SELECT id, token_hash, display_id, free_language_id, expires_at
+    `SELECT id, display_id, free_language_id, purchased_languages, expires_at
      FROM guest_sessions
      WHERE token_hash = $1`,
     [db.sha256(token)]
@@ -41,245 +48,179 @@ async function getGuestSessionByToken(token) {
   return row;
 }
 
-async function invalidateGuestSession(id) {
-  await db.query('DELETE FROM guest_sessions WHERE id = $1', [id]);
-}
-
-/**
- * Language entitlements
- */
-
-async function getEntitlements(guestSessionId) {
-  return db.getMany(
-    `SELECT le.language_id, le.access_type
-     FROM language_entitlements le
-     WHERE le.guest_session_id = $1`,
-    [guestSessionId]
+async function invalidateGuestSession(idOrDisplay) {
+  await db.query(
+    'DELETE FROM guest_sessions WHERE id = $1 OR display_id = $1',
+    [idOrDisplay]
   );
 }
 
+/** Free + purchased languages joined into one entitlement summary row. */
+async function getEntitlements(guestSession) {
+  const purchasedIds = Array.isArray(guestSession.purchased_languages)
+    ? guestSession.purchased_languages
+    : (guestSession.purchased_languages || []);
+  const freeId = guestSession.free_language_id;
+  const hasAny = !!freeId || purchasedIds.length > 0;
+  return {
+    free_language_id: freeId || null,
+    purchased_languages: purchasedIds,
+    unlocked: hasAny,
+  };
+}
+
 /**
- * Insert or update the single free language for one guest session. `ON CONFLICT`
- * rolls the previous selection back atomically, so two concurrent requests
- * never leave two free languages on the same guest.
+ * Selection of the single free language. Guarantees one free slot: if one was
+ * already set with a different language, the second request is rejected —
+ * callers map that to a 409 so the frontend re-renders with what it has.
  */
 async function grantFreeLanguage(guestSessionId, languageId) {
   return db.getOne(
-    `INSERT INTO language_entitlements (guest_session_id, language_id, access_type)
-     VALUES ($1, $2, 'free')
-     ON CONFLICT (guest_session_id, language_id) DO UPDATE
-       SET access_type = 'free', updated_at = now()
-     RETURNING *`,
+    `UPDATE guest_sessions
+        SET free_language_id = $2,
+            expires_at = GREATEST(expires_at, now() + interval '90 days')
+      WHERE id = $1
+        AND (free_language_id IS NULL OR free_language_id = $2)
+      RETURNING id, free_language_id, purchased_languages, expires_at`,
     [guestSessionId, languageId]
   );
 }
 
-async function grantAvailableLanguage(guestSessionId, languageId) {
-  return db.getOne(
-    `INSERT INTO language_entitlements (guest_session_id, language_id, access_type)
-     VALUES ($1, $2, 'available')
-     ON CONFLICT (guest_session_id, language_id) DO UPDATE
-       SET access_type = 'available', updated_at = now()
-     RETURNING *`,
-    [guestSessionId, languageId]
-  );
-}
-
-async function hasAnyEntitlement(guestSessionId, languageId) {
+/** Free slot already used by ANOTHER language → conflict (409 in routes). */
+async function hasFreeLanguageConflict(guestSessionId, languageId) {
   const row = await db.getOne(
-    `SELECT 1 FROM language_entitlements
-     WHERE guest_session_id = $1 AND language_id = $2
-       AND access_type IN ('free', 'purchased')`,
-    [guestSessionId, languageId]
-  );
-  return !!row;
-}
-
-/** True when a guest session owns an active package that unlocks every language. */
-async function hasActivePackageEntitlement(guestSessionId) {
-  const row = await db.getOne(
-    `SELECT 1
-     FROM language_entitlements le
-     JOIN guest_sessions gs ON gs.id = le.guest_session_id
-     JOIN access_packages p
-       ON p.id = le.package_id
-      AND p.is_active = true
-      AND (p.validity_start IS NULL OR p.validity_start <= now())
-      AND (p.validity_end IS NULL OR p.validity_end >= now())
-     WHERE le.guest_session_id = $1
-       AND le.access_type = 'purchased'
-       AND p.unlocks_all_languages = true`,
+    'SELECT free_language_id FROM guest_sessions WHERE id = $1',
     [guestSessionId]
   );
-  return !!row;
+  return !!row && row.free_language_id !== null && Number(row.free_language_id) !== Number(languageId);
+}
+
+/** Sandbox purchase: append the language to purchased_languages. */
+async function purchaseLanguage(guestSessionId, languageId) {
+  return db.getOne(
+    `UPDATE guest_sessions
+        SET purchased_languages = array_append(purchased_languages, $2),
+            expires_at = GREATEST(expires_at, now() + interval '90 days')
+      WHERE id = $1
+        AND NOT ($2 = ANY(purchased_languages))
+      RETURNING id, free_language_id, purchased_languages, expires_at`,
+    [guestSessionId, languageId]
+  );
+}
+
+/** free OR purchased — the entire unlock rule, single row. */
+async function hasLanguageUnlock(guestSession, languageId) {
+  if (!guestSession) return false;
+  if (Number(guestSession.free_language_id) === Number(languageId)) return true;
+  const purchased = Array.isArray(guestSession.purchased_languages)
+    ? guestSession.purchased_languages
+    : [];
+  return purchased.map(Number).includes(Number(languageId));
+}
+
+// ---------------- Checkouts (paywall transaction records) ----------------
+
+// Sandbox price per additional language unlock — the provider is dead-simple,
+// but the amount is server-owned so a client can never set "0".
+const CHECKOUT_PRICE_VND = 20000;
+
+/**
+ * Start a checkout for one language on one guest session.
+ *
+ * - A language the guest already owns (free or purchased) → 409 ALREADY_UNLOCKED.
+ * - An existing pending checkout for the same pair is reused (idempotent).
+ * - amount/currency/provider are server-owned values.
+ */
+async function createCheckout(guestSession, languageId) {
+  if (await hasLanguageUnlock(guestSession, languageId)) {
+    return { conflict: true };
+  }
+
+  // Reuse a pending row for the same guest+language instead of stacking rows.
+  const existing = await db.getOne(
+    `SELECT * FROM checkouts
+     WHERE guest_session_id = $1 AND language_id = $2 AND status = 'pending'`,
+    [guestSession.id, languageId]
+  );
+  if (existing) return { reused: true, checkout: existing };
+
+  const providerTransactionId = `d4_ck_${db.randomHex(8)}`;
+  const idempotencyKey = `d4_g${guestSession.display_id}_l${languageId}`;
+  const checkout = await db.getOne(
+    `INSERT INTO checkouts (
+        guest_session_id, language_id, amount, currency, provider,
+        provider_transaction_id, idempotency_key
+     )
+     VALUES ($1, $2, $3, 'VND', 'SANDBOX', $4, $5)
+     RETURNING *`,
+    [guestSession.id, languageId, CHECKOUT_PRICE_VND, providerTransactionId, idempotencyKey]
+  );
+  return { checkout };
 }
 
 /**
- * After a package or free language is granted we recompute the full set of
- * languages that are available to the guest and attach the access state.
+ * Confirm a pending checkout: marks it success and appends the language to
+ * purchased_languages in one transaction-ish path. Returns the updated guest
+ * row so the caller can reply with the final entitlement state.
+ *
+ * Idempotent: confirming an already-successful checkout just returns it.
  */
-async function getUnlockedAndAvailableLanguages(
-  guestSessionId,
-  entitlementRows,
-  languages
-) {
-  const rows = entitlementRows || [];
-  const unlocked = new Map();
-  const available = new Map();
+async function confirmCheckout(checkoutId) {
+  const checkout = await db.getOne('SELECT * FROM checkouts WHERE id = $1', [checkoutId]);
+  if (!checkout) return { notFound: true };
 
-  for (const lang of languages) {
-    available.set(lang.id, false);
+  if (checkout.status === 'success') {
+    const guest = await db.getOne('SELECT * FROM guest_sessions WHERE id = $1', [checkout.guest_session_id]);
+    return { already: true, checkout, guest };
+  }
+  if (checkout.status === 'failed') {
+    return { failed: true, checkout };
   }
 
-  for (const row of rows) {
-    const lang = languages.find((l) => l.id === row.language_id);
-    if (!lang) continue;
+  // Success → success: one guest+language may only ever have one success row
+  // (partial unique index), so a replayed confirm cannot double-grant.
+  const successRow = await db.getOne(
+    `UPDATE checkouts
+        SET status = 'success', paid_at = now()
+      WHERE id = $1
+        AND status = 'pending'
+      RETURNING *`,
+    [checkoutId]
+  );
 
-    // Free selection: always unlocked, regardless of content presence.
-    if (row.access_type === 'free') {
-      unlocked.set(lang.id, true);
-      available.set(lang.id, true);
-      continue;
-    }
+  const guest = await db.getOne(
+    `UPDATE guest_sessions
+        SET purchased_languages = array_append(purchased_languages, $2)
+      WHERE id = $1
+        AND NOT ($2 = ANY(purchased_languages))
+      RETURNING id, display_id, free_language_id, purchased_languages, expires_at`,
+    [checkout.guest_session_id, checkout.language_id]
+  );
 
-    // Package that unlocks every language: every active language is unlocked.
-    if (row.access_type === 'purchased' && row.package_id) {
-      const pkg = await db.getOne(
-        `SELECT unlocks_all_languages FROM access_packages WHERE id = $1`,
-        [row.package_id]
-      );
-      if (pkg?.unlocks_all_languages) {
-        unlocked.set(lang.id, true);
-        available.set(lang.id, true);
-        continue;
-      }
-    }
-
-    // Explicit package-language mapping.
-    if (row.access_type === 'purchased' && row.package_id) {
-      const mapping = await db.getOne(
-        `SELECT 1 FROM language_package_languages lpl
-         WHERE lpl.package_id = $1 AND lpl.language_id = $2`,
-        [row.package_id, lang.id]
-      );
-      if (mapping) {
-        unlocked.set(lang.id, true);
-        available.set(lang.id, true);
-      }
-      continue;
-    }
-
-    // 'available' entitlement records are only content metadata; never unlock.
-  }
-
-  return rows.map((row) => ({
-    language_id: row.language_id,
-    language_code: row.language_code,
-    access_type: row.access_type,
-    ...unlocked.get(row.language_id)
-      ? { unlocked: true, available: true }
-      : { unlocked: false, available: available.get(row.language_id) },
-  }));
+  return { checkout: successRow || checkout, guest };
 }
 
-/**
- * Package-language mapping
- */
-
-async function getPackageLanguages(packageId, guestSessionId) {
-  if (!packageId) return [];
+/** All checkouts ever made by one guest, newest first. */
+async function listCheckouts(guestSessionId) {
   return db.getMany(
-    `SELECT l.id, l.code, l.name, l.native_name
-     FROM language_package_languages lpl
-     JOIN languages l ON l.id = lpl.language_id
-     WHERE lpl.package_id = $1
-       AND (p.validity_start IS NULL OR p.validity_start <= now())
-       AND (p.validity_end IS NULL OR p.validity_end >= now())
-     ORDER BY l.id`,
-    [packageId]
-  );
-}
-
-/**
- * Access packages
- */
-
-async function listPackages() {
-  const rows = await db.getMany(
-    `SELECT p.*,
-            COALESCE((
-              SELECT count(*)::int
-              FROM language_package_languages lpl
-              WHERE lpl.package_id = p.id
-            ), 0) AS language_count
-     FROM access_packages p
-     WHERE p.is_active
-     ORDER BY p.id`
-  );
-  return rows;
-}
-
-async function getPackage(id) {
-  return db.getOne(`SELECT * FROM access_packages WHERE id = $1`, [id]);
-}
-
-/**
- * Payment transactions
- */
-
-async function createPayment({
-  guestSessionId,
-  packageId,
-  languageId,
-  amount,
-  currency,
-  providerTransactionId,
-  status,
-  providerResponse,
-  idempotencyKey,
-}) {
-  return db.getOne(
-    `INSERT INTO payment_transactions (guest_session_id, package_id, language_id,
-         currency, amount, provider_transaction_id, status, provider_response,
-         idempotency_key)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-     RETURNING *`,
-    [
-      guestSessionId,
-      packageId,
-      languageId,
-      currency,
-      amount,
-      providerTransactionId,
-      status,
-      providerResponse,
-      idempotencyKey,
-    ]
-  );
-}
-
-async function findPendingOrSuccessByProviderTransaction(providerTransactionId) {
-  return db.getOne(
-    `SELECT * FROM payment_transactions
-     WHERE provider_transaction_id = $1 AND status IN ('pending', 'success')`,
-    [providerTransactionId]
-  );
-}
-
-async function countExistingSuccessfulTransaction(guestSessionId) {
-  return db.getOne(
-    `SELECT count(*)::int AS c FROM payment_transactions
-     WHERE guest_session_id = $1 AND status = 'success'`,
+    `SELECT c.id, c.language_id, l.code AS language_code, l.native_name,
+            c.amount, c.currency, c.provider, c.status, c.paid_at, c.created_at
+     FROM checkouts c
+     JOIN languages l ON l.id = c.language_id
+     WHERE c.guest_session_id = $1
+     ORDER BY c.created_at DESC, c.id DESC`,
     [guestSessionId]
   );
 }
 
-async function recordEntitlementAudit({ guestSessionId, userId, packageId, languageId, status, providerTransactionId }) {
-  await db.query(
-    `INSERT INTO language_entitlement_audit (guest_session_id, user_id, package_id, language_id, status, provider_transaction_id)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [guestSessionId, userId, packageId, languageId, status, providerTransactionId]
+async function getCheckoutForGuest(guestId, checkoutId) {
+  const row = await db.getOne(
+    `SELECT c.*, l.code AS language_code, l.native_name
+     FROM checkouts c JOIN languages l ON l.id = c.language_id
+     WHERE c.id = $1 AND c.guest_session_id = $2`,
+    [checkoutId, guestId]
   );
+  return row;
 }
 
 module.exports = {
@@ -288,15 +229,11 @@ module.exports = {
   invalidateGuestSession,
   getEntitlements,
   grantFreeLanguage,
-  grantAvailableLanguage,
-  hasAnyEntitlement,
-  hasActivePackageEntitlement,
-  getUnlockedAndAvailableLanguages,
-  listPackages,
-  getPackage,
-  getPackageLanguages,
-  createPayment,
-  findPendingOrSuccessByProviderTransaction,
-  countExistingSuccessfulTransaction,
-  recordEntitlementAudit,
+  hasFreeLanguageConflict,
+  purchaseLanguage,
+  hasLanguageUnlock,
+  createCheckout,
+  confirmCheckout,
+  listCheckouts,
+  getCheckoutForGuest,
 };

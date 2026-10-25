@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const config = require('./config');
 const routes = require('./routes');
@@ -33,6 +34,9 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json({ limit: '2mb' }));
+// cookie-parser: needed so attachGuestSession can read the httpOnly
+// guest_session_id cookie set by POST /api/guest-sessions.
+app.use(cookieParser());
 
 // Basic rate limiting for public endpoints
 const apiLimiter = rateLimit({

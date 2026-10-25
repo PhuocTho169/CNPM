@@ -44,6 +44,44 @@ function LineChart({ data }) {
   );
 }
 
+function timeAgo(iso) {
+  const diff = Math.max(0, Date.now() - new Date(iso).getTime());
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return 'vừa xong';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m} phút trước`;
+  return `${Math.floor(m / 60)} giờ trước`;
+}
+
+function OnlineUsers({ users }) {
+  const deviceIcon = (d) => (d === 'mobile' ? '📱' : d === 'tablet' ? '📲' : '💻');
+  return (
+    <div className="chart-box">
+      <h3>🟢 Đang truy cập website (5 phút qua): {users.length} khách</h3>
+      {users.length === 0 ? (
+        <div className="empty-state">Chưa có khách nào trong 5 phút qua.</div>
+      ) : (
+        <div className="bar-chart" style={{ display: 'grid', gap: '0.45rem' }}>
+          {users.map((u, i) => (
+            <div key={u.session_id || i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <span>{deviceIcon(u.device_type)}</span>
+              <strong style={{ minWidth: '6.5rem' }}>Khách #{String(u.session_id).slice(2, 8)}</strong>
+              <span style={{ color: 'var(--text-2)', fontSize: '0.82rem' }}>
+                {u.last_page ? <>trang <code style={{ fontSize: '0.75rem' }}>{u.last_page}</code> · </> : ''}
+                {u.actions || 1} hoạt động · {timeAgo(u.last_seen)}
+              </span>
+              {u.platform ? <span style={{ color: 'var(--text-2)', fontSize: '0.78rem' }}>{u.platform}</span> : null}
+            </div>
+          ))}
+        </div>
+      )}
+      <p style={{ color: 'var(--text-2)', fontSize: '0.78rem', marginTop: '0.5rem' }}>
+        Khách được đếm theo phiên ẩn danh (localStorage) — hoạt động đang ở trên trang, quét QR hoặc nghe audio trong 5 phút qua.
+      </p>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
@@ -89,6 +127,8 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      <OnlineUsers users={stats.online_users || []} />
 
       <div className="chart-box">
         <h3>📲 QR scans over time</h3>

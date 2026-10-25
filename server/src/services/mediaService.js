@@ -8,10 +8,40 @@ const { ApiError } = require('../utils/errors');
 const { measureAudioDuration } = require('../utils/audioDuration');
 const narration = require('../utils/narration');
 
-// ---------------- AUDIO ----------------
+// ---------------- AUDIO (stored in media_files) ----------------
+// Audio narration now lives in media_files as (entity_type='translation',
+// entity_id=<translation id>, kind='audio'). The partial unique index
+// uq_media_audio_translation guarantees one narration per translation, so
+// attachAudio keeps the old read-modify-write shape instead of relying on
+// ON CONFLICT inference against a partial index.
+
+/** Media row mapped back to the historical audio_guides column names. */
+function mapAudioRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    entity_type: row.entity_type,
+    entity_id: row.entity_id,
+    translation_id: row.entity_id,
+    file_url: row.url,
+    url: row.url,
+    duration: row.duration,
+    file_size: row.file_size,
+    mime_type: row.mime_type,
+    source: row.source,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
 
 async function getAudioForTranslation(translationId) {
-  return db.getOne('SELECT * FROM audio_guides WHERE translation_id = $1 ORDER BY id DESC LIMIT 1', [translationId]);
+  const row = await db.getOne(
+    `SELECT * FROM media_files
+     WHERE entity_type = 'translation' AND entity_id = $1 AND kind = 'audio'
+     LIMIT 1`,
+    [translationId]
+  );
+  return mapAudioRow(row);
 }
 
 async function attachAudio(translationId, { file_url, duration, file_size, mime_type, source }) {
@@ -20,26 +50,36 @@ async function attachAudio(translationId, { file_url, duration, file_size, mime_
   // provider-supplied duration always wins; otherwise measure the file we just
   // wrote. Keeps the DB correct for newly generated audio without a backfill.
   const seconds = Number(duration) > 0 ? Math.round(Number(duration)) : measureAudioDuration(file_url);
-  const existing = await getAudioForTranslation(translationId);
+  const dbSource = source === 'TTS' ? 'TTS' : 'UPLOAD';
+  const existing = await db.getOne(
+    `SELECT id FROM media_files
+     WHERE entity_type = 'translation' AND entity_id = $1 AND kind = 'audio'
+     LIMIT 1`,
+    [translationId]
+  );
   if (existing) {
-    return db.getOne(
-      `UPDATE audio_guides SET file_url=$2, duration=$3, file_size=$4, mime_type=$5, source=$6
-       WHERE id=$1 RETURNING *`,
-      [existing.id, file_url, seconds, file_size, mime_type, source]
+    return mapAudioRow(
+      await db.getOne(
+        `UPDATE media_files SET url=$2, duration=$3, file_size=$4, mime_type=$5, source=$6
+         WHERE id=$1 RETURNING *`,
+        [existing.id, file_url, seconds, file_size, mime_type, dbSource]
+      )
     );
   }
-  return db.getOne(
-    `INSERT INTO audio_guides (translation_id, file_url, duration, file_size, mime_type, source)
-     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-    [translationId, file_url, seconds, file_size, mime_type, source]
+  return mapAudioRow(
+    await db.getOne(
+      `INSERT INTO media_files (entity_type, entity_id, kind, url, duration, file_size, mime_type, source)
+       VALUES ('translation', $1, 'audio', $2, $3, $4, $5, $6) RETURNING *`,
+      [translationId, file_url, seconds, file_size, mime_type, dbSource]
+    )
   );
 }
 
 async function deleteAudio(audioId) {
-  const row = await db.getOne('SELECT * FROM audio_guides WHERE id = $1', [audioId]);
+  const row = await db.getOne('SELECT * FROM media_files WHERE id = $1 AND kind = \'audio\'', [audioId]);
   if (!row) throw new ApiError(404, 'AUDIO_NOT_FOUND', 'Audio guide not found.');
-  deleteAudioFile(row.file_url);
-  await db.query('DELETE FROM audio_guides WHERE id = $1', [audioId]);
+  deleteAudioFile(row.url);
+  await db.query('DELETE FROM media_files WHERE id = $1', [audioId]);
   return { id: audioId };
 }
 
@@ -54,10 +94,34 @@ function deleteAudioFile(fileUrl) {
   }
 }
 
-// ---------------- QR CODES ----------------
+// ---------------- QR CODES (media_files kind='qr') ----------------
+
+/** QR media row mapped to the historical qr_codes column names. */
+function mapQrRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    entity_type: row.entity_type,
+    entity_id: row.entity_id,
+    culinary_place_id: row.entity_type === 'place' ? row.entity_id : null,
+    dish_id: row.entity_type === 'dish' ? row.entity_id : null,
+    qr_value: row.metadata?.qr_value ?? null,
+    image_url: row.url,
+    url: row.url,
+    updated_at: row.updated_at,
+  };
+}
+
+async function getQrForEntity(entityType, entityId) {
+  const row = await db.getOne(
+    `SELECT * FROM media_files WHERE entity_type = $1 AND entity_id = $2 AND kind = 'qr' LIMIT 1`,
+    [entityType, entityId]
+  );
+  return mapQrRow(row);
+}
 
 async function getQR(placeId) {
-  return db.getOne('SELECT * FROM qr_codes WHERE culinary_place_id = $1', [placeId]);
+  return getQrForEntity('place', placeId);
 }
 
 function isLocalUrl(url) {
@@ -84,7 +148,6 @@ function resolveQrBaseUrl({ baseUrl, originHint } = {}) {
   if (baseUrl) {
     const normalized = normalizeOrigin(baseUrl);
     if (!normalized) {
-      console.log("Hello Hello");
       throw new ApiError(400, 'VALIDATION_ERROR', 'base_url must be a valid http(s) URL, e.g. http://192.168.1.5:5173');
     }
     return normalized;
@@ -96,27 +159,23 @@ function resolveQrBaseUrl({ baseUrl, originHint } = {}) {
     const origin = normalizeOrigin(originHint);
     if (origin) return origin;
   }
-  console.log("Hello");
   return config.publicBaseUrl.replace(/\/$/, '');
 }
 
-async function generateQR(placeId, { regenerate = false, baseUrl, originHint } = {}) {
-  const place = await db.getOne('SELECT id, code, status FROM culinary_places WHERE id = $1', [placeId]);
-  if (!place) throw new ApiError(404, 'PLACE_NOT_FOUND', 'The culinary location could not be found.');
-
+async function generateQrForEntity(entityType, entityId, pathSegment, label, { regenerate = false, baseUrl, originHint } = {}) {
   const qrBase = resolveQrBaseUrl({ baseUrl, originHint });
-  const qrValue = `${qrBase}/place/${placeId}`;
+  const qrValue = `${qrBase}/${pathSegment}/${entityId}`;
 
-  const existing = await getQR(placeId);
+  const existing = await getQrForEntity(entityType, entityId);
   // Only keep the current image when it already encodes the same URL — otherwise
   // the PNG on disk would still point at the OLD address.
   if (existing && !regenerate && existing.qr_value === qrValue) return existing;
 
-  const fileName = `place-${placeId}-${crypto.randomBytes(4).toString('hex')}.svg`;
+  const fileName = `${pathSegment}-${entityId}-${crypto.randomBytes(4).toString('hex')}.svg`;
   const dir = path.join(config.uploadDir, 'qr');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const filePath = path.join(dir, fileName);
-  // SVG (vector): nét ở mọi kích thước — ảnh PNG thu nhỏ 512→72px bị mờ viền module
+  // SVG (vector): nét ở mọi kích thước — ảnh PNG thu nhỏ bị mờ viền module
   await QRCode.toFile(filePath, qrValue, {
     type: 'svg',
     width: 512,
@@ -127,121 +186,90 @@ async function generateQR(placeId, { regenerate = false, baseUrl, originHint } =
   const imageUrl = `/uploads/qr/${fileName}`;
 
   if (existing) {
-    // delete old image file
     const oldName = existing.image_url.split('/uploads/qr/')[1];
     if (oldName) {
       const oldPath = path.join(config.uploadDir, 'qr', oldName);
       if (fs.existsSync(oldPath)) { try { fs.unlinkSync(oldPath); } catch { /* ignore */ } }
     }
-    return db.getOne(
-      `UPDATE qr_codes SET qr_value=$2, image_url=$3, updated_at=now() WHERE id=$1 RETURNING *`,
-      [existing.id, qrValue, imageUrl]
+    return mapQrRow(
+      await db.getOne(
+        `UPDATE media_files SET url=$2, metadata=$3, updated_at=now() WHERE id=$1 RETURNING *`,
+        [existing.id, imageUrl, JSON.stringify({ qr_value: qrValue, label })]
+      )
     );
   }
-  return db.getOne(
-    `INSERT INTO qr_codes (culinary_place_id, qr_value, image_url) VALUES ($1,$2,$3) RETURNING *`,
-    [placeId, qrValue, imageUrl]
+  return mapQrRow(
+    await db.getOne(
+      `INSERT INTO media_files (entity_type, entity_id, kind, url, source, metadata)
+       VALUES ($1, $2, 'qr', $3, 'UPLOAD', $4) RETURNING *`,
+      [entityType, entityId, imageUrl, JSON.stringify({ qr_value: qrValue, label })]
+    )
   );
 }
 
-// ---------------- DISH QR CODES ----------------
+async function generateQR(placeId, options = {}) {
+  const place = await db.getOne('SELECT id, code, status FROM culinary_places WHERE id = $1', [placeId]);
+  if (!place) throw new ApiError(404, 'PLACE_NOT_FOUND', 'The culinary location could not be found.');
+  return generateQrForEntity('place', placeId, 'place', 'place', options);
+}
 
 async function getDishQR(dishId) {
-  return db.getOne('SELECT * FROM dish_qr_codes WHERE dish_id = $1', [dishId]);
+  return getQrForEntity('dish', dishId);
 }
 
-async function generateDishQR(dishId, { regenerate = false, baseUrl, originHint } = {}) {
+async function generateDishQR(dishId, options = {}) {
   const dish = await db.getOne('SELECT id, code, status FROM dishes WHERE id = $1', [dishId]);
   if (!dish) throw new ApiError(404, 'DISH_NOT_FOUND', 'The dish could not be found.');
-
-  const qrBase = resolveQrBaseUrl({ baseUrl, originHint });
-  const qrValue = `${qrBase}/dish/${dishId}`;
-
-  const existing = await getDishQR(dishId);
-  if (existing && !regenerate && existing.qr_value === qrValue) return existing;
-
-  const fileName = `dish-${dishId}-${crypto.randomBytes(4).toString('hex')}.svg`;
-  const dir = path.join(config.uploadDir, 'qr');
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const filePath = path.join(dir, fileName);
-  // SVG (vector): nét ở mọi kích thước — ảnh PNG thu nhỏ 512→260px bị mờ viền module
-  await QRCode.toFile(filePath, qrValue, {
-    type: 'svg',
-    width: 512,
-    margin: 2,
-    color: { dark: '#212121', light: '#FFFFFF' },
-    errorCorrectionLevel: 'M',
-  });
-  const imageUrl = `/uploads/qr/${fileName}`;
-
-  if (existing) {
-    const oldName = existing.image_url.split('/uploads/qr/')[1];
-    if (oldName) {
-      const oldPath = path.join(config.uploadDir, 'qr', oldName);
-      if (fs.existsSync(oldPath)) { try { fs.unlinkSync(oldPath); } catch { /* ignore */ } }
-    }
-    return db.getOne(
-      `UPDATE dish_qr_codes SET qr_value=$2, image_url=$3, updated_at=now() WHERE id=$1 RETURNING *`,
-      [existing.id, qrValue, imageUrl]
-    );
-  }
-  return db.getOne(
-    `INSERT INTO dish_qr_codes (dish_id, qr_value, image_url) VALUES ($1,$2,$3) RETURNING *`,
-    [dishId, qrValue, imageUrl]
-  );
+  return generateQrForEntity('dish', dishId, 'dish', 'dish', options);
 }
 
 // ---------------- AUDIO (per place / per dish) ----------------
 
-/** GET /api/culinary-places/:placeId/audio — audio row for the requested language. */
+/** GET /api/culinary-places/:placeId/audio — narration for the requested language. */
 async function getAudioForPlace(placeId, language) {
   const lang = String(language || 'vi').toLowerCase();
-  const translation = await db.getOne(
-    `SELECT t.id, t.name, t.description, l.code AS language_code
-     FROM culinary_place_translations t
+  const row = await db.getOne(
+    `SELECT t.id, t.name, l.code AS language_code, m.url, m.duration
+     FROM translations t
      JOIN languages l ON l.id = t.language_id
-     WHERE t.culinary_place_id = $1 AND l.code = $2`,
+     LEFT JOIN media_files m
+       ON m.entity_type = 'translation' AND m.entity_id = t.id AND m.kind = 'audio'
+     WHERE t.entity_type = 'place' AND t.entity_id = $1 AND l.code = $2`,
     [placeId, lang]
   );
-  if (!translation) {
+  if (!row) {
     throw new ApiError(404, 'NARRATION_UNAVAILABLE', `No ${lang} guide is available for this culinary place.`);
   }
-  const audio = await db.getOne(
-    'SELECT file_url, duration FROM audio_guides WHERE translation_id = $1',
-    [translation.id]
-  );
   return {
     placeId,
     language: lang,
-    title: translation.name,
-    audioUrl: audio?.file_url || null,
-    duration: audio?.duration ?? null,
+    title: row.name,
+    audioUrl: row.url || null,
+    duration: row.duration ?? null,
   };
 }
 
-/** GET /api/dishes/:dishId/audio — audio row for the requested language. */
+/** GET /api/dishes/:dishId/audio — narration for the requested language. */
 async function getAudioForDish(dishId, language) {
   const lang = String(language || 'vi').toLowerCase();
-  const translation = await db.getOne(
-    `SELECT t.id, t.name, t.description, l.code AS language_code
-     FROM dish_translations t
+  const row = await db.getOne(
+    `SELECT t.id, t.name, l.code AS language_code, m.url, m.duration
+     FROM translations t
      JOIN languages l ON l.id = t.language_id
-     WHERE t.dish_id = $1 AND l.code = $2`,
+     LEFT JOIN media_files m
+       ON m.entity_type = 'translation' AND m.entity_id = t.id AND m.kind = 'audio'
+     WHERE t.entity_type = 'dish' AND t.entity_id = $1 AND l.code = $2`,
     [dishId, lang]
   );
-  if (!translation) {
+  if (!row) {
     throw new ApiError(404, 'NARRATION_UNAVAILABLE', `No ${lang} audio is available for this dish.`);
   }
-  const audio = await db.getOne(
-    'SELECT file_url, duration FROM dish_audio_guides WHERE translation_id = $1',
-    [translation.id]
-  );
   return {
     dishId,
     language: lang,
-    title: translation.name,
-    audioUrl: audio?.file_url || null,
-    duration: audio?.duration ?? null,
+    title: row.name,
+    audioUrl: row.url || null,
+    duration: row.duration ?? null,
   };
 }
 
@@ -339,7 +367,7 @@ function chunkText(text, max = 190) {
   const clean = String(text).replace(/\s+/g, ' ').trim();
   if (!clean) return [];
   if (clean.length <= max) return [clean];
-  const sentences = clean.split(/(?<=[.!?。！？…])\\s+/);
+  const sentences = clean.split(/(?<=[.!?。！？…])\s+/);
   const chunks = [];
   let cur = '';
   const push = () => { if (cur.trim()) chunks.push(cur.trim()); cur = ''; };
@@ -447,9 +475,6 @@ async function generateWithEdgeTTS(text, locale, voiceNote) {
   }
 
   const { spawn } = require('child_process');
-  const fs = require('fs');
-  const path = require('path');
-  const crypto = require('crypto');
 
   return new Promise((resolve, reject) => {
     const dir = path.join(config.uploadDir, 'audio');

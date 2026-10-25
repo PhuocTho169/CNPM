@@ -1,8 +1,8 @@
 const db = require('../db');
 const mediaService = require('../services/mediaService');
 const placeService = require('../services/placeService');
-const eventService = require('../services/eventService');
-const entitlementService = require('../services/entitlementService');
+const catalogService = require('../services/catalogService');
+const statsService = require('../services/statsService');
 const { success, created, ApiError } = require('../utils/errors');
 const { toIntOrNull, requireFields } = require('../validators');
 
@@ -24,7 +24,7 @@ async function audioAccess(req, res, next) {
 /** GET /api/dishes/:dishId/audio?idx=vi — audio for a dish. */
 async function dishAudioAccess(req, res, next) {
   try {
-    const dishId = toIntOrNull(req.params.dishId);
+    const dishId = toIntOrNull(req.params.dishId || req.params.id);
     if (!dishId) throw new ApiError(400, 'INVALID_DISH_ID', 'Invalid dish id.');
     const lang = (req.query.language || req.query.idx || 'vi').toLowerCase();
     const audio = await mediaService.getAudioForDish(dishId, lang);
@@ -42,13 +42,15 @@ async function translationAccess(req, res, next) {
     const lang = (req.query.language || req.query.idx || 'vi').toLowerCase();
     const translation = await placeService.getTranslation(placeId, lang);
     if (!translation) {
-      const available = (req.guestSession.free_language_id ? [req.guestSession.free_language_id] : [])
-        .map(async (id) => {
-          const row = await placeService.getTranslation(placeId, (await db.getOne('SELECT code FROM languages WHERE id = $1', [id])).code);
-          return row ? { id, code: (await db.getOne('SELECT code FROM languages WHERE id = $1', [id])).code } : null;
-        })
-        .filter(Boolean);
-      throw new ApiError(403, 'TRANSlation_UNAVAILABLE', 'No translation is available for this language in the requested language.', { available: await Promise.all(available) });
+      // Offer what the guest CAN hear: their chosen free language, when a guide
+      // exists for it. Keeps the paywall explainer honest instead of guessing.
+      const row = await db.getOne(
+        `SELECT l.code FROM guest_sessions g JOIN languages l ON l.id = g.free_language_id
+         WHERE g.display_id = $1`,
+        [req.guestSession?.display_id]
+      );
+      const available = row ? [row.code] : [];
+      throw new ApiError(403, 'TRANSLATION_UNAVAILABLE', 'No translation is available for this language in the requested language.', { available });
     }
     return success(res, translation);
   } catch (err) {
@@ -59,12 +61,12 @@ async function translationAccess(req, res, next) {
 /** GET /api/dishes/:dishId/translation?idx=vi — protected dish translation. */
 async function dishTranslationAccess(req, res, next) {
   try {
-    const dishId = toIntOrNull(req.params.dishId);
+    const dishId = toIntOrNull(req.params.dishId || req.params.id);
     if (!dishId) throw new ApiError(400, 'INVALID_DISH_ID', 'Invalid dish id.');
     const lang = (req.query.language || req.query.idx || 'vi').toLowerCase();
-    const translation = await placeService.getDishTranslation(dishId, lang);
+    const translation = await catalogService.getDishTranslation(dishId, lang);
     if (!translation) {
-      throw new ApiError(403, 'TRANSlation_UNAVAILABLE', 'No translation is available for this language in the requested language.');
+      throw new ApiError(403, 'TRANSLATION_UNAVAILABLE', 'No translation is available for this language in the requested language.');
     }
     return success(res, translation);
   } catch (err) {
@@ -213,28 +215,55 @@ async function regenerateDishQR(req, res, next) {
 // ---------- Statistics ----------
 async function dashboardStats(req, res, next) {
   try {
-    const [overview, scans, topPlaces, languages, playsByLang, devices, dishes] = await Promise.all([
-      eventService.dashboardStatistics(),
-      eventService.scansOverTime(14),
-      eventService.topPlaces(8),
-      eventService.popularLanguages(),
-      eventService.audioPlaysByLanguage(),
-      eventService.deviceBreakdown(),
-      eventService.popularDishes(8),
+    const [overview, scans, topPlaces, languages, playsByLang, devices, dishes, online] = await Promise.all([
+      statsService.dashboardStatistics(),
+      statsService.scansOverTime(14),
+      statsService.topPlaces(8),
+      statsService.popularLanguages(),
+      statsService.audioPlaysByLanguage(),
+      statsService.deviceBreakdown(),
+      statsService.popularDishes(8),
+      statsService.onlineUsers(5),
     ]);
     return success(res, {
       overview, scans_over_time: scans, top_places: topPlaces,
       languages, audio_plays_by_language: playsByLang, devices, popular_dishes: dishes,
+      online_users: online,
     });
+  } catch (err) { return next(err); }
+}
+
+// POST /api/activity/ping (public) — the public website fires this when a page
+// opens and every ~2 min after, so the dashboard's "Đang truy cập" reflects
+// everyone browsing, not just place-guide scanners.
+async function logVisit(req, res, next) {
+  try {
+    const sessionId = req.body?.session_id || req.body?.anonymous_session_id;
+    if (!sessionId) throw new ApiError(400, 'VALIDATION_ERROR', 'session_id is required.');
+    await statsService.logVisit({
+      sessionId,
+      deviceType: req.body?.device_type,
+      platform: req.body?.platform,
+      path: req.body?.path,
+    });
+    return success(res, { logged: true });
+  } catch (err) { return next(err); }
+}
+
+// GET /api/activity/online?minutes=5 (admin) — live online-visitors list.
+async function onlineUsers(req, res, next) {
+  try {
+    const minutes = Math.min(Math.max(toIntOrNull(req.query.minutes) || 5, 1), 60);
+    return success(res, await statsService.onlineUsers(minutes));
   } catch (err) { return next(err); }
 }
 
 async function scansStats(req, res, next) {
   try {
     return success(res, {
-      over_time: await eventService.scansOverTime(toIntOrNull(req.query.days) || 30),
-      by_place: await eventService.topPlaces(20),
-      by_language: await eventService.popularLanguages(),
+      over_time: await statsService.scansOverTime(toIntOrNull(req.query.days) || 30),
+      by_place: await statsService.topPlaces(20),
+      by_language: await statsService.popularLanguages(),
     });
   } catch (err) { return next(err); }
 }
@@ -242,29 +271,32 @@ async function scansStats(req, res, next) {
 async function audioStats(req, res, next) {
   try {
     return success(res, {
-      by_language: await eventService.audioPlaysByLanguage(),
-      by_place: await eventService.topPlaces(20),
+      by_language: await statsService.audioPlaysByLanguage(),
+      by_place: await statsService.topPlaces(20),
     });
   } catch (err) { return next(err); }
 }
 
-// ---------- Visitor favorites & history ----------
+// ---------- Visitor favorites & history (activity_logs stream) ----------
+
 async function listFavorites(req, res, next) {
   try {
     const rows = await db.getMany(
       `SELECT p.id, p.code, p.address, p.price_range,
-              c.name AS category_name, prim.image_url AS primary_image,
-              t.name, t.short_description, f.created_at
-       FROM visitor_favorites f
+              c.name AS category_name, prim.url AS primary_image,
+              t.name, t.short_description, f.created_at, f.language_id
+       FROM activity_logs f
        JOIN culinary_places p ON p.id = f.culinary_place_id
        LEFT JOIN categories c ON c.id = p.category_id
-       LEFT JOIN culinary_place_translations t ON t.culinary_place_id = p.id
-         AND t.language_id = (SELECT id FROM languages WHERE code = $2)
+       LEFT JOIN translations t
+         ON t.entity_type = 'place' AND t.entity_id = p.id
+        AND t.language_id = (SELECT id FROM languages WHERE code = $2)
        LEFT JOIN LATERAL (
-         SELECT image_url FROM culinary_place_images pi WHERE pi.culinary_place_id = p.id
-         ORDER BY pi.is_primary DESC, pi.sort_order ASC LIMIT 1
+         SELECT url FROM media_files m
+         WHERE m.entity_type = 'place' AND m.entity_id = p.id AND m.kind = 'image'
+         ORDER BY m.is_primary DESC, m.sort_order ASC LIMIT 1
        ) prim ON true
-       WHERE f.session_id = $1 AND p.status = 'PUBLISHED'
+       WHERE f.event_type = 'favorite' AND f.session_id = $1 AND p.status = 'PUBLISHED'
        ORDER BY f.created_at DESC`,
       [req.query.session_id, (req.query.lang || 'vi').toLowerCase()]
     );
@@ -276,9 +308,10 @@ async function addFavorite(req, res, next) {
   try {
     requireFields(req.body, ['session_id']);
     await db.query(
-      `INSERT INTO visitor_favorites (session_id, culinary_place_id) VALUES ($1,$2)
-       ON CONFLICT (session_id, culinary_place_id) DO NOTHING`,
-      [req.body.session_id, toIntOrNull(req.body.culinary_place_id)]
+      `INSERT INTO activity_logs (event_type, session_id, culinary_place_id, language_id)
+       VALUES ('favorite', $1, $2, $3)
+       ON CONFLICT (session_id, culinary_place_id) WHERE event_type = 'favorite' DO NOTHING`,
+      [req.body.session_id, toIntOrNull(req.body.culinary_place_id), toIntOrNull(req.body.language_id)]
     );
     return created(res, { added: true });
   } catch (err) { return next(err); }
@@ -288,7 +321,8 @@ async function removeFavorite(req, res, next) {
   try {
     requireFields(req.body, ['session_id']);
     await db.query(
-      'DELETE FROM visitor_favorites WHERE session_id = $1 AND culinary_place_id = $2',
+      `DELETE FROM activity_logs
+       WHERE event_type = 'favorite' AND session_id = $1 AND culinary_place_id = $2`,
       [req.body.session_id, toIntOrNull(req.body.culinary_place_id)]
     );
     return success(res, { removed: true });
@@ -299,7 +333,8 @@ async function logHistory(req, res, next) {
   try {
     requireFields(req.body, ['session_id']);
     await db.query(
-      `INSERT INTO visitor_history (session_id, culinary_place_id, language_id) VALUES ($1,$2,$3)`,
+      `INSERT INTO activity_logs (event_type, session_id, culinary_place_id, language_id)
+       VALUES ('view', $1, $2, $3)`,
       [req.body.session_id, toIntOrNull(req.body.culinary_place_id), toIntOrNull(req.body.language_id)]
     );
     return created(res, { logged: true });
@@ -310,19 +345,21 @@ async function listHistory(req, res, next) {
   try {
     const rows = await db.getMany(
       `SELECT DISTINCT ON (h.culinary_place_id)
-              p.id, p.code, t.name, t.short_description, prim.image_url AS primary_image,
-              c.name AS category_name, h.viewed_at
-       FROM visitor_history h
+              p.id, p.code, t.name, t.short_description, prim.url AS primary_image,
+              c.name AS category_name, h.created_at AS viewed_at
+       FROM activity_logs h
        JOIN culinary_places p ON p.id = h.culinary_place_id
-       LEFT JOIN culinary_place_translations t ON t.culinary_place_id = p.id
-         AND t.language_id = (SELECT id FROM languages WHERE code = $2)
+       LEFT JOIN translations t
+         ON t.entity_type = 'place' AND t.entity_id = p.id
+        AND t.language_id = (SELECT id FROM languages WHERE code = $2)
        LEFT JOIN categories c ON c.id = p.category_id
        LEFT JOIN LATERAL (
-         SELECT image_url FROM culinary_place_images pi WHERE pi.culinary_place_id = p.id
-         ORDER BY pi.is_primary DESC, pi.sort_order ASC LIMIT 1
+         SELECT url FROM media_files m
+         WHERE m.entity_type = 'place' AND m.entity_id = p.id AND m.kind = 'image'
+         ORDER BY m.is_primary DESC, m.sort_order ASC LIMIT 1
        ) prim ON true
-       WHERE h.session_id = $1 AND p.status = 'PUBLISHED'
-       ORDER BY h.culinary_place_id, h.viewed_at DESC`,
+       WHERE h.event_type = 'view' AND h.session_id = $1 AND p.status = 'PUBLISHED'
+       ORDER BY h.culinary_place_id, h.created_at DESC`,
       [req.query.session_id, (req.query.lang || 'vi').toLowerCase()]
     );
     rows.sort((a, b) => new Date(b.viewed_at) - new Date(a.viewed_at));
@@ -334,11 +371,11 @@ async function logPlay(req, res, next) {
   try {
     const id = toIntOrNull(req.params.id);
     if (!id) throw new ApiError(400, 'INVALID_PLACE_ID', 'Invalid place id.');
-    await eventService.logAudioPlay({
+    await statsService.logAudioPlay({
       placeId: id,
       translationId: toIntOrNull(req.body.translation_id),
       languageId: toIntOrNull(req.body.language_id),
-      sessionId: req.body.anonymous_session_id,
+      sessionId: req.body.anonymous_session_id || req.body.session_id,
     });
     return success(res, { logged: true });
   } catch (err) { return next(err); }
@@ -350,5 +387,6 @@ module.exports = {
   getQR, createQR, regenerateQR,
   getDishQR, createDishQR, regenerateDishQR,
   dashboardStats, scansStats, audioStats,
-  listFavorites, addFavorite, removeFavorite, logHistory, listHistory, logPlay,
+  listFavorites, addFavorite, removeFavorite, logHistory, listHistory, logVisit, logPlay,
+  onlineUsers,
 };

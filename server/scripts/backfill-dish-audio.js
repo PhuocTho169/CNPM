@@ -11,14 +11,15 @@ const force = process.argv.includes('--force');
 (async () => {
   const params = [];
   let sql = `
-    SELECT dt.id AS id, dt.id AS translation_id, dt.dish_id, d.code, d.is_signature,
+    SELECT dt.id AS id, dt.id AS translation_id, dt.entity_id AS dish_id, d.code, d.is_signature,
            l.code AS language_code, dt.name, dt.description, dt.ingredients,
-           da.id AS existing_id
-    FROM dish_translations dt
+           m.id AS existing_id
+    FROM translations dt
     JOIN languages l ON l.id = dt.language_id
-    JOIN dishes d ON d.id = dt.dish_id
-    LEFT JOIN dish_audio_guides da ON da.translation_id = dt.id
-    WHERE l.is_active = true`;
+    JOIN dishes d ON d.id = dt.entity_id
+    LEFT JOIN media_files m
+      ON m.entity_type = 'translation' AND m.entity_id = dt.id AND m.kind = 'audio'
+    WHERE dt.entity_type = 'dish' AND l.is_active = true`;
   if (!force) sql += ` AND da.id IS NULL`;
   sql += ` ORDER BY d.id, l.id`;
 
@@ -48,10 +49,12 @@ const force = process.argv.includes('--force');
   const coverage = await db.getMany(`
     SELECT d.id, d.code,
       count(DISTINCT dt.id) AS translations,
-      count(DISTINCT da.id) AS with_audio
+      count(DISTINCT m.id) AS with_audio
     FROM dishes d
-    JOIN dish_translations dt ON dt.dish_id = d.id
-    LEFT JOIN dish_audio_guides da ON da.translation_id = dt.id
+    JOIN translations dt
+      ON dt.entity_type = 'dish' AND dt.entity_id = d.id
+    LEFT JOIN media_files m
+      ON m.entity_type = 'translation' AND m.entity_id = dt.id AND m.kind = 'audio'
     GROUP BY d.id, d.code ORDER BY d.id
   `);
   console.log('\nDish coverage:');

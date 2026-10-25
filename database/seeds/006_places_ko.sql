@@ -1,6 +1,6 @@
 -- 006: Korean (ko) translations for places & dishes
-INSERT INTO culinary_place_translations (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, l.id, v.name, v.short_desc, v.descr, v.history, v.culture, v.tips
+INSERT INTO translations (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, l.id, v.name, v.short_desc, v.descr, v.history, v.culture, v.tips
 FROM (VALUES
   ('oc-oanh', '어안 조개집',
    '4군에서 유명한 길거리 해산물 조개 전문점으로, 오후부터 영업하며 남방식 진한 양념으로 일품.',  
@@ -65,10 +65,10 @@ FROM (VALUES
 ) AS v(code, name, short_desc, descr, history, culture, tips)
 JOIN culinary_places p ON p.code = v.code
 JOIN languages l ON l.code = 'ko'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO dish_translations (dish_id, language_id, name, description, ingredients)
-SELECT d.id, l.id, v.name, v.descr, v.ingr
+INSERT INTO translations (entity_type, entity_id, language_id, name, description, ingredients)
+SELECT 'dish', d.id, l.id, v.name, v.descr, v.ingr
 FROM (VALUES
   ('oc-huong', '맛조개 구이', '숯불 구이 또는 버터 마늘 볶음, 도톰하고 달콤한 살이 특징으로 이 가게에서 가장 많이 주문되는 메뉴입니다.', '싱싱한 맛조개, 버터, 마늘, 고싱, 파'),
   ('nghieu-hap-sa', '레몬그라스 바지락 찜', '싱싱한 바지락을 레몬그라스와 고추와 함께 쪄서 국물이 시원하게 달콤하고, 레몬 소스에 찍어 먹습니다.', '바지락, 레몬그라스, 고추, 베트남 허브'),
@@ -85,4 +85,4 @@ FROM (VALUES
 ) AS v(code, name, descr, ingr)
 JOIN dishes d ON d.code = v.code
 JOIN languages l ON l.code = 'ko'
-ON CONFLICT (dish_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;

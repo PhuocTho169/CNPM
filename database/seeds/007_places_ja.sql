@@ -1,6 +1,6 @@
 -- 007: Japanese (ja) translations for places & dishes
-INSERT INTO culinary_place_translations (culinary_place_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
-SELECT p.id, l.id, v.name, v.short_desc, v.descr, v.history, v.culture, v.tips
+INSERT INTO translations (entity_type, entity_id, language_id, name, short_description, description, history, cultural_significance, tourist_tips)
+SELECT 'place', p.id, l.id, v.name, v.short_desc, v.descr, v.history, v.culture, v.tips
 FROM (VALUES
   ('oc-oanh', 'オー・オアン（貝料理）',
    '4区で有名な屋台スタイルの貝料理店。夕方から営業し、炭火で貝を焼く南房独自の香ばしい味わい。',
@@ -23,9 +23,9 @@ FROM (VALUES
   ('bun-rieu-ben-van-don', 'ブン・リエウ・ベン・ヴァン・ドン',
    '蟹の甘い澄んだスープのブン・リエウ、生野菜と酸蝦とともに、川沿い朝の透き通った味。',
    '蟹みそが固まったスープは澄んで甘く、生麺・豆腐・トマト・各種生野菜と一緒に出る。川の近くのエリアでよくある朝食・昼食だ。淡水蟹をすりつぶして濾した蟹みそをトマトとともに煮込み、自然な赤みがでる。麺には酸蝦・空芯菜・もやし・バナナの花の千切りが付く。ベン・ヴァン・ドン一帯は河岸に近く、昔から地元住民の朝食を支える食堂が集まっていた。ブン・リエウは南部を代表する朝食で、水郷の食事らしいあっさりした味つけを表している。',
-   '淡水蟹を擦り潰して濾した蟹みそを、トマトとともに煮ると自然な赤色が出る。麺には酸蝦・空芯菜・もやし・バナナの花の千切りがつき、川沿いの地区に住む人々の朝食は昔からこの地区で提供されてきた。川が近いからこそ、清々しい朝という気分を起こさせる。'},
+   '淡水蟹を擦り潰して濾した蟹みそを、トマトとともに煮ると自然な赤色が出る。麺には酸蝦・空芯菜・もやし・バナナの花の千切りがつき、川沿いの地区に住む人々の朝食は昔からこの地区で提供されてきた。川が近いからこそ、清々しい朝という気分を起こさせる。',
    'ブン・リエウは南部を代表する朝食で、水郷の食事らしいあっさりした味つけを示す。ブン・リエウは川がつくる朝の静けさ、道路の日常リズム、川の水に頼って暮らした人たちのご飯のあり方をそのまま反映している。霧のかかる朝には、もう薪は消えているのにかまどは残る光景がこの食べ物の歴史をつたえる。',
-   'こってり好きなら蟹みそを追加してください • カラマンチュウを搾ると風味が引き立ちます • 多くの店がカードを断る場合があるため現金をお持ちください •  새벽 강가의 고요한 시적 분위기를 함께 느껴보세요'),
+   'こってり好きなら蟹みそを追加してください • カラマンチュウを搾ると風味が引き立ちます • 多くの店がカードを断る場合があるため現金をお持ちください'),
   ('pho-an-vinh-khanh', 'ヴィン・カイン夜食ストリート',
    '4区で最も賑わう夜食街。海鮮焼き・貝料理・鍋が揃う、夜がくると立ち上がる食の舞台。',
    '日が暮れるとヴィン・カイン通りは夜食の街に変わる。通り沿いにプラスチックテーブルが並び、海鮮焼きと鍋の香りが漂う。サイゴンの夜のリズムを感じるのに最高の場所だ。通り沿いの屋台では海鮮焼き・どんな貝料理・魚の鍋・海鮮おかゆなどを出す。夜19時〜23時が最も混む時刻だ。この通りは港地区の住民の夜食ニーズから始まり、次第に全市の常連が集う夜中グルメストリートへと伸長した。ヴィン・カインの夜食文化はプラスチック椅子に座り生臭くも爽やかな料理を楽しみながら深夜までしゃべるサイゴンのオープンな暮らしそのものを映している。',
@@ -47,7 +47,7 @@ FROM (VALUES
   ('che-heo-quay', 'チェー（伝統スイーツ）店',
    '路地の伝統デザート店。ミックスチェーと白玉風チェーが名物、午後の路地の甘さを伝える。',
    'ミックスチェーの一椀に緑豆・タロイモ・タピオカ・ coconut cream が凝縮。ほかに白玉チェー・タイ風チェーもあり、夕方地元民に愛されるデザートのスポットだ。チェーは毎日炊きたてで、午後から夜まで提供される。各種のチェーにはココナッツクリームのまろやかな甘みがあり、南部風味がよく出ている。こうしたデザートの小さな屋台は路地の奥に店を構え、長年、地域住民に愛されてきた。チェーは南部のデザート文化で、緑豆・タロイモ・ココナッツなど水郷の豊かな素材を反映している。',
-   'ミックスチェーには緑豆・タロイモ・タピオカ・ココナッツクリームが混ざり、白玉チェー・タイ風チェーも一緒に出される。チェーは毎日新たに作られ、午後から深夜まで販売されており、ココナッツクリームの深い甘みは南部独自の風味をよく表している。路地の奥まったところにあるこうしたデザートの小さい屋台は、何年も地元民に親しまれ継承されてきたのである。'},
+   'ミックスチェーには緑豆・タロイモ・タピオカ・ココナッツクリームが混ざり、白玉チェー・タイ風チェーも一緒に出される。チェーは毎日新たに作られ、午後から深夜まで販売されており、ココナッツクリームの深い甘みは南部独自の風味をよく表している。路地の奥まったところにあるこうしたデザートの小さい屋台は、何年も地元民に親しまれ継承されてきたのである。',
    'チェーは南部のデザート文化であり、緑豆・タロイモ・ココナッツなどのデルタ域で豊富な農産物を反映している。チェーは、一杯のなかに旬の素材と人びとの素朴な味覚が重ねられ、甘さが長く残る路地の情緒をつくりだすものである。',
    '夜に食べる場合は氷を少なめに頼みましょう • 炒りピーナッツをかけると香ばしさが加わります'),
   ('banh-canh-cua-nguyen-khoai', 'バイン・カン・クア（蟹）グエン・コアイ',
@@ -65,10 +65,10 @@ FROM (VALUES
 ) AS v(code, name, short_desc, descr, history, culture, tips)
 JOIN culinary_places p ON p.code = v.code
 JOIN languages l ON l.code = 'ja'
-ON CONFLICT (culinary_place_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;
 
-INSERT INTO dish_translations (dish_id, language_id, name, description, ingredients)
-SELECT d.id, l.id, v.name, v.descr, v.ingr
+INSERT INTO translations (entity_type, entity_id, language_id, name, description, ingredients)
+SELECT 'dish', d.id, l.id, v.name, v.descr, v.ingr
 FROM (VALUES
   ('oc-huong', 'ヒメザボテン貝の炭火焼き', '炭火焼きまたはバターガーリック炒め。コリコリとした甘みが評判の、店で一番注文される一品です。', '新鮮なヒメザボテン貝、バター、ニンニク、唐辛子、ねぎ'),
   ('nghieu-hap-sa', 'レモングラス蒸しハマグリ', '新鮮なハマグリをレモングラスと唐辛子で蒸し、澄んだ甘い汁をレモン椒塩で味わいます。', 'ハマグリ、レモングラス、唐辛子、ベトナム香草'),
@@ -85,4 +85,4 @@ FROM (VALUES
 ) AS v(code, name, descr, ingr)
 JOIN dishes d ON d.code = v.code
 JOIN languages l ON l.code = 'ja'
-ON CONFLICT (dish_id, language_id) DO NOTHING;
+ON CONFLICT (entity_type, entity_id, language_id) DO NOTHING;

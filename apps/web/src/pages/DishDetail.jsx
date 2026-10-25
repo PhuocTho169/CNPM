@@ -90,24 +90,6 @@ export default function DishDetail() {
           )}
         </header>
 
-        {/* Language selector — giống trang quán */}
-        <div>
-          <label className="eyebrow" htmlFor="dish-lang-picker">{t('chooseLanguage')}</label>
-          <div className="lang-picker" id="dish-lang-picker" role="radiogroup" aria-label={t('chooseLanguage')}>
-            {languages.map((l) => (
-              <button
-                key={l.code}
-                role="radio"
-                aria-checked={l.code === lang}
-                className={`lang-pill ${l.code === lang ? 'active' : ''}`}
-                onClick={() => setLang(l.code)}
-              >
-                {l.native_name}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* QR — góc phải, ngay trên phần nghe thuyết minh (giống trang quán) */}
         {hasQr && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.6rem', marginBottom: '0.8rem', flexWrap: 'wrap' }}>

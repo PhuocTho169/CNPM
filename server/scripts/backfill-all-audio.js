@@ -21,13 +21,13 @@ const onlyPlace = (() => {
 (async () => {
   const params = [];
   let sql = `
-    SELECT t.id AS translation_id, t.culinary_place_id, p.code, p.status,
+    SELECT t.id AS translation_id, t.entity_id AS culinary_place_id, p.code, p.status,
            l.code AS language_code, t.name, t.short_description, t.description,
            t.history, t.cultural_significance, t.tourist_tips
-    FROM culinary_place_translations t
+    FROM translations t
     JOIN languages l ON l.id = t.language_id
-    JOIN culinary_places p ON p.id = t.culinary_place_id
-    WHERE l.is_active = true`;
+    JOIN culinary_places p ON p.id = t.entity_id
+    WHERE t.entity_type = 'place' AND l.is_active = true`;
   if (onlyPlace) {
     params.push(onlyPlace);
     sql += ` AND p.id = $${params.length}`;
@@ -74,10 +74,12 @@ const onlyPlace = (() => {
   const coverage = await db.getMany(`
     SELECT p.id, p.code,
       count(DISTINCT t.id) AS translations,
-      count(DISTINCT a.id) AS with_audio
+      count(DISTINCT m.id) AS with_audio
     FROM culinary_places p
-    JOIN culinary_place_translations t ON t.culinary_place_id = p.id
-    LEFT JOIN audio_guides a ON a.translation_id = t.id
+    JOIN translations t
+      ON t.entity_type = 'place' AND t.entity_id = p.id
+    LEFT JOIN media_files m
+      ON m.entity_type = 'translation' AND m.entity_id = t.id AND m.kind = 'audio'
     GROUP BY p.id, p.code ORDER BY p.id
   `);
   console.log('\nCoverage per place:');
