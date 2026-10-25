@@ -49,9 +49,7 @@ export default function PublicLayout() {
                   ✕
                 </button>
               </span>
-            ) : (
-              <Link to="/login" className="btn btn-ghost btn-sm">{t('login')} · {t('register')}</Link>
-            )}
+            ) : null}
           </div>
         </div>
       </nav>

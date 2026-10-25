@@ -841,8 +841,8 @@ _CH2_TAIL = [
     ("h2", "2.5. Quy ước đặt tên và mức độ trưởng thành (Maturity)"),
     ("p", "Để mọi tài liệu (yêu cầu, hồ sơ, user story, kiểm thử) truy vết được cho nhau, nhóm sử dụng tập ký hiệu thống nhất:"),
     ("bullets", [
-        "FR-xx: yêu cầu chức năng (Bảng 1.2); NFR-xx: yêu cầu phi chức năng (Bảng 1.3).",
-        "BR-xx: quy tắc nghiệp vụ (Bảng 1.4).",
+        "FR-xx: yêu cầu chức năng (Bảng 1.4); NFR-xx: yêu cầu phi chức năng (Bảng 1.5).",
+        "BR-xx: quy tắc nghiệp vụ (Bảng 1.6).",
         "UC-xx: use case; US-xx: user story chung của một use case; US-xx.y: user story cụ thể (x là use case).",
         "TC-xx: test case trong bộ kiểm thử (Chương 4); AC-xx: tiêu chí kiểm nhận (trình bày dạng câu Given - When - Then trong hồ sơ từng UC).",
         "A-xx / E-xx: luồng thay thế / luồng ngoại lệ trong hồ sơ UC; EP: điểm mở rộng.",
@@ -893,7 +893,7 @@ _CH2_TAIL = [
 
     # ---------------------------------------------------------- 2.7 BR tổng hợp
     ("h2", "2.7. Quy tắc nghiệp vụ tổng hợp"),
-    ("p", "Bảng 2.65 trình bày (trạng thái thi hành) 14 quy tắc nghiệp vụ (mô tả đầy đủ ở Bảng 1.4) với các use case áp dụng; cột trạng thái cho biết quy tắc đã được thi hành trong mã nguồn trong mức nào."),
+    ("p", "Bảng 2.65 trình bày (trạng thái thi hành) 14 quy tắc nghiệp vụ (mô tả đầy đủ ở Bảng 1.6) với các use case áp dụng; cột trạng thái cho biết quy tắc đã được thi hành trong mã nguồn trong mức nào."),
     ("tbl", {
         "caption": "%s Áp dụng quy tắc nghiệp vụ theo Use Case" % tn(),
         "cols": ["Mã", "Tóm tắt quy tắc", "Use Case áp dụng", "Trạng thái thi hành"],

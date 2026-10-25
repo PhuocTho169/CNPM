@@ -38,35 +38,6 @@ async function login(email, password) {
   };
 }
 
-// Public sign-up for visitors. The password policy lives in the controller;
-// here we only care about uniqueness and the VISITOR role binding.
-async function register({ email, password, full_name }) {
-  const existing = await db.getOne(
-    'SELECT id FROM users WHERE lower(email) = lower($1)',
-    [email]
-  );
-  if (existing) {
-    throw new ApiError(409, 'EMAIL_IN_USE', 'This email is already registered.');
-  }
-
-  const roleRow = await db.getOne("SELECT id FROM roles WHERE code = 'VISITOR'");
-  if (!roleRow) {
-    // Migration 018 has not been applied — nothing we can fake client-side.
-    throw new ApiError(500, 'ROLE_NOT_READY', 'Visitor accounts are not available yet.');
-  }
-
-  const row = await db.getOne(
-    `INSERT INTO users (email, password_hash, full_name, role_id)
-     VALUES ($1, $2, $3, $4)
-     RETURNING id, email, full_name`,
-    [email.toLowerCase(), bcrypt.hashSync(password, 10), full_name?.trim() || null, roleRow.id]
-  );
-
-  // Auto-login right after sign-up: one request, no second form.
-  const user = { ...row, role: 'VISITOR' };
-  return { token: signToken(user), user };
-}
-
 async function getMe(userId) {
   return db.getOne(
     `SELECT u.id, u.email, u.full_name, u.is_active, u.last_login_at, r.code AS role, r.name AS role_name
@@ -154,6 +125,6 @@ async function setRolePermissions(roleId, permissionIds) {
 }
 
 module.exports = {
-  login, register, getMe, listUsers, createUser, updateUser,
+  login, getMe, listUsers, createUser, updateUser,
   resetPassword, deleteUser, listRoles, listPermissions, setRolePermissions,
 };

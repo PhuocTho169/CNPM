@@ -1,12 +1,24 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// Interactive OpenStreetMap without the www.openstreetmap.org embed — that
-// host is unreachable from some networks (DNS fails), so we render Leaflet
-// with CARTO-hosted tiles instead. Attribution stays truthful.
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+// Standard OSM raster tiles: free, no API key. CARTO's keyless "voyager"
+// endpoint now ships a placeholder tile stamped "API KEY REQUIRED",
+// so it is no longer usable without an account.
+const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+// Vite rewrites these imports into hashed asset URLs; without this the
+// Leaflet default icons resolve to broken paths and markers render as
+// broken-image placeholders.
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 /**
  * Minimal Leaflet wrapper.

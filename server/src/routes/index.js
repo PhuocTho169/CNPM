@@ -16,7 +16,6 @@ router.get('/health', health.health);
 
 // ---------- Auth ----------
 router.post('/auth/login', auth.login);
-router.post('/auth/register', auth.register);
 router.get('/auth/me', authenticate, auth.me);
 
 // ---------- Users & roles (ADMIN only) ----------

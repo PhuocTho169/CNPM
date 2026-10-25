@@ -1,0 +1,141 @@
+SQL table layout (nhóm chính + bảng con)
+==========================================
+
+1. Users (admin / staff)
+------------------------
+- Bảng chính:
+  - users
+
+- Bảng con (RBAC phụ trợ):
+  - roles
+  - permissions
+  - role_permissions
+
+Ghi chú: Nếu muốn gộp ít hơn, có thể chỉ giữ users + 1 bảng roles đơn giản, hoặc bỏ permissions + role_permissions nếu không cần phân quyền chi tiết. Nếu gộp roles/permissions/role_permissions vào users thì sẽ mất granularity phân quyền.
+
+2. Catalog (places + dishes)
+-----------------------------
+- Bảng chính:
+  - culinary_places
+  - dishes
+
+- Bảng con:
+  - categories
+  - languages
+  - culinary_place_translations
+  - dish_translations
+  - culinary_place_images
+
+Ghi chú: Nếu gộp places/dishes thành 1 cluster không chứa translation/image riêng, thì hoặc bỏ đa ngôn ngữ, hoặc phải chuyển translation/image thành dạng JSON/1 ảnh chính trong places/dishes. Khi đó sẽ không còn bảng translation/image riêng.
+
+3. Guest (phiên ẩn danh)
+------------------------
+- Bảng chính:
+  - guest_sessions
+
+- Bảng con:
+  - language_entitlements
+
+Ghi chú: Nếu đơn giản, có thể gộp entitlement vào guest_sessions nếu chỉ cần 1 free language, không cần追踪 purchased/available chi tiết.
+
+4. Thanh toán
+-------------
+- Bảng chính:
+  - payment_transactions
+
+- Bảng con:
+  - language_entitlement_audit
+  - payment_webhook_events
+
+Ghi chú: Có thể gộp webhook/audit vào payment, nhưng sẽ mất追踪 chi tiết (event lặp, lịch sử quyết định entitlement).
+
+5. Analytics / event
+--------------------
+- Bảng chính (có thể 1 bảng chung hoặc 2 bảng):
+  - scan_logs
+  - audio_play_logs
+
+- Bảng con:
+  - visitor_favorites
+  - visitor_history
+
+- Bảng nhỏ (settings):
+  - system_settings
+
+Ghi chú: Có thể gộp scan + play thành 1 bảng event logs (có event_type, reference place/dish, session_id, language_id, device/platform, created_at). Có thể gộp favorites + history thành 1 bảng activity, nhưng nên để rõ "yêu thích" và "xem" nếu sau này cần phân biệt.
+
+6. Routes (tuyến ẩm thực)
+--------------------------
+- Bảng chính:
+  - culinary_routes
+
+- Bảng con:
+  - route_translations
+  - route_stops
+
+Quan hệ: route_stops trỏ đến culinary_places. Routes không chứa dishes trực tiếp. Nếu gộp, cần nhớ mối quan hệ này, không nên ghi nhầm routes là chứa dishes/places trực tiếp.
+
+7. Media (audio + QR)
+---------------------
+- Bảng chính (audio):
+  - audio_guides
+  - dish_audio_guides
+
+- Bảng con (QR):
+  - qr_codes
+  - dish_qr_codes
+
+Ghi chú: Có thể gộp audio place + dish thành 1 bảng audio chung, nhưng nên để rõ loại audio (place/dish) và trỏ đến đối tượng cha. QR thường liên quan đến media/QR, có thể để riêng hoặc gom vào media.
+
+8. Cài đặt hệ thống
+-------------------
+- Bảng chính:
+  - system_settings
+
+Ghi chú: Thường là bảng key-value nhỏ, có thể để riêng hoặc gộp vào 1 bảng config chung.
+
+Tóm lại dạng "chính + con"
+==========================
+
+- Users: chính = users
+       con = roles, permissions, role_permissions
+
+- Catalog: chính = culinary_places, dishes
+        con = categories, languages, culinary_place_translations, dish_translations, culinary_place_images
+
+- Guest: chính = guest_sessions
+      con = language_entitlements
+
+- Thanh toán: chính = payment_transactions
+          con = language_entitlement_audit, payment_webhook_events
+
+- Analytics/event: chính = scan_logs, audio_play_logs
+                con = visitor_favorites, visitor_history
+                con nhỏ = system_settings
+
+- Routes: chính = culinary_routes
+        con = route_translations, route_stops
+
+- Media: chính = audio_guides, dish_audio_guides
+       con = qr_codes, dish_qr_codes
+
+- Settings: chính = system_settings
+
+Ghi chú cuối
+============
+- Việc gộp các bảng con vào một cluster "ít table hơn" có thể làm dự án dễ quản lý hơn nếu:
+
+  1. Dự án nhỏ,
+  2. Không cần RBAC chi tiết,
+  3. Không cần đa ngôn ngữ/đa ảnh phức tạp,
+  4. Không cần guest entitlement chi tiết,
+  5. Không cần webhook/audit chi tiết,
+  6. Không cần phân biệt event scan/play phức tạp.
+
+- Nhưng nếu sau này cần các thứ đó, việc gộp sớm sẽ gây khó mở rộng.
+- Nếu muốn, có thể chọn cách:
+
+  - Gộp mạnh → ít table, dễ quản lý, nhưng mất chi tiết.
+  - Giữ nguyên → nhiều table, nhưng dễ mở rộng, dễ audit, dễ phân quyền.
+
+Nếu cần, có thể liệt kê lại theo dạng "bảng nào bắt buộc giữ, bảng nào có thể gộp/bỏ" nhưng vẫn không đụng code.

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Cover, front matter and Chapter 1."""
+"""Cover, front matter and Chapter 1 (PRD)."""
 
 TITLE = "HỆ THỐNG THUYẾT MINH TỰ ĐỘNG ĐA NGÔN NGỮ CHO DU LỊCH ẨM THỰC QUẬN 4"
 TITLE_EN = "Multilingual Automated Narration System for District 4 Food Tourism"
@@ -31,44 +31,63 @@ FRONT = [
 ]
 
 CH1 = [
-    ("h1", "CHƯƠNG 1. TỔNG QUAN ĐỀ TÀI"),
-    ("lead", "Chương này trình bày bối cảnh, mục tiêu, phạm vi của đề tài, các yêu cầu nghiệp vụ và lý do lựa chọn giải pháp công nghệ. Mọi thông tin về công nghệ, thư viện và chức năng trong chương đều được đối chiếu với mã nguồn hiện có của dự án; những phần chỉ ở mức thiết kế được ghi rõ."),
+    ("h1", "CHƯƠNG 1. TÀI LIỆU YÊU CẦU SẢN PHẨM (PRD)"),
+    ("lead", "Chương 1 đóng vai trò Tài liệu Yêu cầu Sản phẩm (PRD — Product Requirements Document): mô tả sản phẩm, bối cảnh và vấn đề cần giải quyết, mục tiêu kèm chỉ số đo lường, người dùng, giải pháp tổng quan, phạm vi, rồi hệ thống yêu cầu chức năng – phi chức năng – quy tắc nghiệp vụ và lộ trình thực hiện. Mỗi khẳng định đều đối chiếu với mã nguồn và môi trường đang chạy; phần còn ở mức thiết kế được ghi rõ trạng thái thay vì suy đoán."),
 
-    ("h2", "1.1. Mô tả dự án"),
-    ("h3", "1.1.1. Bối cảnh và lý do chọn đề tài"),
+    ("h2", "1.1. Tổng quan sản phẩm"),
+    ("h3", "1.1.1. Mô tả sản phẩm"),
+    ("p", "Sản phẩm mang tên “Hệ thống thuyết minh tự động đa ngôn ngữ cho du lịch ẩm thực Quận 4” (tên dự án trong mã nguồn: District 4 Culinary Guide). Định vị trong một câu: khách quét mã QR đặt tại quán ăn ở Quận 4, đọc và nghe câu chuyện địa điểm - món ăn bằng ngôn ngữ của mình; đơn vị quản lý cập nhật nội dung một lần trên trang quản trị, hệ thống phân phối tới mọi thiết bị và mọi ngôn ngữ."),
+    ("p", "Sản phẩm gồm ba ứng dụng trong cùng một kho mã nguồn: website công khai cho khách du lịch (React), ứng dụng di động hỗ trợ quét QR và hướng dẫn theo GPS (Expo/React Native), và trang quản trị nội dung trong website hiện chỉ dành cho ADMIN/STAFF. Ba phần chia sẻ chung một máy chủ API (Express × PostgreSQL). Bảng 1.1 tóm tắt thông tin sản phẩm theo kiểu thẻ PRD."),
+    ("tbl", {
+        "caption": "Bảng 1.1. Thẻ tóm tắt sản phẩm",
+        "cols": ["Hạng mục", "Giá trị"],
+        "widths": [4.6, 11.0],
+        "rows": [
+            ["Tên sản phẩm", "Hệ thống thuyết minh tự động đa ngôn ngữ cho du lịch ẩm thực Quận 4 (District 4 Culinary Guide)"],
+            ["Vấn đề cốt lõi", "Khách du lịch khó tiếp cận nội dung ẩm thực có hệ thống, nhất là khi không đọc được tiếng Việt"],
+            ["Người dùng chính", "Khách du lịch (ẩn danh hoặc đăng ký VISITOR); ADMIN/STAFF của đơn vị quản lý"],
+            ["Nền tảng", "Website SPA + ứng dụng di động (Expo) + trang quản trị trên cùng website"],
+            ["Công nghệ lõi", "Node.js + Express, PostgreSQL 16, React 18/Vite, Expo, Docker Compose"],
+            ["Quy mô dữ liệu", "10 địa điểm, 12 món ăn, 3 tuyến ẩm thực, 5 ngôn ngữ nạp bằng seed; 31 bảng"],
+            ["Quy mô API", "95 tuyến REST (75 tuyến hệ thống, 15 tuyến phiên khách, 5 tuyến thanh toán)"],
+            ["Trạng thái hiện tại", "Ba container Docker đang chạy; website đã build và phục vụ; nhánh thanh toán còn ở mức thiết kế"],
+        ],
+        "font": 10.5,
+    }),
+
+    ("h3", "1.1.2. Bối cảnh và vấn đề cần giải quyết"),
     ("p", "Quận 4 là một quận nội thành của Thành phố Hồ Chí Minh, nổi tiếng với các tuyến phố ẩm thực như Vĩnh Khánh, Nguyễn Khoái, Bến Vân Đồn và các khu chợ truyền thống. Phần lớn địa điểm ở đây là quán ăn gia đình, xe bán hàng nhỏ hoặc quán lâu năm, chưa có website riêng và thông tin thường chỉ tồn tại dưới dạng bài viết rời rạc trên mạng xã hội."),
     ("p", "Với khách du lịch, việc tự tìm hiểu địa điểm ẩm thực gặp ba khó khăn chính. Thứ nhất, thông tin về món ăn, lịch sử và văn hoá của quán hầu như không được trình bày có hệ thống. Thứ hai, rào cản ngôn ngữ khiến khách nước ngoài không hiểu nội dung tiếng Việt. Thứ ba, việc tra cứu thủ công trên điện thoại trong lúc di chuyển không thuận tiện bằng việc quét một mã QR đặt ngay tại quán."),
     ("p", "Phương thức thuyết minh truyền thống — biển hiệu, tờ rơi, hoặc hướng dẫn viên — có ưu điểm là gần gũi nhưng hạn chế về khả năng cập nhật, chi phí in ấn và số ngôn ngữ có thể phục vụ. Một hệ thống số cho phép quản trị viên sửa nội dung một lần và phân phối tới mọi ngôn ngữ, mọi thiết bị, đồng thời ghi nhận được dữ liệu sử dụng để đánh giá hiệu quả quảng bá."),
-    ("p", "Từ những lý do trên, đề tài “Hệ thống thuyết minh tự động đa ngôn ngữ cho du lịch ẩm thực Quận 4” được chọn nhằm xây dựng một nền tảng web và ứng dụng di động cho phép khách truy cập nội dung địa điểm, món ăn và nghe thuyết minh bằng nhiều ngôn ngữ thông qua mã QR."),
 
-    ("h3", "1.1.2. Giới thiệu đề tài"),
-    ("p", "Hệ thống gồm ba phần: website công khai dành cho khách du lịch, ứng dụng di động hỗ trợ quét QR và hướng dẫn theo vị trí GPS, và trang quản trị nội dung dành cho quản trị viên. Website công khai là phần hoàn thiện nhất: khách có thể xem danh sách địa điểm, lọc theo danh mục, giá, trạng thái mở cửa, xem chi tiết địa điểm và món ăn, chọn ngôn ngữ và nghe tệp thuyết minh."),
-    ("p", "Mã QR được tạo tự động cho từng địa điểm và từng món ăn, trỏ tới đường dẫn /place/{id} hoặc /dish/{id} của website. Khi khách quét mã, trình duyệt hoặc ứng dụng mở đúng trang hướng dẫn, ghi nhận lượt quét và hiển thị nội dung theo ngôn ngữ đang chọn."),
-    ("p", "Nội dung thuyết minh được soạn theo từng ngôn ngữ trong bảng culinary_place_translations và dish_translations. Mỗi bản dịch có thể đính kèm một tệp âm thanh. Khi chưa có tệp, hệ thống có hai cơ chế dự phòng: phát bằng giọng đọc của trình duyệt (Web Speech API) và tạo âm thanh bằng dịch vụ chuyển văn bản thành giọng nói ở phía máy chủ."),
-    ("p", "Bên cạnh đó, mã nguồn còn có một nhánh chức năng quản lý quyền truy cập ngôn ngữ theo phiên khách và theo gói thanh toán (các bảng guest_sessions, language_entitlements, access_packages, payment_transactions…) cùng tính năng đăng ký/đăng nhập tài khoản khách đứng vai VISITOR. Nhánh thanh toán đã có bảng dữ liệu, một phần dịch vụ và tuyến API nhưng chưa được nối vào giao diện, chưa gắn vào tuyến nội dung và chưa có adapter cổng thanh toán — báo cáo mô tả phần này ở mức thiết kế (UC-14, UC-15 và Chương 5); đăng ký/đăng nhập VISITOR đã chạy được và được kiểm chứng E2E (FR-19)."),
-
-    ("h3", "1.1.3. Mục tiêu xây dựng hệ thống"),
-    ("p", "Mục tiêu tổng quát: xây dựng một hệ thống số phục vụ quảng bá ẩm thực Quận 4, cho phép khách du lịch tiếp cận nội dung thuyết minh đa ngôn ngữ tại chỗ thông qua mã QR, đồng thời cho phép đơn vị quản lý cập nhật nội dung mà không cần sửa mã nguồn."),
-    ("p", "Các mục tiêu cụ thể, có thể kiểm chứng qua mã nguồn hiện có:"),
-    ("b", [
-        "Số hoá dữ liệu 10 địa điểm ăn uống và 12 món ăn tiêu biểu của Quận 4 thành dữ liệu có cấu trúc trong PostgreSQL.",
-        "Cung cấp giao diện tra cứu cho khách: danh sách, tìm kiếm, lọc, bản đồ, tuyến ẩm thực, chi tiết địa điểm và chi tiết món ăn.",
-        "Tổ chức nội dung theo ngôn ngữ ở mức bản ghi, cho phép một địa điểm có nhiều bản dịch độc lập và một bản dịch có tệp âm thanh riêng.",
-        "Sinh mã QR cho địa điểm và món ăn, đảm bảo mã trỏ tới địa chỉ truy cập được từ điện thoại.",
-        "Cung cấp công cụ quản trị để tạo, sửa, xuất bản, lưu trữ địa điểm và món ăn; soạn bản dịch; tải lên hoặc tạo tệp âm thanh; xem thống kê lượt quét và lượt nghe.",
-        "Thiết kế và hiện thực một phần cơ chế quyền truy cập ngôn ngữ theo phiên khách, làm cơ sở cho hướng phát triển có thu phí.",
-    ]),
-
-    ("h3", "1.1.4. Đối tượng sử dụng hệ thống"),
-    ("p", "Các tác nhân dưới đây được xác định từ mã nguồn: vai trò trong bảng roles, middleware phân quyền, và cách các màn hình gọi API."),
+    ("h3", "1.1.3. Mục tiêu và chỉ số thành công"),
+    ("p", "Mục tiêu tổng quát: xây dựng một hệ thống số phục vụ quảng bá ẩm thực Quận 4, cho phép khách du lịch tiếp cận nội dung thuyết minh đa ngôn ngữ tại chỗ thông qua mã QR, đồng thời cho phép đơn vị quản lý cập nhật nội dung mà không cần sửa mã nguồn. Vì đây là PRD gắn với mã nguồn thật, mỗi mục tiêu đều đi kèm một chỉ số có thể kiểm chứng trực tiếp (Bảng 1.2)."),
     ("tbl", {
-        "caption": "Bảng 1.1. Các tác nhân của hệ thống",
-        "cols": ["Tác nhân", "Mô tả", "Cách hệ thống nhận diện", "Quyền hạn chính"],
+        "caption": "Bảng 1.2. Mục tiêu sản phẩm và chỉ số thành công",
+        "cols": ["Mục tiêu", "Chỉ số kiểm chứng", "Giá trị hiện tại"],
+        "widths": [4.8, 6.0, 4.8],
+        "rows": [
+            ["Số hoá nội dung ẩm thực Quận 4", "Số bản ghi trong CSDL sau migrate + seed", "10 địa điểm, 12 món ăn, 3 tuyến (13 điểm dừng), 5 ngôn ngữ; 31 bảng"],
+            ["Khách xem nội dung đa ngôn ngữ", "Bản dịch + tệp audio gắn với bản dịch", "40 bản ghi audio địa điểm, 60 bản ghi audio món; dự phòng Web Speech/TTS"],
+            ["Khách truy cập bằng mã QR", "Mã QR hiện hành trỏ tới trang công khai", "10 mã QR địa điểm, 12 mã QR món ăn, trỏ /place/{id} và /dish/{id}"],
+            ["Quản trị nội dung không cần sửa mã", "Vùng /admin với màn hình CRUD và trình soạn 5 thẻ", "CRUD địa điểm/món/danh mục/tuyến/ngôn ngữ/người dùng qua API quản trị"],
+            ["Vận hành tái lập một lệnh", "docker compose up -d → đổi trạng thái health", "3 container chạy; GET /api/health trả database connected"],
+            ["Mở rộng ngôn ngữ không sửa nguồn", "Thêm ngôn ngữ qua API quản trị", "languages là dữ liệu (mã, tên bản ngữ, locale BCP-47); 17 quyền seed"],
+            ["Phát triển thu phí (hướng mở)", "Luồng mua gói cấp quyền chạy đầu-cuối", "Thiết kế/một phần: bảng + API có, adapter cổng thanh toán chưa có"],
+        ],
+        "font": 10,
+    }),
+
+    ("h3", "1.1.4. Người dùng và các vai trò"),
+    ("p", "Các vai trò dưới đây được xác định từ mã nguồn: bảng roles, middleware phân quyền, và cách các màn hình gọi API. Khách du lịch là người dùng sản phẩm chính; ADMIN/STAFF là người nội bộ quyết định chất lượng nội dung mà khách nhận được."),
+    ("tbl", {
+        "caption": "Bảng 1.3. Người dùng và vai trò của sản phẩm",
+        "cols": ["Vai trò", "Mô tả", "Cách hệ thống nhận diện", "Quyền hạn chính"],
         "widths": [3.2, 6.0, 4.2, 3.6],
         "rows": [
             ["Khách du lịch (khách vãng lai)", "Người truy cập website hoặc ứng dụng, không cần tài khoản", "Không có token; có thể có mã phiên ẩn danh lưu trong localStorage/AsyncStorage", "Đọc nội dung công khai, quét QR, chọn ngôn ngữ, nghe audio"],
             ["Khách đã đăng ký (VISITOR)", "Khách tự đăng ký tài khoản qua /auth/register", "JWT có trường role = 'VISITOR'", "Nội dung công khai; định danh làm cơ sở cấp quyền ngôn ngữ"],
-["Quản trị viên (ADMIN)", "Quản lý toàn bộ nội dung, người dùng và cấu hình", "JWT có trường role = 'ADMIN'", "Toàn bộ API quản trị, kể cả quản lý người dùng và phân quyền"],
+            ["Quản trị viên (ADMIN)", "Quản lý toàn bộ nội dung, người dùng và cấu hình", "JWT có trường role = 'ADMIN'", "Toàn bộ API quản trị, kể cả quản lý người dùng và phân quyền"],
             ["Nhân viên nội dung (STAFF)", "Biên tập nội dung địa điểm, món ăn, bản dịch, audio, QR", "JWT có trường role = 'STAFF'", "CRUD nội dung; không quản lý người dùng, vai trò, cấu hình"],
             ["Dịch vụ TTS (bên ngoài)", "Tạo tệp âm thanh từ văn bản thuyết minh", "Máy chủ gọi HTTPS tới nhà cung cấp", "Không truy cập hệ thống; chỉ nhận văn bản và trả tệp"],
             ["Cổng thanh toán (dự kiến)", "Xác nhận giao dịch mua gói ngôn ngữ", "Webhook máy chủ tới máy chủ (chưa có adapter)", "Chưa hoạt động — thiết kế, xem UC-14/UC-15"],
@@ -76,31 +95,39 @@ CH1 = [
         "font": 10.5,
     }),
 
-    ("h3", "1.1.5. Phạm vi triển khai đề tài"),
-    ("p", "Phạm vi chức năng đã triển khai trong mã nguồn:"),
-    ("b", [
-        "Tra cứu công khai: danh sách và tìm kiếm địa điểm, lọc theo danh mục/giá/trạng thái mở cửa, xem địa điểm gần đây theo toạ độ, xem chi tiết địa điểm và món ăn, xem tuyến ẩm thực, bản đồ.",
-        "Đa ngôn ngữ ở mức nội dung: bảng ngôn ngữ có mã, tên, tên bản ngữ, locale BCP-47 và ghi chú giọng đọc; bản dịch riêng cho địa điểm, món ăn và tuyến.",
-        "Thuyết minh: hiển thị văn bản, phát tệp MP3 đã lưu, phát bằng giọng trình duyệt khi chưa có tệp, tạo TTS ở phía máy chủ với ba nhà cung cấp có thể cấu hình.",
-        "QR: sinh mã cho địa điểm và món ăn, cho phép chọn địa chỉ gốc, làm lại mã khi địa chỉ thay đổi, cảnh báo khi mã trỏ tới localhost.",
-        "Quản trị: đăng nhập JWT, CRUD địa điểm/món ăn/danh mục/tuyến/ngôn ngữ/người dùng, soạn bản dịch, quản lý ảnh, quản lý audio, thống kê quét và lượt nghe.",
-        "Ứng dụng di động: khung ứng dụng Expo với 5 tab, quét QR bằng camera, màn hình hướng dẫn GPS có phát hiện vùng và hàng đợi thuyết minh.",
-    ]),
-    ("p", "Phạm vi không nằm trong đề tài hoặc chưa triển khai:"),
-    ("b", [
-        "Không có giỏ hàng, đặt món, thanh toán đơn ăn uống. Hệ thống chỉ giới thiệu nội dung.",
-        "Không có chức năng đặt bàn, giữ chỗ hoặc đặt tour.",
-        "Không có ứng dụng iOS/Android phát hành chính thức; ứng dụng di động đang ở dạng mã nguồn chạy qua Expo.",
-        "Luồng mua gói ngôn ngữ chưa hoàn chỉnh: thiếu adapter cổng thanh toán, thiếu giao diện và thiếu bước kiểm tra quyền trên tuyến nội dung.",
-        "Chưa có bản dịch cho toàn bộ 12 món ăn ở cả 5 ngôn ngữ; số lượng bản dịch phụ thuộc các tệp seed hiện có.",
-    ]),
-    ("note", "Giới hạn của báo cáo: môi trường máy phát triển tại thời điểm viết chưa cài đủ gói phụ thuộc (thiếu esbuild, @babel/types, pg-types) và Docker daemon không chạy, nên các kiểm thử cần cơ sở dữ liệu thật không thực hiện được. Báo cáo ghi rõ phần nào đã kiểm tra tĩnh, phần nào chưa kiểm thử."),
+    ("h3", "1.1.5. Giải pháp tổng quan và hành trình người dùng"),
+    ("p", "Hình 1.1 tóm tắt cách sản phẩm vận hành theo hai luồng: khách du lịch thao tác trong 5 bước, từ quét mã QR, mở đúng trang /place/{id}, chọn ngôn ngữ, đọc nội dung tới nghe thuyết minh; quản trị viên biên soạn và phát hành nội dung trên trang /admin để khách thấy ngay cả với ngôn ngữ thêm mới."),
+    ("fig", ("hinh_1_1_prd_flow.png", "Hình 1.1. Tổng quan sản phẩm: hành trình khách từ mã QR đến thuyết minh và vai trò của quản trị viên", 16.0)),
+    ("p", "Nội dung thuyết minh được soạn theo từng ngôn ngữ trong bảng culinary_place_translations và dish_translations; mỗi bản dịch có thể đính kèm một tệp âm thanh. Khi chưa có tệp, hệ thống có hai cơ chế dự phòng: phát bằng giọng đọc của trình duyệt (Web Speech API) và tạo âm thanh bằng dịch vụ chuyển văn bản thành giọng nói ở phía máy chủ. Hình 1.2 nhóm các tính năng theo trạng thái thực tế trong mã nguồn — ranh giới giữa “đã có”, “một phần” và “thiết kế” được giữ nhất quán trong toàn bộ báo cáo."),
+    ("fig", ("hinh_1_2_prd_features.png", "Hình 1.2. Bản đồ tính năng sản phẩm ghi theo trạng thái trong mã nguồn", 16.0)),
+    ("note", "Điểm PRD cần đọc kỹ: nhánh quyền truy cập ngôn ngữ theo phiên khách và thanh toán (guest_sessions, language_entitlements, access_packages, payment_transactions…) đã có 7 bảng dữ liệu và 20 tuyến API nhưng chưa nối giao diện, chưa gắn kiểm tra quyền vào tuyến nội dung và chưa có adapter cổng thanh toán — phần này đặt trong trạng thái thiết kế (UC-14, UC-15, Chương 5); ngược lại, đăng ký/đăng nhập VISITOR (FR-19) đã chạy được và được kiểm chứng E2E."),
 
-    ("h2", "1.2. Yêu cầu nghiệp vụ"),
+    ("h3", "1.1.6. Phạm vi sản phẩm"),
+    ("p", "Nằm trong phạm vi (đã hiện diện trong mã nguồn):"),
+    ("b", [
+        "Tra cứu công khai: danh sách và tìm kiếm địa điểm, lọc theo danh mục/giá/trạng thái mở cửa, chi tiết địa điểm và món ăn, tuyến ẩm thực, bản đồ.",
+        "Đa ngôn ngữ ở mức bản ghi: mỗi địa điểm/món/tuyến có bản dịch riêng theo ngôn ngữ; bảng languages khai báo mã, tên bản ngữ, locale BCP-47 và ghi chú giọng đọc.",
+        "Thuyết minh: phát tệp MP3 đã lưu, dự phòng giọng trình duyệt, tạo TTS ở phía máy chủ với ba nhà cung cấp cấu hình được.",
+        "QR: sinh mã cho địa điểm và món ăn, chọn địa chỉ gốc, làm lại mã khi địa chỉ thay đổi, cảnh báo khi mã trỏ tới localhost.",
+        "Quản trị: đăng nhập JWT, CRUD địa điểm/món ăn/danh mục/tuyến/ngôn ngữ/người dùng, soạn bản dịch, quản lý ảnh, quản lý audio, thống kê quét - nghe - người dùng truy cập.",
+        "Ứng dụng di động: khung ứng dụng Expo với 5 tab, quét QR bằng camera, màn hình hướng dẫn GPS có phát hiện vùng và hàng đợi thuyết minh.",
+        "Đăng ký/đăng nhập tài khoản khách (VISITOR) đã chạy E2E.",
+    ]),
+    ("p", "Ngoài phạm vi hoặc chưa hoàn thành:"),
+    ("b", [
+        "Không có giỏ hàng, đặt món, thanh toán đơn ăn uống — hệ thống chỉ giới thiệu nội dung.",
+        "Không có chức năng đặt bàn, giữ chỗ hoặc đặt tour.",
+        "Không có bản phát hành chính thức iOS/Google Play; ứng dụng di động chạy qua Expo Go.",
+        "Luồng mua gói ngôn ngữ chưa hoàn chỉnh: thiếu adapter cổng thanh toán, thiếu giao diện và bước kiểm tra quyền trên tuyến nội dung.",
+        "Chưa có bản dịch cho toàn bộ 12 món ăn ở cả 5 ngôn ngữ; số lượng bản dịch phụ thuộc tệp seed hiện có.",
+    ]),
+    ("note", "Ranh giới PRD: môi trường kiểm chứng là Docker Compose ba container đã chạy thật (web/API/PostgreSQL) với dữ liệu seed; các con số trong báo cáo đọc từ cơ sở dữ liệu thống nhất và mã nguồn, các kết quả E2E trình bày ở Chương 4 với lệnh và phản hồi thật. Phần nào chưa chạy được (adapter cổng thanh toán, phát hành mobile) không được suy đoán là đã xong."),
+
+    ("h2", "1.2. Yêu cầu sản phẩm"),
     ("h3", "1.2.1. Yêu cầu chức năng"),
-    ("p", "Bảng dưới đây liệt kê các yêu cầu chức năng với mã định danh, tiêu chí kiểm chứng và trạng thái tương ứng với mã nguồn. Ký hiệu trạng thái: “Đã có” nghĩa là chức năng tồn tại trong mã nguồn và có tuyến API/giao diện tương ứng; “Một phần” nghĩa là có mã nguồn nhưng thiếu một mắt xích để chạy đầu-cuối; “Thiết kế” nghĩa là mới có bảng dữ liệu hoặc mô tả, chưa có luồng chạy."),
+    ("p", "Bảng 1.4 liệt kê các yêu cầu chức năng với mã định danh, mô tả - tiêu chí kiểm chứng và trạng thái theo mã nguồn. Ký hiệu: “Đã có” — chức năng tồn tại trong mã nguồn và có tuyến API/giao diện tương ứng; “Một phần” — có mã nguồn nhưng thiếu một mắt xích để chạy đầu-cuối; “Thiết kế” — chỉ có bảng dữ liệu hoặc mô tả, chưa có luồng chạy. Các mã FR này được dùng nhất quán trong Chương 2 (use case, user story), Chương 3 (kết cấu giải pháp) và Phụ lục C."),
     ("tbl", {
-        "caption": "Bảng 1.2. Yêu cầu chức năng",
+        "caption": "Bảng 1.4. Yêu cầu chức năng",
         "cols": ["Mã", "Tên yêu cầu", "Mô tả và tiêu chí kiểm chứng", "Trạng thái"],
         "widths": [1.4, 4.2, 8.6, 2.4],
         "rows": [
@@ -118,7 +145,7 @@ CH1 = [
             ["FR-12", "Quản lý bản dịch", "Soạn bản dịch cho từng ngôn ngữ ở địa điểm, món ăn, tuyến; mỗi bản dịch có tệp âm thanh riêng.", "Đã có"],
             ["FR-13", "Quản lý ngôn ngữ", "Thêm, sửa, tắt, xoá ngôn ngữ; khai báo locale BCP-47 và ghi chú giọng đọc; chặn xoá ngôn ngữ còn nội dung.", "Đã có"],
             ["FR-14", "Quản lý QR", "Sinh mã cho địa điểm và món ăn, tải PNG, làm lại mã với địa chỉ gốc khác.", "Đã có"],
-            ["FR-15", "Thống kê", "Đếm lượt quét, lượt nghe, phân bố theo địa điểm, ngôn ngữ, thiết bị; biểu đồ 14 ngày.", "Đã có (một số thẻ sai tên trường)"],
+            ["FR-15", "Thống kê", "Đếm lượt quét, lượt nghe, số phiên người dùng truy cập (unique_visitors, visitors_today), phân bố theo địa điểm, ngôn ngữ, thiết bị; biểu đồ 14 ngày.", "Đã có"],
             ["FR-16", "Quyền truy cập ngôn ngữ theo phiên khách", "Khách có một ngôn ngữ miễn phí; ngôn ngữ khác cần gói đã thanh toán; nội dung bị khoá trả 403.", "Thiết kế / Một phần"],
             ["FR-17", "Thanh toán mở khoá ngôn ngữ", "Tạo giao dịch từ gói, nhận webhook đã xác thực, cấp quyền sau khi thanh toán thành công, chống trùng lặp.", "Thiết kế / Một phần"],
             ["FR-18", "Hướng dẫn theo vị trí GPS", "Ứng dụng theo dõi vị trí, phát hiện vào/ra vùng quanh địa điểm và tự động phát thuyết minh.", "Một phần"],
@@ -128,9 +155,9 @@ CH1 = [
     }),
 
     ("h3", "1.2.2. Yêu cầu phi chức năng"),
-    ("p", "Các yêu cầu dưới đây được xác định từ cấu hình và mã nguồn. Báo cáo chỉ nêu chỉ tiêu khi có căn cứ; chưa có phép đo hiệu năng nào được thực hiện trong môi trường hiện tại."),
+    ("p", "Các yêu cầu dưới đây được xác định từ cấu hình và mã nguồn. Báo cáo chỉ nêu chỉ tiêu khi có căn cứ trong mã; chưa có phép đo hiệu năng nào được thực hiện trong môi trường hiện tại."),
     ("tbl", {
-        "caption": "Bảng 1.3. Yêu cầu phi chức năng",
+        "caption": "Bảng 1.5. Yêu cầu phi chức năng",
         "cols": ["Mã", "Nhóm", "Yêu cầu", "Căn cứ trong mã nguồn"],
         "widths": [1.3, 3.0, 7.0, 5.3],
         "rows": [
@@ -140,7 +167,7 @@ CH1 = [
             ["NFR-04", "Bảo mật", "Mật khẩu băm bcrypt; API quản trị yêu cầu JWT; header bảo vệ của helmet; CORS giới hạn origin; giới hạn kích thước body 2 MB và tệp tải lên 10 MB.", "bcryptjs, jsonwebtoken, helmet, cors, multer."],
             ["NFR-05", "Toàn vẹn dữ liệu", "Ràng buộc khoá ngoại, UNIQUE và CHECK ở mức cơ sở dữ liệu; giao dịch cho thao tác chọn ngôn ngữ miễn phí.", "database/migrations; guest.js dùng BEGIN ISOLATION LEVEL REPEATABLE READ."],
             ["NFR-06", "Bảo trì", "Tách lớp route – controller – service – db; cấu hình tập trung; xử lý lỗi thống nhất.", "server/src/{routes,controllers,services,db}, utils/errors.js."],
-            ["NFR-07", "Mở rộng", "Thêm ngôn ngữ không cần sửa mã nguồn nhờ bảng languages có cột bcl/voice_note; thêm nhà cung cấp TTS bằng cấu hình.", "catalogService.createLanguage; mediaService.generateSpeech."],
+            ["NFR-07", "Mở rộng", "Thêm ngôn ngữ không cần sửa mã nguồn nhờ bảng languages có cột locale/voice_note; thêm nhà cung cấp TTS bằng cấu hình.", "catalogService.createLanguage; mediaService.generateSpeech."],
             ["NFR-08", "Khả chuyển", "Toàn bộ hệ thống chạy được bằng Docker Compose với ba dịch vụ.", "docker-compose.yml, docker-compose.dev.yml, Dockerfile."],
             ["NFR-09", "Quan sát", "Có endpoint kiểm tra sức khoẻ trả trạng thái kết nối cơ sở dữ liệu.", "GET /api/health; db.healthCheck()."],
         ],
@@ -148,9 +175,9 @@ CH1 = [
     }),
 
     ("h3", "1.2.3. Quy tắc nghiệp vụ"),
-    ("p", "Bảng 1.4 phân biệt quy tắc đã được cài đặt trong mã nguồn và quy tắc mới ở mức thiết kế. Đây là điểm quan trọng: một quy tắc có bảng dữ liệu chưa chắc đã được thi hành ở tuyến nội dung."),
+    ("p", "Bảng 1.6 phân biệt quy tắc đã được cài đặt trong mã nguồn và quy tắc mới ở mức thiết kế. Đây là điểm quan trọng của PRD: một quy tắc có bảng dữ liệu chưa chắc đã được thi hành ở tuyến nội dung."),
     ("tbl", {
-        "caption": "Bảng 1.4. Quy tắc nghiệp vụ",
+        "caption": "Bảng 1.6. Quy tắc nghiệp vụ",
         "cols": ["Mã", "Quy tắc", "Cách thi hành", "Trạng thái"],
         "widths": [1.4, 8.4, 5.2, 2.0],
         "rows": [
@@ -172,7 +199,7 @@ CH1 = [
         "font": 10,
     }),
 
-    ("h3", "1.2.4. Các ràng buộc của hệ thống"),
+    ("h3", "1.2.4. Ràng buộc và giả định của hệ thống"),
     ("b", [
         "Ràng buộc công nghệ: backend dùng CommonJS và Express 4 (không dùng TypeScript, không ORM); toàn bộ truy vấn viết bằng SQL thuần với tham số hoá.",
         "Ràng buộc dữ liệu: nội dung chỉ hiển thị khi có bản dịch tương ứng; ảnh và audio lưu trên đĩa, chỉ lưu đường dẫn trong cơ sở dữ liệu, nên phải mount volume khi chạy Docker.",
@@ -184,9 +211,9 @@ CH1 = [
     ]),
 
     ("h2", "1.3. Giải pháp công nghệ"),
-    ("p", "Phần này trình bày giải pháp công nghệ theo bốn lớp — giao diện web, ứng dụng di động, máy chủ ứng dụng, cơ sở dữ liệu — cùng cách đóng gói bằng Docker và lý do lựa chọn. Bảng 1.5 tổng hợp các công nghệ với phiên bản đọc trực tiếp từ package.json, Dockerfile và bằng chứng môi trường (Node.js 26.8.1 cùng npm 11.19.0 trên máy phát triển; Node.js v22.16.0 trong container)."),
+    ("p", "Phần này đối chiếu giải pháp công nghệ theo bốn lớp — giao diện web, ứng dụng di động, máy chủ ứng dụng, cơ sở dữ liệu — cùng cách đóng gói bằng Docker và lý do lựa chọn. Bảng 1.7 tổng hợp các công nghệ với phiên bản đọc trực tiếp từ package.json, Dockerfile và bằng chứng môi trường (Node.js 26.8.1 cùng npm 11.19.0 trên máy phát triển; Node.js v22.16.0 trong container)."),
     ("tbl", {
-        "caption": "Bảng 1.5. Công nghệ và phiên bản đang dùng trong dự án",
+        "caption": "Bảng 1.7. Công nghệ và phiên bản đang dùng trong dự án",
         "cols": ["Thành phần", "Công nghệ", "Phiên bản (theo package.json / Dockerfile)", "Vai trò"],
         "widths": [3.2, 4.4, 4.6, 4.4],
         "rows": [
@@ -205,7 +232,7 @@ CH1 = [
             ["Điều hướng mobile", "@react-navigation (native, native-stack, bottom-tabs)", "^6.1.18, ^6.11.0, ^6.6.1", "Stack + tab"],
             ["Thiết bị", "expo-camera, expo-location, expo-av, async-storage", "~15.0.16, ~17.0.1, ~14.0.7, 1.23.1", "Camera, GPS, phát audio, lưu trữ cục bộ"],
             ["TTS máy chủ", "edge-tts (cài sẵn trong image) + ba nhà cung cấp cấu hình được", "python3 + edge-tts trong server/Dockerfile", "Tạo tệp MP3 từ văn bản thuyết minh"],
-            ["Triển khai", "Docker, Docker Compose, Nginx", "node:22-alpine3.20, nginx:alpine, postgres:16", "Đóng gói và phục vụ"],
+            ["Triển khai", "Docker, Docker Compose, Nginx", "node:22-alpine3.20, nginx:alpine3.20, postgres:16", "Đóng gói và phục vụ"],
         ],
         "font": 10,
     }),
@@ -214,7 +241,7 @@ CH1 = [
     ("p", "Website là một SPA React 18 đóng gói bằng Vite, chia hai vùng trong cùng một ứng dụng: vùng công khai cho khách du lịch và vùng /admin cho quản trị nội dung. React Router ánh xạ trực tiếp các đường dẫn mà mã QR trỏ tới (/place/:id, /dish/:id) nên một mã quét được mở đúng trang mà không cần phía máy chủ sinh trang HTML."),
     ("b", [
         "Vùng công khai gồm các trang: Trang chủ, Khám phá (tra cứu và bộ lọc), Bản đồ (Leaflet trên lớp Carto Voyager, marker các địa điểm), Hướng dẫn địa điểm (PlaceGuide, bản đồ một marker), Món ăn, Tuyến ẩm thực, Giới thiệu; cùng các trang xác thực (Đăng nhập, Đăng ký) và trang chi tiết món.",
-        "Vùng quản trị gồm 8 màn hình: Dashboard thống kê, địa điểm, món ăn, danh mục, tuyến, ngôn ngữ, người dùng, hình ảnh/audio; trình soạn PlaceEditor tách 5 thẻ (thông tin, bản dịch, hình ảnh, âm thanh, QR).",
+        "Vùng quản trị gồm các màn hình: Dashboard thống kê (có thêm thẻ người dùng truy cập), địa điểm, món ăn, danh mục, tuyến, ngôn ngữ, người dùng, hình ảnh/audio; trình soạn PlaceEditor tách 5 thẻ (thông tin, bản dịch, hình ảnh, âm thanh, QR).",
         "Quét QR trên web dùng getUserMedia + jsQR: luồng camera vẽ lên canvas, mỗi khung hình được giải mã; khi nhận đường dẫn /place/{id} ứng dụng điều hướng ngay.",
         "Phát thuyết minh dùng phần tử <audio> (tua 10 giây, đổi tốc độ, thanh tiến trình); dự phòng bằng speechSynthesis theo locale của ngôn ngữ khi chưa có tệp MP3.",
         "Nhãn giao diện được tách trong utils/uiStrings.js để thêm ngôn ngữ mới không phải sửa từng trang; axios client cấu hình baseURL qua biến môi trường VITE_API_URL.",
@@ -231,29 +258,29 @@ CH1 = [
     ("h3", "1.3.3. Giải pháp Back End"),
     ("p", "Máy chủ là một ứng dụng Node.js + Express 4 viết bằng JavaScript CommonJS, tổ chức thành các lớp route → controller → service → db. Route chỉ nhận - trả HTTP; controller kiểm tra tham số; service chứa nghiệp vụ và xử lý lỗi; tầng db trực tiếp chạy SQL. Cấu trúc này giữ cho mỗi tệp nhỏ, dễ kiểm thử và đúng yêu cầu NFR-06 (bảo trì)."),
     ("b", [
-        "Xác thực: /api/auth/login trả JWT chứa id và role, middleware authenticate + requireRole bảo vệ các tuyến /api/admin/*; bcryptjs băm mật khẩu; FR-19 bổ sung /api/auth/register tạo tài khoản VISITOR.",
+        "Xác thực: /api/auth/login trả JWT chứa id và role, middleware authenticate + requireRole bảo vệ các tuyến quản trị; bcryptjs băm mật khẩu; FR-19 bổ sung /api/auth/register tạo tài khoản VISITOR.",
         "Bảo mật và giới hạn: helmet cho HTTP header, cors giới hạn origin theo FRONTEND_URL, express-rate-limit giới hạn 300 yêu cầu/phút mỗi IP trên /api, multer giới hạn tệp tải lên 10 MB.",
         "Lỗi chuẩn hoá: lớp utils/errors.js định nghĩa ApiError {code, message, status}; mọi route trả lỗi cùng định dạng và không rò chi tiết nội bộ.",
-        "Nghiệp vụ tách dịch vụ: placeService, catalogService, mediaService, analyticsService, authService…; mediaService đảm nhiệm upload ảnh, sinh QR (qrcode), attachAudio và TTS với ba nhà cung cấp cấu hình được (image, DIAVOICE, GOOGLE_TRANSLATE).",
+        "Nghiệp vụ tách dịch vụ: 10 tệp service (authService, catalogService, dishAudioService, entitlementService, eventService, geoAudioService, mediaService, placeService, statsService, audioWarmupService); mediaService đảm nhiệm upload ảnh, sinh QR (qrcode), attachAudio và TTS với ba nhà cung cấp cấu hình được.",
         "Thuyết minh sinh trước trong utils/narration.js (khoảng 30 giây/đoạn) để mọi đường vào dùng cùng một nội dung.",
     ]),
 
     ("h3", "1.3.4. Giải pháp cơ sở dữ liệu"),
     ("p", "Hệ quản trị chọn PostgreSQL 16. Toàn bộ cấu trúc được tạo bằng 14 tệp migration (001-011, 016, 017, 018) cho 31 bảng trong schema public; dữ liệu mẫu Quận 4 nạp bằng 15 tệp seed. Ứng dụng kết nối bằng tài khoản riêng district4_user, không dùng superuser."),
     ("b", [
-        "Mô hình nội dung đa ngôn ngữ: bảng gốc (culinary_places, dishes, food_routes) + bảng bản dịch (culinary_place_translations, dish_translations, route_translations) với UNIQUE (cha, language_id); bảng languages khai báo mã, tên, tên bản ngữ, locale BCP-47 (bcl) và ghi chú giọng đọc.",
+        "Mô hình nội dung đa ngôn ngữ: bảng gốc (culinary_places, dishes, food_routes) + bảng bản dịch (culinary_place_translations, dish_translations, route_translations) với UNIQUE (cha, language_id); bảng languages khai báo mã, tên, tên bản ngữ, locale BCP-47 và ghi chú giọng đọc.",
         "Mô hình thuyết minh: audio_guides và dish_audio_guides liên kết đúng một bản dịch với một tệp MP3; qr_codes và dish_qr_codes lưu đường dẫn ảnh PNG.",
-        "Mô hình hoạt động: scan_logs và audio_play_logs ghi lượt quét và lượt nghe phục vụ thống kê (FR-15).",
+        "Mô hình hoạt động: scan_logs và audio_play_logs ghi lượt quét, lượt nghe và phiên người dùng phục vụ thống kê (FR-15).",
         "Mô hình quyền ngôn ngữ (thiết kế): guest_sessions, language_entitlements, access_packages, language_package_languages, payment_transactions, language_entitlement_audit, payment_webhook_events.",
         "Toàn vẹn dữ liệu đặt ở tầng CSDL: khoá ngoại, UNIQUE, CHECK, CREATE INDEX cho các cột tra cứu; thao tác nhạy cảm dùng giao dịch (POST /api/guest-sessions/free-language chạy trong BEGIN ISOLATION LEVEL REPEATABLE READ).",
     ]),
 
     ("h3", "1.3.5. Giải pháp container hoá (Docker)"),
-    ("p", "Toàn bộ hệ thống đóng gói bằng Docker Compose với ba dịch vụ, giúp môi trường phát triển tái lập được chỉ bằng một lệnh (NFR-08). Trạng thái thời điểm viết báo cáo: ba container đều đang chạy và GET /api/health trả về {database: connected}."),
+    ("p", "Toàn bộ hệ thống đóng gói bằng Docker Compose với ba dịch vụ, giúp môi trường phát triển tái lập được chỉ bằng một lệnh (NFR-08). Trạng thái thời điểm viết báo cáo: ba container d4-web, d4-server, d4-postgres đều đang chạy và GET /api/health trả về {database: connected}."),
     ("b", [
-        "d4-web: image Nginx alpine; phục vụ bản build tĩnh của React trên cổng host 8080 (ổ 80 trong container); thêm cấu hình reverse-proxy /api về d4-server.",
-        "d4-server: image dựng từ node:22-alpine3.20, cài thêm python3 + edge-tts; API Express lắng nghe 5000 trong container, ánh xạ cổng host 5001; thư mục uploads (audio, images, qr) mount ra ngoài.",
-        "d4-postgres: image postgres:16; cổng nội bộ 5432; dữ liệu lưu volume riêng để không mất khi rebuild.",
+        "d4-web: image Nginx alpine3.20; phục vụ bản build tĩnh của React trên cổng host 8080 (ổ 80 trong container); thêm cấu hình reverse-proxy /api về d4-server.",
+        "d4-server: image dựng từ node:22-alpine3.20, cài thêm python3 + edge-tts; API Express lắng nghe 5000 trong container, ánh xạ cổng host 5001; thư mục uploads (audio, images, qr) mount volume riêng.",
+        "d4-postgres: image postgres:16; cổng 5432; dữ liệu lưu volume riêng để không mất khi rebuild.",
         "Lệnh khởi động chuẩn: docker compose up -d, sau đó chạy migration và seed vào cơ sở dữ liệu.",
     ]),
 
@@ -263,48 +290,49 @@ CH1 = [
     ("p", "React và Vite được chọn cho website vì tốc độ phát triển và khả năng tách trang công khai khỏi trang quản trị trong cùng một ứng dụng; Leaflet đáp ứng nhu cầu bản đồ tương tác nhẹ, cho phép thay lớp nền (Carto Voyager) mà không phụ thuộc khoá API. React Native qua Expo được chọn cho phần di động vì cho phép dùng chung một API, truy cập camera, GPS và phát âm thanh mà không phải viết hai ứng dụng native riêng."),
     ("p", "Docker Compose giúp cố định môi trường: cùng một lệnh tạo được cơ sở dữ liệu, chạy migration, seed và phục vụ website. Điều này quan trọng với một dự án có 31 bảng và nhiều tệp seed, đồng thời là cơ sở để kiểm thử E2E được trình bày ở Chương 4."),
 
+    ("h2", "1.4. Lộ trình và tổ chức thực hiện"),
     ("h3", "1.4.1. Phạm vi công việc"),
     ("p", "Dự án hướng tới một sản phẩm chạy được trong môi trường phát triển. Các nhóm công việc thuộc phạm vi của nhóm:"),
     ("b", [
         "Tổ chức cơ sở dữ liệu: 14 tệp migration cho 31 bảng, 15 tệp seed nạp dữ liệu mẫu Quận 4 (10 địa điểm, 12 món ăn, 3 tuyến, 5 ngôn ngữ, tài khoản quản trị).",
         "Xây dựng máy chủ API: các tuyến tra cứu công khai, xác thực (đăng nhập, đăng ký tài khoản VISITOR), quản trị CRUD, đa ngôn ngữ, audio/TTS, QR, thống kê.",
-        "Website công khai: 9 trang khách (trang chủ, khám phá, bản đồ, địa điểm, món ăn, tuyến, giới thiệu, đăng nhập, đăng ký) cùng các trang chi tiết.",
-        "Trang quản trị: 8 màn hình cho quản trị viên, trong đó trình soạn địa điểm 5 thẻ là màn hình phức tạp nhất.",
-        "Tích hợp QR, audio và TTS; trang bản đồ Leaflet; tính năng đăng ký - đăng nhập khách (FR-19).",
+        "Website công khai: các trang khách (trang chủ, khám phá, bản đồ, địa điểm, món ăn, tuyến, giới thiệu, đăng nhập, đăng ký) cùng các trang chi tiết.",
+        "Trang quản trị: các màn hình quản trị, trong đó trình soạn địa điểm 5 thẻ là màn hình phức tạp nhất.",
+        "Tích hợp QR, audio và TTS; trang bản đồ Leaflet; thống kê người dùng truy cập trên Dashboard; tính năng đăng ký - đăng nhập khách (FR-19).",
         "Thiết kế - hiện thực một phần nhánh quyền ngôn ngữ và thanh toán (bảng dữ liệu, tuyến API, middleware; phần giao diện và adapter chưa làm).",
         "Ứng dụng di động: khung ứng dụng Expo với 5 tab, quét QR, hướng dẫn theo GPS.",
     ]),
     ("p", "Các phần ngoài phạm vi hoặc chưa thực hiện: phát hành ứng dụng lên App Store/Google Play, thanh toán thật với cổng dịch vụ, hạ tầng production (HTTPS, tên miền, giám sát), giỏ hàng/đặt món và chức năng đặt bàn."),
 
-    ("h3", "1.4.2. Giai đoạn thực hiện"),
-    ("p", "Bảng 1.6 nêu các giai đoạn theo thứ tự thực hiện. Cột thời gian để ở dạng khoảng thời lượng dự kiến; trạng thái phản ánh mã nguồn và môi trường đang chạy khi viết báo cáo."),
+    ("h3", "1.4.2. Giai đoạn và cột mốc thực hiện"),
+    ("p", "Bảng 1.8 nêu các giai đoạn theo thứ tự thực hiện; trạng thái phản ánh mã nguồn và môi trường đang chạy khi viết báo cáo (mọi giai đoạn cốt lõi đã hoàn thành, phần đang dở thiết kế được ghi rõ)."),
     ("tbl", {
-        "caption": "Bảng 1.6. Kế hoạch thực hiện theo giai đoạn",
-        "cols": ["Giai đoạn", "Công việc chính", "Đầu ra dự kiến", "Thời lượng dự kiến", "Trạng thái"],
+        "caption": "Bảng 1.8. Kế hoạch thực hiện theo giai đoạn",
+        "cols": ["Giai đoạn", "Công việc chính", "Đầu ra", "Thời lượng dự kiến", "Trạng thái"],
         "widths": [1.6, 5.6, 4.6, 2.4, 2.4],
         "rows": [
             ["1", "Khảo sát đề tài, xác định phạm vi, thu thập dữ liệu ẩm thực Quận 4", "Danh mục địa điểm, món ăn, tuyến", "2 tuần", "Hoàn thành"],
             ["2", "Thiết kế cơ sở dữ liệu và viết migration", "14 tệp migration, 31 bảng", "1 tuần", "Hoàn thành"],
-            ["3", "Xây dựng API tra cứu, quản trị và xác thực", "75 tuyến REST, controllers, services", "3 tuần", "Hoàn thành"],
-            ["4", "Xây dựng website công khai", "9 trang công khai cùng các trang chi tiết", "2 tuần", "Hoàn thành"],
-            ["5", "Xây dựng trang quản trị", "8 màn hình quản trị", "2 tuần", "Hoàn thành"],
+            ["3", "Xây dựng API tra cứu, quản trị và xác thực", "95 tuyến REST, controllers, services", "3 tuần", "Hoàn thành"],
+            ["4", "Xây dựng website công khai", "Các trang công khai cùng trang chi tiết", "2 tuần", "Hoàn thành"],
+            ["5", "Xây dựng trang quản trị", "Các màn hình quản trị + Dashboard thống kê", "2 tuần", "Hoàn thành"],
             ["6", "Tích hợp QR, audio, TTS và bản đồ", "QR cho địa điểm/món, phát audio, TTS, Leaflet", "2 tuần", "Hoàn thành"],
             ["7", "Thử nghiệm ứng dụng di động", "5 tab, quét QR, GPS guide", "1 tuần", "Một phần"],
             ["8", "Thiết kế quyền truy cập ngôn ngữ và thanh toán", "Bảng dữ liệu, tuyến API, middleware", "1 tuần", "Một phần"],
-            ["9", "Triển khai Docker, kiểm thử E2E, viết báo cáo", "Hệ thống chạy Compose, bộ kiểm thử, báo cáo", "2 tuần", "Đang thực hiện"],
+            ["9", "Triển khai Docker, kiểm thử E2E, viết báo cáo", "Hệ thống chạy Compose, bộ kiểm tra E2E, báo cáo này", "2 tuần", "Hoàn thành"],
         ],
         "font": 10,
     }),
-    ("p", "Bảng 1.7 tóm tắt các mốc bàn giao. Các mốc phản ánh cấu trúc mã nguồn hiện có và trạng thái đã kiểm chứng ở Chương 4."),
+    ("p", "Bảng 1.9 tóm tắt các mốc bàn giao và tiêu chí hoàn thành tương ứng; tiêu chí M7 đã được chứng minh ở Chương 4 bằng bộ kiểm tra chạy qua HTTP thật."),
     ("tbl", {
-        "caption": "Bảng 1.7. Mốc bàn giao và tiêu chí hoàn thành",
+        "caption": "Bảng 1.9. Cột mốc bàn giao và tiêu chí hoàn thành",
         "cols": ["Mốc", "Sản phẩm", "Tiêu chí hoàn thành"],
         "widths": [2.2, 6.0, 8.6],
         "rows": [
             ["M1", "Cơ sở dữ liệu và dữ liệu mẫu", "Chạy được migrate + seed trong Docker; có 10 địa điểm, 12 món, 3 tuyến, 5 ngôn ngữ; GET /api/health trả database connected"],
             ["M2", "API tra cứu và xác thực", "Các tuyến /places, /dishes, /languages, /routes trả dữ liệu đúng định dạng; đăng nhập/đăng ký trả JWT"],
             ["M3", "Website công khai", "Điều hướng được các trang; chọn ngôn ngữ; phát audio; bản đồ Leaflet hiển thị"],
-            ["M4", "Trang quản trị", "Đăng nhập; CRUD địa điểm, món ăn; soạn bản dịch; tạo QR"],
+            ["M4", "Trang quản trị", "Đăng nhập; CRUD địa điểm, món ăn; soạn bản dịch; tạo QR; thẻ thống kê người dùng truy cập"],
             ["M5", "QR và thuyết minh", "Quét mã mở đúng trang; audio phát theo ngôn ngữ"],
             ["M6", "Quyền truy cập ngôn ngữ (thiết kế)", "Có bảng, tuyến và middleware; chưa chạy đầu-cuối"],
             ["M7", "Kiểm thử E2E bằng Docker Compose", "Bộ kiểm tra chạy qua HTTP thật: sức khoẻ, đăng ký, đăng nhập, nội dung công khai"],
@@ -323,14 +351,14 @@ CH1 = [
         "pgAdmin / psql (tuỳ chọn) — tra cứu dữ liệu trong PostgreSQL khi kiểm chứng dữ liệu seed.",
     ]),
 
-    ("h3", "1.4.4. Quản lý mã nguồn"),
+    ("h3", "1.4.4. Quản lý mã nguồn và cấu hình"),
     ("p", "Dự án dùng Git với một nhánh chính. Toàn bộ mã nguồn nằm trong một kho theo mô hình pnpm workspace: apps/web, apps/mobile và server. Cấu hình môi trường tách khỏi mã nguồn qua tệp .env; kho chỉ lưu .env.example làm mẫu. Các biến quan trọng gồm PORT, DATABASE_URL, JWT_SECRET, UPLOAD_DIR, PUBLIC_BASE_URL, FRONTEND_URL, TTS_PROVIDER, TTS_API_KEY, VITE_API_URL và EXPO_PUBLIC_API_URL."),
     ("note", "Báo cáo không sao chép giá trị thật trong tệp .env, không nêu mật khẩu cơ sở dữ liệu hay khoá API. Tài khoản demo trong tệp seed chỉ dùng cho môi trường phát triển và đã được ghi rõ trong giao diện đăng nhập."),
 
     ("h3", "1.4.5. Phân công công việc"),
     ("p", "Bảng phân công dưới đây để ở dạng mẫu vì kho mã nguồn không có tài liệu phân công. Nhóm cần điền tên thật trước khi nộp."),
     ("tbl", {
-        "caption": "Bảng 1.8. Phân công công việc (mẫu cần điền)",
+        "caption": "Bảng 1.10. Phân công công việc (mẫu cần điền)",
         "cols": ["Thành viên", "Mảng phụ trách", "Sản phẩm bàn giao"],
         "widths": [4.0, 6.4, 6.4],
         "rows": [
@@ -341,5 +369,5 @@ CH1 = [
         ],
         "font": 10.5,
     }),
-    ("sum", "Tổng kết chương 1: Đề tài giải quyết bài toán quảng bá ẩm thực Quận 4 bằng một hệ thống web và di động có nội dung đa ngôn ngữ, mã QR và thuyết minh âm thanh. Chương đã xác định tác nhân, phạm vi, 19 yêu cầu chức năng, 9 yêu cầu phi chức năng và 14 quy tắc nghiệp vụ; trình bày giải pháp công nghệ theo bốn lớp cùng Docker; và kế hoạch triển khai gồm 9 giai đoạn, 7 mốc bàn giao. Phần đã chạy được và phần mới ở mức thiết kế được phân biệt rõ ràng xuyên suốt chương."),
+    ("sum", "Tổng kết chương 1 (PRD): sản phẩm “Hệ thống thuyết minh tự động đa ngôn ngữ cho du lịch ẩm thực Quận 4” được mô tả từ góc định vị sản phẩm tới hệ thống yêu cầu: 7 mục tiêu có chỉ số kiểm chứng (10 địa điểm, 12 món, 3 tuyến, 5 ngôn ngữ, 95 tuyến API, 31 bảng), 6 vai trò người dùng, 19 yêu cầu chức năng, 9 yêu cầu phi chức năng và 14 quy tắc nghiệp vụ; giải pháp công nghệ theo bốn lớp với Docker Compose ba container; lộ trình 9 giai đoạn - 7 mốc bàn giao. Hai hình PRD (hành trình người dùng và bản đồ tính năng) giúp xem nhanh ranh giới giữa phần đã chạy thật và phần còn thiết kế."),
 ]

@@ -49,9 +49,12 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    api.get('/dashboard/statistics')
-      .then((res) => setStats(res.data.data))
+    const load = () => api.get('/dashboard/statistics')
+      .then((res) => { setStats(res.data.data); setError(null); })
       .catch((e) => setError(e?.response?.data?.message || 'Failed to load statistics'));
+    load();
+    const timer = setInterval(load, 30000);
+    return () => clearInterval(timer);
   }, []);
 
   if (error) return <div className="error-banner">{error}</div>;
@@ -59,12 +62,14 @@ export default function Dashboard() {
 
   const o = stats.overview || {};
   const cards = [
+    ['Đang truy cập (5 phút)', o.users_online, '🟢'],
+    ['Truy cập hôm nay', o.visitors_today, '🧑‍💻'],
     ['Total Places', o.total_places, '🍜'],
     ['Published', o.published_places, '✅'],
     ['Dishes', o.total_dishes, '🥢'],
     ['Languages', o.total_languages, '🌐'],
-    ['Audio Guides', o.total_audio, '🎧'],
-    ['QR Codes', o.total_qr, '🔳'],
+    ['Audio Guides', (o.total_audio || 0) + (o.total_dish_audio || 0), '🎧'],
+    ['QR Codes', (o.total_place_qr || 0) + (o.total_dish_qr || 0), '🔳'],
     ['QR Scans', o.total_scans, '📲'],
     ['Audio Plays', o.total_plays, '▶️'],
   ];
@@ -73,7 +78,7 @@ export default function Dashboard() {
     <>
       <div className="admin-header">
         <h1>Dashboard</h1>
-        <span style={{ color: 'var(--text-2)', fontSize: '0.85rem' }}>Last 14 days activity</span>
+        <span style={{ color: 'var(--text-2)', fontSize: '0.85rem' }}>Tự động cập nhật mỗi 30 giây · chuỗi 14 ngày</span>
       </div>
 
       <div className="stat-cards">

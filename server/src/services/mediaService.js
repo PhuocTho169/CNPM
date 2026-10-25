@@ -84,6 +84,7 @@ function resolveQrBaseUrl({ baseUrl, originHint } = {}) {
   if (baseUrl) {
     const normalized = normalizeOrigin(baseUrl);
     if (!normalized) {
+      console.log("Hello Hello");
       throw new ApiError(400, 'VALIDATION_ERROR', 'base_url must be a valid http(s) URL, e.g. http://192.168.1.5:5173');
     }
     return normalized;
@@ -95,6 +96,7 @@ function resolveQrBaseUrl({ baseUrl, originHint } = {}) {
     const origin = normalizeOrigin(originHint);
     if (origin) return origin;
   }
+  console.log("Hello");
   return config.publicBaseUrl.replace(/\/$/, '');
 }
 

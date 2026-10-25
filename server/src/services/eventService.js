@@ -9,22 +9,33 @@ async function logAudioPlay({ placeId, translationId, languageId, sessionId }) {
 }
 
 async function dashboardStatistics() {
-  const [counts] = [await db.getOne(`\
-    SELECT\
-      (SELECT count(*)::int FROM culinary_places) AS total_places,\
-      (SELECT count(*)::int FROM culinary_places WHERE status = 'PUBLISHED') AS published_places,\
-      (SELECT count(*)::int FROM dishes) AS total_dishes,\
-      (SELECT count(*)::int FROM languages WHERE is_active) AS total_languages,\
-      (SELECT count(*)::int FROM audio_guides) AS total_audio,\
-      (SELECT count(*)::int FROM dish_audio_guides) AS total_dish_audio,\
-      (SELECT count(*)::int FROM qr_codes) AS total_place_qr,\
-      (SELECT count(*)::int FROM dish_qr_codes) AS total_dish_qr,\
-      (SELECT count(*)::int FROM scan_logs) AS total_scans,\
-      (SELECT count(*)::int FROM audio_play_logs) AS total_plays,\
-      (SELECT count(*)::int FROM culinary_routes) AS total_routes,\
-      (SELECT count(*)::int FROM users) AS total_users\
-  `)];
-  return counts;
+  return db.getOne(`
+    SELECT
+      (SELECT count(*)::int FROM culinary_places) AS total_places,
+      (SELECT count(*)::int FROM culinary_places WHERE status = 'PUBLISHED') AS published_places,
+      (SELECT count(*)::int FROM dishes) AS total_dishes,
+      (SELECT count(*)::int FROM languages WHERE is_active) AS total_languages,
+      (SELECT count(*)::int FROM audio_guides) AS total_audio,
+      (SELECT count(*)::int FROM dish_audio_guides) AS total_dish_audio,
+      (SELECT count(*)::int FROM qr_codes) AS total_place_qr,
+      (SELECT count(*)::int FROM dish_qr_codes) AS total_dish_qr,
+      (SELECT count(*)::int FROM scan_logs) AS total_scans,
+      (SELECT count(*)::int FROM audio_play_logs) AS total_plays,
+      (SELECT count(*)::int FROM culinary_routes) AS total_routes,
+      (SELECT count(*)::int FROM users) AS total_users,
+      (SELECT count(DISTINCT anonymous_session_id)::int FROM scan_logs
+        WHERE anonymous_session_id IS NOT NULL) AS unique_visitors,
+      (SELECT count(DISTINCT anonymous_session_id)::int FROM scan_logs
+        WHERE anonymous_session_id IS NOT NULL
+          AND created_at > now() - interval '24 hours') AS visitors_today,
+      (SELECT count(DISTINCT e.anonymous_session_id)::int FROM (
+         SELECT anonymous_session_id, created_at FROM scan_logs
+         UNION ALL
+         SELECT anonymous_session_id, created_at FROM audio_play_logs
+       ) e
+         WHERE e.anonymous_session_id IS NOT NULL
+           AND e.created_at > now() - interval '5 minutes') AS users_online
+  `);
 }
 
 async function scansOverTime(days = 14) {
