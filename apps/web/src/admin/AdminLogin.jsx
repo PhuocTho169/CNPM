@@ -3,9 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { tokenStore } from './adminApi';
 import { apiErrorMessage } from '../api/client';
+import { useApp } from '../context/AppContext';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  // Same store as the public site: pushing the user in here makes the navbar
+  // of the public pages show the signed-in account WITHOUT a full reload.
+  const { setUser } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -18,6 +22,7 @@ export default function AdminLogin() {
     try {
       const res = await api.post('/auth/login', { email, password });
       tokenStore.set(res.data.data.token);
+      setUser(res.data.data.user || res.data.data);
       navigate('/admin');
     } catch (err) {
       setError(apiErrorMessage(err));

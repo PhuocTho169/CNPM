@@ -32,7 +32,7 @@ async function createGuestSession() {
 
 async function getGuestSessionByToken(token) {
   const row = await db.getOne(
-    `SELECT id, display_id, free_language_id, purchased_languages, expires_at
+    `SELECT id, display_id, free_language_id, free_language_id_2, purchased_languages, expires_at
      FROM guest_sessions
      WHERE token_hash = $1`,
     [db.sha256(token)]
@@ -55,44 +55,60 @@ async function invalidateGuestSession(idOrDisplay) {
   );
 }
 
-/** Free + purchased languages joined into one entitlement summary row. */
+/** Free (both slots) + purchased languages joined into one entitlement summary row. */
 async function getEntitlements(guestSession) {
   const purchasedIds = Array.isArray(guestSession.purchased_languages)
     ? guestSession.purchased_languages
     : (guestSession.purchased_languages || []);
-  const freeId = guestSession.free_language_id;
-  const hasAny = !!freeId || purchasedIds.length > 0;
+  const freeIds = [guestSession.free_language_id, guestSession.free_language_id_2].filter(
+    (id) => id !== null && id !== undefined
+  ).map(Number);
+  const hasAny = freeIds.length > 0 || purchasedIds.length > 0;
   return {
-    free_language_id: freeId || null,
+    free_language_id: freeIds[0] || null,
+    free_language_id_2: freeIds[1] || null,
+    free_languages: freeIds,
     purchased_languages: purchasedIds,
     unlocked: hasAny,
   };
 }
 
 /**
- * Selection of the single free language. Guarantees one free slot: if one was
- * already set with a different language, the second request is rejected —
- * callers map that to a 409 so the frontend re-renders with what it has.
+ * Selection of a free language. The guest owns TWO free slots (requirement:
+ * at most 2 languages may be chosen for free, from the 3rd onward they pay).
+ * Fills slot 1 when empty or already holding the same language, then slot 2;
+ * with both slots taken by OTHER languages the update matches no row and the
+ * caller maps `null` to a 409 so the frontend re-renders with what it has.
  */
 async function grantFreeLanguage(guestSessionId, languageId) {
   return db.getOne(
     `UPDATE guest_sessions
-        SET free_language_id = $2,
+        SET free_language_id = CASE
+              WHEN free_language_id IS NULL OR free_language_id = $2 THEN $2
+              ELSE free_language_id END,
+            free_language_id_2 = CASE
+              WHEN free_language_id IS NULL OR free_language_id = $2 THEN free_language_id_2
+              ELSE $2 END,
             expires_at = GREATEST(expires_at, now() + interval '90 days')
       WHERE id = $1
-        AND (free_language_id IS NULL OR free_language_id = $2)
-      RETURNING id, free_language_id, purchased_languages, expires_at`,
+        AND (free_language_id IS NULL OR free_language_id = $2
+             OR free_language_id_2 IS NULL OR free_language_id_2 = $2)
+      RETURNING id, free_language_id, free_language_id_2, purchased_languages, expires_at`,
     [guestSessionId, languageId]
   );
 }
 
-/** Free slot already used by ANOTHER language → conflict (409 in routes). */
+/** Both free slots taken by OTHER languages → conflict (409 in routes). */
 async function hasFreeLanguageConflict(guestSessionId, languageId) {
   const row = await db.getOne(
-    'SELECT free_language_id FROM guest_sessions WHERE id = $1',
+    'SELECT free_language_id, free_language_id_2 FROM guest_sessions WHERE id = $1',
     [guestSessionId]
   );
-  return !!row && row.free_language_id !== null && Number(row.free_language_id) !== Number(languageId);
+  if (!row) return true;
+  const taken = [row.free_language_id, row.free_language_id_2]
+    .filter((id) => id !== null && id !== undefined)
+    .map(Number);
+  return taken.length >= 2 && !taken.includes(Number(languageId));
 }
 
 /** Sandbox purchase: append the language to purchased_languages. */
@@ -108,10 +124,13 @@ async function purchaseLanguage(guestSessionId, languageId) {
   );
 }
 
-/** free OR purchased — the entire unlock rule, single row. */
+/** free (either slot) OR purchased — the entire unlock rule, single row. */
 async function hasLanguageUnlock(guestSession, languageId) {
   if (!guestSession) return false;
-  if (Number(guestSession.free_language_id) === Number(languageId)) return true;
+  if (
+    Number(guestSession.free_language_id) === Number(languageId) ||
+    Number(guestSession.free_language_id_2) === Number(languageId)
+  ) return true;
   const purchased = Array.isArray(guestSession.purchased_languages)
     ? guestSession.purchased_languages
     : [];
@@ -159,9 +178,11 @@ async function createCheckout(guestSession, languageId) {
 }
 
 /**
- * Confirm a pending checkout: marks it success and appends the language to
- * purchased_languages in one transaction-ish path. Returns the updated guest
- * row so the caller can reply with the final entitlement state.
+ * Confirm a pending checkout: marks it success and grants the entitlement in
+ * one transaction-ish path. The product rule is "20,000 VND once unlocks ALL
+ * languages", so the successful payment replaces purchased_languages with the
+ * full active catalog. Returns the updated guest row so the caller can reply
+ * with the final entitlement state.
  *
  * Idempotent: confirming an already-successful checkout just returns it.
  */
@@ -190,11 +211,13 @@ async function confirmCheckout(checkoutId) {
 
   const guest = await db.getOne(
     `UPDATE guest_sessions
-        SET purchased_languages = array_append(purchased_languages, $2)
+        SET purchased_languages = (
+          SELECT COALESCE(array_agg(id ORDER BY id), '{}')
+          FROM languages WHERE is_active = true
+        )
       WHERE id = $1
-        AND NOT ($2 = ANY(purchased_languages))
-      RETURNING id, display_id, free_language_id, purchased_languages, expires_at`,
-    [checkout.guest_session_id, checkout.language_id]
+      RETURNING id, display_id, free_language_id, free_language_id_2, purchased_languages, expires_at`,
+    [checkout.guest_session_id]
   );
 
   return { checkout: successRow || checkout, guest };

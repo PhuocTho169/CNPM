@@ -75,12 +75,14 @@ export default function Home() {
           </div>
           <div className="hero-art">
             <div className="hero-photo-card">
-              <div
-                className="hero-photo"
-                role="img"
-                aria-label="Hương vị Quận 4"
-                style={{ backgroundImage: "url('/images/hero/hero-pho.png')" }}
-              />
+              <div className="hero-photo">
+                <img
+                  src="/images/hero/hero-lau.png"
+                  alt="Hương vị Quận 4"
+                  loading="eager"
+                  onError={(e) => { e.currentTarget.src = '/images/hero/hero-pho.png'; e.currentTarget.onerror = null; }}
+                />
+              </div>
               <div className="hero-photo-caption" aria-hidden="true">
                 <span className="cap-1">DISTRICT 4</span>
                 <span className="cap-2">ẨM THỰC • AUDIO GUIDE</span>

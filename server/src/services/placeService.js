@@ -167,8 +167,22 @@ async function getFullDetail(id, lang) {
        AND t.entity_type = 'place' AND t.entity_id = $1`,
     [id]
   );
+  // Drop rows whose file vanished from disk (container rebuild, cleanup): they
+  // 404 in the player and silence the guide. Removing the row lets the
+  // audio_pending flow below regenerate the narration for that language.
+  for (const a of audioRows) {
+    if (a.file_url && media.audioFileMissing(a.file_url)) {
+      await media.removeStaleAudio({ id: a.id, url: a.file_url });
+      a._stale = true;
+      const fullTranslation = translations.find((t) => t.id === a.translation_id);
+      if (fullTranslation) media.scheduleTranslationAudio(fullTranslation);
+    }
+  }
   const audioByTranslation = {};
-  for (const a of audioRows) audioByTranslation[a.translation_id] = a;
+  for (const a of audioRows) {
+    if (a._stale || audioByTranslation[a.translation_id]) continue;
+    audioByTranslation[a.translation_id] = a;
+  }
 
   place.translations = translations.map((t) => ({
     ...t,
@@ -241,6 +255,22 @@ async function getFullDetail(id, lang) {
   );
   const fbMap = {};
   for (const fb of dishFallbacks) fbMap[fb.dish_id] = fb;
+
+  // Dish audio rows pointing at files that no longer exist would 404 in the
+  // player. Drop the row and let the regeneration below schedule a fresh file.
+  for (const d of dishes) {
+    if (d.audio_url && media.audioFileMissing(d.audio_url)) {
+      if (d.translation_id) {
+        await db.query(
+          `DELETE FROM media_files WHERE entity_type = 'translation' AND entity_id = $1 AND kind = 'audio'`,
+          [d.translation_id]
+        );
+      }
+      console.warn(`[audio] stale dish audio removed: ${d.audio_url}`);
+      d.audio_url = null;
+    }
+  }
+
   place.dishes = dishes.map((d) => ({
     ...d,
     name: d.name || fbMap[d.id]?.name || null,

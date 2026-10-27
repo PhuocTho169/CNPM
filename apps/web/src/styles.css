@@ -66,6 +66,10 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; }
 /* language select + QR button: keep their natural size, let the brand absorb
    the leftover space on narrow screens. */
 .nav-actions { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+/* Logged-in user + logout button in the public navbar */
+.nav-user { display: inline-flex; align-items: center; gap: 0.55rem; white-space: nowrap; }
+.nav-user .logout-btn { color: var(--primary-dark); white-space: nowrap; }
+.nav-user .logout-btn:hover { background: #ffe8d3; border-color: var(--primary-light); }
 .btn-scan:hover { transform: translateY(-1px); background: var(--primary-dark); }
 
 .lang-select {
@@ -133,12 +137,16 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; }
 .hero-photo {
   width: 100%; aspect-ratio: 1 / 0.92; border-radius: 18px;
   /* warm gradient stays visible until the real photo is saved to
-     /images/hero/hero-pho.png */
+     /images/hero/hero-lau.png (falls back to hero-pho.png in the img onError) */
   background-color: #4a2a0d;
   background-image:
     radial-gradient(320px 200px at 70% 30%, rgba(255, 170, 70, 0.35), transparent 70%),
     linear-gradient(150deg, #5a3310, #331a06);
   background-size: cover; background-position: center;
+}
+.hero-photo img {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: inherit; display: block;
 }
 .hero-photo-caption {
   position: absolute; left: 10px; right: 10px; bottom: 10px;
@@ -314,6 +322,82 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; }
   border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.7rem; background: #fff;
 }
 .filter-bar input[type="search"] { flex: 1; min-width: 200px; }
+
+/* ---------- Language picker + selection banner ---------- */
+.lang-picker { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+.lang-pill {
+  border: 1.5px solid var(--border); background: var(--surface); border-radius: 20px;
+  padding: 0.45rem 1rem; font-size: 0.9rem; font-weight: 600; color: var(--text-2);
+  transition: all .15s;
+}
+.lang-pill.active { border-color: var(--primary); background: #fff3e6; color: var(--primary-dark); }
+.lang-pill:hover { border-color: var(--primary-light); }
+.lang-pill.locked { border-color: #ead8c6; opacity: 0.86; }
+.lang-pill.free-available { border-color: #7bc78a; }
+.lang-pill small { font-weight: 600; opacity: 0.65; }
+
+.lang-nav-btn {
+  border: 1.5px solid var(--border); background: var(--surface); border-radius: 999px;
+  padding: 0.25rem 0.6rem; font-size: 0.9rem; cursor: pointer; line-height: 1.2;
+}
+.lang-nav-btn:hover { border-color: var(--primary-light); background: #fff3e6; }
+
+/* Overlay banner — first thing the visitor sees on a place guide page */
+.lang-banner-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(28, 14, 3, 0.62); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.lang-banner {
+  background: var(--surface, #fff); border-radius: 18px;
+  max-width: 560px; width: 100%; padding: 1.5rem 1.6rem 1.3rem;
+  box-shadow: 0 24px 70px rgba(10, 3, 0, 0.55);
+  max-height: 90vh; overflow: auto;
+}
+.lang-banner-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.lang-banner h2 { margin: 0; font-size: 1.2rem; }
+.lang-banner-close {
+  border: none; background: transparent; font-size: 1rem; cursor: pointer;
+  color: var(--text-2); padding: 0.3rem 0.5rem; border-radius: 8px;
+}
+.lang-banner-close:hover { background: #f4ede2; }
+.lang-banner-hint { color: var(--text-2); font-size: 0.92rem; margin: 0.5rem 0 0.8rem; }
+.lang-banner-slots { margin-bottom: 0.2rem; }
+.lang-banner-slots .chip { font-size: 0.8rem; font-weight: 700; }
+.lang-pay-panel {
+  margin-top: 0.9rem; padding: 1rem 1.1rem; border-radius: 14px;
+  background: #fff6ec; border: 1px dashed #eeb463;
+}
+.lang-pay-panel p { margin: 0 0 0.7rem; font-size: 0.92rem; }
+.lang-banner-note { margin: 0.7rem 0 0; font-size: 0.9rem; }
+.lang-banner-note.success { color: #2e7d32; font-weight: 700; }
+.lang-banner-note.error { color: #b3261e; }
+
+/* Payment banner on top of the language banner while paying / success */
+.pay-overlay {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(28, 14, 3, 0.66); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.pay-card {
+  background: var(--surface, #fff); border-radius: 20px;
+  max-width: 330px; width: 100%; padding: 1.8rem 1.6rem 1.4rem;
+  text-align: center; box-shadow: 0 24px 70px rgba(10, 3, 0, 0.55);
+}
+.pay-amount { font-size: 1.9rem; font-weight: 800; color: var(--primary-dark); margin: 0.4rem 0; }
+.pay-title { font-size: 0.95rem; margin: 0; color: var(--text-1, #3a2a18); }
+.pay-sub { font-size: 0.75rem; letter-spacing: 0.14em; color: var(--text-2); margin: 0.5rem 0 0; }
+.pay-spinner {
+  width: 34px; height: 34px; margin: 0 auto; display: block;
+  border: 4px solid #f2e4d2; border-top-color: var(--primary);
+  border-radius: 50%; animation: pay-spin .8s linear infinite;
+}
+@keyframes pay-spin { to { transform: rotate(360deg); } }
+.pay-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #2e7d32; color: #fff; font-size: 1.5rem; font-weight: 800;
+}
 
 /* ---------- Route timeline ---------- */
 .route-stops { position: relative; padding-left: 1.8rem; margin: 1.2rem 0; }

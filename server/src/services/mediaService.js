@@ -41,7 +41,63 @@ async function getAudioForTranslation(translationId) {
      LIMIT 1`,
     [translationId]
   );
+  // A row whose file is gone from disk (container rebuilt, volume replaced,
+  // files cleaned up) serves a 404 that silently kills the player: the browser
+  // sees an <audio src>, never falls back to the browser voice, and the guest
+  // hears nothing. Treat a missing file the same as a missing row: delete the
+  // stale record and queue a fresh TTS so the guide self-heals.
+  if (row && audioFileMissing(row.url)) {
+    await removeStaleAudio(row);
+    scheduleRegeneration(row.entity_id);
+    return null;
+  }
   return mapAudioRow(row);
+}
+
+/**
+ * True when the local `/uploads` file behind `fileUrl` no longer exists on disk.
+ * Remote URLs (http(s)://, CDN…) are assumed reachable — we can only verify ours.
+ */
+function audioFileMissing(fileUrl) {
+  if (!fileUrl) return true;
+  if (!String(fileUrl).startsWith('/uploads/')) return false;
+  const relative = String(fileUrl).split('?')[0].replace(/^\/uploads\//, '');
+  return !fs.existsSync(path.join(config.uploadDir, relative));
+}
+
+/** Delete an audio row (and, when local, nothing is left on disk to clean). */
+async function removeStaleAudio(row) {
+  if (!row) return;
+  await db.query('DELETE FROM media_files WHERE id = $1', [row.id]);
+  console.warn(`[audio] stale audio row ${row.id}: file missing on disk (${row.url}) — removed, regenerating.`);
+}
+
+/**
+ * Queue a fresh narration for the translation `translationId` (place or dish).
+ * Reads the full translation text back so the composer gets the same script it
+ * originally narrated.
+ */
+function scheduleRegeneration(translationId) {
+  setImmediate(async () => {
+    try {
+      const t = await db.getOne(
+        `SELECT t.id, t.entity_type, t.entity_id, l.code AS language_code,
+                t.name, t.short_description, t.description,
+                t.history, t.cultural_significance, t.tourist_tips
+         FROM translations t JOIN languages l ON l.id = t.language_id
+         WHERE t.id = $1`,
+        [translationId]
+      );
+      if (!t) return;
+      if (t.entity_type === 'dish') {
+        require('./dishAudioService').scheduleTranslationAudio(t);
+      } else {
+        scheduleTranslationAudio(t);
+      }
+    } catch (err) {
+      console.warn(`[audio] regeneration of translation ${translationId} failed:`, err.message);
+    }
+  });
 }
 
 async function attachAudio(translationId, { file_url, duration, file_size, mime_type, source }) {
@@ -240,6 +296,12 @@ async function getAudioForPlace(placeId, language) {
   if (!row) {
     throw new ApiError(404, 'NARRATION_UNAVAILABLE', `No ${lang} guide is available for this culinary place.`);
   }
+  if (row.url && audioFileMissing(row.url)) {
+    await removeStaleAudio(row);
+    scheduleRegeneration(row.entity_id);
+    row.url = null;
+    row.duration = null;
+  }
   return {
     placeId,
     language: lang,
@@ -263,6 +325,12 @@ async function getAudioForDish(dishId, language) {
   );
   if (!row) {
     throw new ApiError(404, 'NARRATION_UNAVAILABLE', `No ${lang} audio is available for this dish.`);
+  }
+  if (row.url && audioFileMissing(row.url)) {
+    await removeStaleAudio(row);
+    scheduleRegeneration(row.entity_id);
+    row.url = null;
+    row.duration = null;
   }
   return {
     dishId,
@@ -619,6 +687,7 @@ async function generateWithGoogle(text, locale, voiceNote) {
 
 module.exports = {
   getAudioForTranslation, attachAudio, deleteAudio, deleteAudioFile,
+  audioFileMissing, removeStaleAudio,
   getQR, generateQR,
   getDishQR, generateDishQR,
   getAudioForPlace, getAudioForDish,

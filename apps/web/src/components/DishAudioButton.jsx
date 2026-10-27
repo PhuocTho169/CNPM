@@ -24,6 +24,11 @@ export default function DishAudioButton({ audioUrl, pending, label, narrationTex
   const { lang, languages, t } = useApp();
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
+  // The DB may point at a file the server cannot serve anymore (404 after a
+  // rebuild). The play promise then never resolves and the button looked
+  // dead — treat the file as broken and speak with the browser voice instead.
+  const [fileBroken, setFileBroken] = useState(false);
+  const effectiveAudioUrl = fileBroken ? null : audioUrl;
 
   // Switching dishes/language must not leave the previous clip running.
   useEffect(() => {
@@ -32,6 +37,7 @@ export default function DishAudioButton({ audioUrl, pending, label, narrationTex
     el.pause();
     el.load();
     setPlaying(false);
+    setFileBroken(false); // the new file may be fine even if the last one 404'd
   }, [audioUrl]);
 
   useEffect(() => () => window.speechSynthesis?.cancel(), [audioUrl]);
@@ -50,12 +56,15 @@ export default function DishAudioButton({ audioUrl, pending, label, narrationTex
 
   const toggle = () => {
     const el = audioRef.current;
-    if (el && audioUrl) {
+    if (el && effectiveAudioUrl) {
       if (!el.paused) {
         el.pause();
         setPlaying(false);
       } else {
-        el.play().then(() => setPlaying(true)).catch(() => speakWithBrowser());
+        el.play().then(() => setPlaying(true)).catch(() => {
+          setFileBroken(true); // decode/load failure → browser voice keeps the button alive
+          speakWithBrowser();
+        });
       }
       return;
     }
@@ -76,8 +85,20 @@ export default function DishAudioButton({ audioUrl, pending, label, narrationTex
       title={pending ? t('creatingTitle') : undefined}
     >
       {playing ? '❚❚' : '🔊'} {pending ? t('creating') : t('listenDish')}
-      {!audioUrl && window.speechSynthesis && <span style={{ marginLeft: 6, fontSize: '0.78rem', color: 'var(--text-2)' }}>({t('voiceNotAvailableForLang')})</span>}
-      {audioUrl && <audio key={audioUrl} ref={audioRef} src={audioUrl} preload="none" />}
+      {!effectiveAudioUrl && window.speechSynthesis && (
+        <span style={{ marginLeft: 6, fontSize: '0.78rem', color: 'var(--text-2)' }}>
+          ({t('voiceNotAvailableForLang')})
+        </span>
+      )}
+      {effectiveAudioUrl && (
+        <audio
+          key={effectiveAudioUrl}
+          ref={audioRef}
+          src={effectiveAudioUrl}
+          preload="none"
+          onError={() => setFileBroken(true)}
+        />
+      )}
     </button>
   );
 }

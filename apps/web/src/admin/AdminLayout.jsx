@@ -1,5 +1,6 @@
 import { NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { useAdmin, tokenStore } from './adminApi';
+import { useApp } from '../context/AppContext';
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', icon: '📊', end: true },
@@ -14,6 +15,7 @@ const NAV = [
 
 export default function AdminLayout() {
   const { user, checked } = useAdmin();
+  const { logout: logoutPublic } = useApp();
   const navigate = useNavigate();
 
   if (!checked) return <div className="spinner" />;
@@ -34,7 +36,7 @@ export default function AdminLayout() {
           <button
             className="btn btn-sm btn-ghost"
             style={{ marginTop: '0.6rem', color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }}
-            onClick={() => { tokenStore.clear(); navigate('/admin/login'); }}
+            onClick={() => { tokenStore.clear(); logoutPublic(); navigate('/admin/login'); }}
           >
             Logout
           </button>

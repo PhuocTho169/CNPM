@@ -3,10 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { api, getSessionId } from '../api/client';
 import { useApp } from '../context/AppContext';
 import AudioPlayer from '../components/AudioPlayer';
+import LanguageBanner from '../components/LanguageBanner';
 import DishCard from '../components/DishCard';
 import { directionsUrl, osmMapUrl, distanceMeters, formatDistance, getCurrentPosition } from '../utils/geo';
 import { placeNarration } from '../utils/narration';
-import BaseMap from '../components/BaseMap';
 
 export default function PlaceGuide() {
   const { id } = useParams();
@@ -15,21 +15,23 @@ export default function PlaceGuide() {
   const [nearby, setNearby] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [deviceType, setDeviceType] = useState('desktop');
+  // Detect the device ONCE, synchronously before any effect runs. Previously
+  // detection ran in a useEffect, so the load/scan effect below fired first
+  // with the stale 'desktop' initial value: on a phone the QR scan was logged
+  // as 'desktop' AND the guide was fetched twice (double request = mobile lag).
+  function detectDevice() {
+    const ua = navigator.userAgent;
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+    const isTablet = /iPad|Tablet/i.test(ua);
+    return isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop';
+  }
+  const [deviceType] = useState(detectDevice);
   const [visitorLocation, setVisitorLocation] = useState(null);
   const [locating, setLocating] = useState(false);
   const [locationNote, setLocationNote] = useState(null);
 
-  const detectDevice = useCallback(() => {
-    const ua = navigator.userAgent;
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
-    const isTablet = /iPad|Tablet/i.test(ua);
-    setDeviceType(isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop');
-  }, []);
-
-  useEffect(() => { detectDevice(); }, [detectDevice]);
-
   // Main load: guide + scan logging + history
+  // `deviceType` never changes after mount now, so this runs once per QR visit.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -127,6 +129,9 @@ export default function PlaceGuide() {
 
   return (
     <div>
+      {/* First thing on screen: the language-selection banner (2 free, 3rd+ pay 20.000đ once) */}
+      <LanguageBanner />
+
       {/* Hero image */}
       <div className="guide-hero">
         {place.images?.length ? (
@@ -230,44 +235,47 @@ export default function PlaceGuide() {
         {place.latitude && place.longitude && (
           <section className="guide-section">
             <h2>{t('location')}</h2>
-            <div className="map-wrap">
-              <BaseMap
-                center={[place.latitude, place.longitude]}
-                zoom={16}
-                markers={[{ latitude: place.latitude, longitude: place.longitude, name }]}
+            <div className="map-wrap" style={{ marginTop: '1rem', maxHeight: '400px', overflow: 'hidden' }}>
+              <iframe
+                className="map-embed"
+                title="Vị trí địa điểm"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${place.longitude - 0.004},${place.latitude - 0.003},${place.longitude + 0.004},${place.latitude + 0.003}&layer=mapnik&marker=${place.latitude},${place.longitude}`}
+                loading="lazy"
               />
-              <div className="map-actions">
-                <button
-                  type="button"
-                  className="btn btn-orange btn-sm"
-                  onClick={handleDirections}
-                  disabled={locating}
-                >
-                  🚶 {locating ? t('gettingLocation') : t('getDirections')}
-                </button>
-                <a
-                  className="btn btn-ghost btn-sm"
-                  href={osmMapUrl({ latitude: place.latitude, longitude: place.longitude })}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  🧭 {t('openMap')}
-                </a>
-              </div>
-              {straightLine && (
-                <p style={{ fontSize: '0.88rem', color: 'var(--text-2)', marginTop: '0.5rem' }}>
-                  📏 ~{straightLine} {t('straightLine')}
-                </p>
-              )}
-              {locationNote && (
-                <p role="status" style={{ fontSize: '0.88rem', color: 'var(--text-2)', marginTop: '0.5rem' }}>
-                  {locationNote}
-                </p>
-              )}
             </div>
-            {place.phone && <p style={{ fontSize: '0.88rem', color: 'var(--text-2)', marginTop: '0.5rem' }}>☎️ {place.phone}</p>}
+            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                className="btn btn-orange btn-sm"
+                style={{ padding: '0.6rem 0.8rem' }}
+                onClick={handleDirections}
+                disabled={locating}
+              >
+                🚶 {locating ? t('gettingLocation') : t('getDirections')}
+              </button>
+              <a
+                className="btn btn-ghost btn-sm"
+                href={osmMapUrl({ latitude: place.latitude, longitude: place.longitude })}
+                target="_blank"
+                rel="noreferrer"
+                style={{ padding: '0.6rem 0.8rem' }}
+              >
+                🧭 {t('openMap')}
+              </a>
+            </div>
+            {straightLine && (
+              <p style={{ fontSize: '0.88rem', color: 'var(--text-2)', marginTop: '0.5rem' }}>
+                📏 ~{straightLine} {t('straightLine')}
+              </p>
+            )}
+            {locationNote && (
+              <p role="status" style={{ fontSize: '0.88rem', color: 'var(--text-2)', marginTop: '0.5rem' }}>
+                {locationNote}
+              </p>
+            )}
           </section>
         )}
+        {place.phone && <p style={{ fontSize: '0.88rem', color: 'var(--text-2)', marginTop: '0.5rem' }}>☎️ {place.phone}</p>}
 
         {/* Nearby */}
         {nearby.length > 0 && (

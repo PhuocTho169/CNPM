@@ -19,6 +19,30 @@ const narration = require('../utils/narration');
 // Voice per language, matching the durations we saw from edge-tts.
 const isActive = true;
 
+/**
+ * Remove audio rows whose file is gone from disk. A docker rebuild or a
+ * replaced volume keeps the DB (named volume) but wipes `./server/uploads` —
+ * from then on every /uploads/audio URL is a 404 and the player is silent.
+ * Deleting the stale rows feeds the standard "missing" queries below, so the
+ * same warm-up regenerates them without extra logic.
+ */
+async function reconcileStaleAudioRows({ log = console.log } = {}) {
+  const rows = await db.getMany(
+    `SELECT m.id, m.url, m.entity_id AS translation_id, t.entity_type
+     FROM media_files m
+     JOIN translations t ON t.id = m.entity_id
+     WHERE m.kind = 'audio'`
+  );
+  let removed = 0;
+  for (const row of rows) {
+    if (!media.audioFileMissing(row.url)) continue;
+    await media.removeStaleAudio(row);
+    removed++;
+  }
+  if (removed) log(`[audio] removed ${removed} stale audio row(s) — files missing on disk.`);
+  return removed;
+}
+
 async function missingTranslations(limit = 200) {
   return db.getMany(
     `SELECT t.id AS translation_id, t.entity_id AS culinary_place_id, l.code AS language_code,
@@ -38,6 +62,9 @@ async function missingTranslations(limit = 200) {
 }
 
 async function ensureAllAudio({ concurrency = 2, log = console.log } = {}) {
+  // DB rows lacking a backing file must be dropped first, otherwise the
+  // "missing audio" queries still see a healthy row.
+  await reconcileStaleAudioRows({ log });
   const pending = await missingTranslations();
   if (!pending.length) {
     log('[audio] all translations already have audio.');
@@ -92,6 +119,7 @@ async function missingDishTranslations(limit = 500) {
 }
 
 async function ensureAllDishAudio({ concurrency = 2, log = console.log } = {}) {
+  await reconcileStaleAudioRows({ log });
   const pending = await missingDishTranslations();
   if (!pending.length) {
     log('[audio] all dish translations already have audio.');

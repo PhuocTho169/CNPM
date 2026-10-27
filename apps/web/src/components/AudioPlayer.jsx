@@ -51,6 +51,18 @@ export default function AudioPlayer({ audioUrl, duration, narrationText, placeNa
   const [volume, setVolume] = useState(1);
   const [browserSpeaking, setBrowserSpeaking] = useState(false);
   const [voicesReady, setVoicesReady] = useState(false);
+  // The DB can reference an MP3 that is no longer on disk (404) or that the
+  // browser cannot decode. Without this flag the play button silently does
+  // nothing — the guide sounded "dead" for exactly these languages. A broken
+  // file falls back to the browser voice, so the narration is ALWAYS audible.
+  const [fileBroken, setFileBroken] = useState(false);
+
+  // Mark the file unusable when the browser fails to load or decode it.
+  const onFileError = () => {
+    setFileBroken(true);
+    setPlaying(false);
+    setCurrent(0);
+  };
 
   useEffect(() => {
     const el = audioRef.current;
@@ -80,7 +92,8 @@ export default function AudioPlayer({ audioUrl, duration, narrationText, placeNa
     setPlaying(false);
     setCurrent(0);
     setTotal(duration || 0);
-  }, [audioUrl]);
+    setFileBroken(false); // the new file may work even if the previous one didn't
+  }, [audioUrl, duration]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.playbackRate = speed;
@@ -124,13 +137,29 @@ export default function AudioPlayer({ audioUrl, duration, narrationText, placeNa
     }
   }, [volume, speed]);
 
+  const locale = localeFor(lang, languages);
+  const matchedVoice = pickVoice(locale);
+
+  // Only trust the file until the browser proves it unreadable.
+  const hasFileAudio = !!audioUrl && !fileBroken;
+  const useBrowserVoice = !hasFileAudio && !!(narrationText || placeName);
+
   const toggle = () => {
+    // A file the browser cannot load (gone from disk, 404, decode error) must
+    // never leave the guest in silence: fall back to the browser voice instead.
     const el = audioRef.current;
-    if (el) {
+    if (hasFileAudio && el) {
       if (playing) el.pause();
-      else el.play().catch(() => {});
+      else
+        el.play().catch(() => {
+          setFileBroken(true);
+          setPlaying(false);
+          toggleBrowserNarration();
+        });
       setPlaying(!playing);
+      return;
     }
+    toggleBrowserNarration();
   };
 
   // When the native TTS (or a generated file) ends, just stop playing but keep
@@ -189,16 +218,13 @@ export default function AudioPlayer({ audioUrl, duration, narrationText, placeNa
     }
   };
 
-  const hasFile = !!audioUrl;
-  const locale = localeFor(lang, languages);
-  const matchedVoice = pickVoice(locale);
-
   return (
     <div className="audio-player" role="region" aria-label="Audio guide player">
       <div className="audio-player-top">
         <button
           className="play-btn"
-          onClick={hasFile ? toggle : toggleBrowserNarration}
+          onClick={hasFileAudio ? toggle : toggleBrowserNarration}
+          disabled={!hasFileAudio && !useBrowserVoice}
           aria-label={playing || browserSpeaking ? t('pause') : t('play')}
         >
           {playing || browserSpeaking ? '❚❚' : '▶'}
@@ -206,14 +232,16 @@ export default function AudioPlayer({ audioUrl, duration, narrationText, placeNa
         <div style={{ flex: 1 }}>
           <strong style={{ fontSize: '0.95rem' }}>{t('listenGuide')}</strong>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-2)' }}>
-            {hasFile
+            {hasFileAudio
               ? (browserSpeaking ? '' : playing ? '▶ ' + t('play') + '…' : '')
-              : (browserSpeaking ? '🔊 …' : t('noAudioFile'))}
+              : browserSpeaking
+                ? '🔊 …'
+                : t('noAudioFile')}
           </div>
         </div>
       </div>
 
-      {hasFile ? (
+      {hasFileAudio ? (
         <>
           <input
             className="seekbar"
@@ -242,8 +270,10 @@ export default function AudioPlayer({ audioUrl, duration, narrationText, placeNa
             </div>
           </div>
           {/* key={audioUrl} forces a brand-new <audio> per file, so switching
-              language can never keep the previously loaded audio. */}
-          <audio key={audioUrl} ref={audioRef} src={audioUrl} preload="metadata" />
+              language can never keep the previously loaded audio.
+              A load/decode failure (e.g. the file no longer exists on the
+              server) flips to the browser voice instead of dying silently. */}
+          <audio key={audioUrl} ref={audioRef} src={audioUrl} preload="metadata" onError={onFileError} />
         </>
       ) : (
         narrationText && (

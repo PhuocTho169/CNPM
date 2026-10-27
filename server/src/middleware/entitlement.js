@@ -14,7 +14,7 @@ async function attachGuestSession(req, res, next) {
   if (!id) return next();
 
   const session = await db.getOne(
-    `SELECT id, display_id, free_language_id, purchased_languages, expires_at
+    `SELECT id, display_id, free_language_id, free_language_id_2, purchased_languages, expires_at
      FROM guest_sessions
      WHERE id::text = $1 OR display_id = $1`,
     [String(id)]
@@ -73,7 +73,8 @@ async function requireLanguageUnlock(req, res, next) {
       `SELECT 1
          FROM guest_sessions
         WHERE id = $1
-          AND (free_language_id = $2 OR $2 = ANY(purchased_languages))`,
+          AND (free_language_id = $2 OR free_language_id_2 = $2
+               OR $2 = ANY(purchased_languages))`,
       [session.id, languageId]
     );
     if (ok) return next();

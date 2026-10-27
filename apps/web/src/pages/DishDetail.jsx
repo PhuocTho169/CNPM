@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
@@ -7,6 +7,7 @@ import DishAudioButton from '../components/DishAudioButton';
 import DishCard from '../components/DishCard';
 import { dishBanner } from '../utils/dishBanner';
 import { dishNarration } from '../utils/narration';
+import { directionsUrl, osmMapUrl, getCurrentPosition } from '../utils/geo';
 
 export default function DishDetail() {
   const { id } = useParams();
@@ -15,6 +16,21 @@ export default function DishDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [placeDishes, setPlaceDishes] = useState([]);
+
+  // Same GPS flow as the place guide / map page: ask for the visitor's
+  // location first so directions start from where they actually are; if the
+  // permission is denied, fall back to the plain OpenStreetMap of the place.
+  const handleDirections = useCallback(() => {
+    if (!dish?.place?.latitude || !dish?.place?.longitude) return;
+    getCurrentPosition().then((here) => {
+      const dest = { latitude: dish.place.latitude, longitude: dish.place.longitude };
+      window.open(
+        here ? directionsUrl(dest, `${here.latitude},${here.longitude}`) : osmMapUrl(dest),
+        '_blank',
+        'noopener'
+      );
+    });
+  }, [dish?.place?.latitude, dish?.place?.longitude]);
 
   useEffect(() => {
     setLoading(true);
@@ -147,7 +163,7 @@ export default function DishDetail() {
           <section className="guide-section">
             <h2>{t('atPlace') || 'Tại quán'}</h2>
             {dish.place.latitude && dish.place.longitude && (
-              <div className="map-wrap" style={{ marginTop: '1rem' }}>
+              <div className="map-wrap" style={{ marginTop: '1rem', maxHeight: '400px', overflow: 'hidden' }}>
                 <iframe
                   className="map-embed"
                   title="Vị trí quán"
@@ -164,9 +180,25 @@ export default function DishDetail() {
               {dish.place.price_range && (
                 <p><strong>💰 {dish.place.price_range}</strong></p>
               )}
-              <Link to={`/place/${dish.culinary_place_id}`} className="btn btn-primary" style={{ marginTop: '1rem' }}>
-                📍 {t('viewPlace') || 'Xem quán'}
-              </Link>
+            </div>
+            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                className="btn btn-orange btn-sm"
+                style={{ padding: '0.6rem 0.8rem' }}
+                onClick={handleDirections}
+              >
+                🚶 {t('getDirections')}
+              </button>
+              <a
+                className="btn btn-ghost btn-sm"
+                href={osmMapUrl({ latitude: dish.place.latitude, longitude: dish.place.longitude })}
+                target="_blank"
+                rel="noreferrer"
+                style={{ padding: '0.6rem 0.8rem' }}
+              >
+                🧭 {t('openMap')}
+              </a>
             </div>
           </section>
         )}

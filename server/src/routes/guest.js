@@ -49,6 +49,8 @@ router.get('/me', attachGuestSession, async (req, res, next) => {
         guest_session_id: req.guestSession.id,
         display_id: req.guestSession.display_id,
         free_language_id: summary.free_language_id,
+        free_language_id_2: summary.free_language_id_2,
+        free_languages: summary.free_languages,
         purchased_languages: summary.purchased_languages,
         expires_at: req.guestSession.expires_at,
       },
@@ -90,7 +92,7 @@ router.post('/free-language', attachGuestSession, async (req, res, next) => {
       throw new ApiError(
         409,
         'FREE_LANGUAGE_ALREADY_SELECTED',
-        "A free language has already been selected for this guest session."
+        "Both free languages have already been selected for this guest session."
       );
     }
 
@@ -130,7 +132,7 @@ router.get('/languages', attachGuestSession, async (req, res, next) => {
       const summary = await entitlement.getEntitlements(req.guestSession);
       free_language_id = summary.free_language_id;
       purchased_languages = summary.purchased_languages;
-      const unlockedIds = [free_language_id, ...purchased_languages].filter(Boolean).map(Number);
+      const unlockedIds = [...(summary.free_languages || []), ...purchased_languages].filter(Boolean).map(Number);
       unlocked = languages.filter((l) => unlockedIds.includes(l.id));
     }
     res.json({

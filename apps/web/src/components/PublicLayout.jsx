@@ -38,17 +38,34 @@ export default function PublicLayout() {
             <li><NavLink to="/admin" title={t('adminPanel')}>⚙️</NavLink></li>
           </ul>
           <div className="nav-actions">
+            <button
+              type="button"
+              title={t('chooseLanguage')}
+              aria-label={t('chooseLanguage')}
+              className="lang-nav-btn"
+              onClick={() => window.dispatchEvent(new Event('open-language-banner'))}
+            >🌐</button>
             {!guestSession && !user ? (
               <span className="subtitle">{t('scanQrGuide')}</span>
             ) : user ? (
-              <span className="subtitle">👤 {user.full_name || user.email}</span>
+              <span className="nav-user subtitle">
+                <span>👤 {user.full_name || user.email}</span>
+                {/* Người dùng (kể cả admin) đang vào giao diện công khai: cho phép
+                    đăng xuất ngay tại đây để tránh phải quay lại trang /admin. */}
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm logout-btn"
+                  onClick={() => { logout(); navigate('/'); }}
+                >
+                  🚪 {t('logout')}
+                </button>
+              </span>
             ) : null}
           </div>
         </div>
       </nav>
 
       <Outlet />
-}
 
       <footer>
         <div className="container">

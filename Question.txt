@@ -1,18 +1,128 @@
 # Danh sách câu hỏi
 
 ## Mẫu (hôm trước đã hỏi)
-1. Xuất ra số lượng người dùng đang truy cập hệ thống
-2. Nếu QR quét không được thì -> Hello hello, được thì hello
+1. **Xuất ra số lượng người dùng đang truy cập hệ thống**
+   - Câu trả lời: `SELECT COUNT(*) FROM users WHERE status = 'active';` hoặc `SELECT COUNT(DISTINCT session_id) FROM activity_logs WHERE created_at >= NOW() - INTERVAL '5 minutes';`
+
+2. **Nếu QR quét không được thì -> Hello hello, được thì hello**
+   - Câu trả lời: `SELECT CASE WHEN qr_status = 'success' THEN 'hello' ELSE 'Hello hello' END FROM qr_codes ORDER BY created_at DESC LIMIT 1;`
 
 ## 10 câu hỏi mới
 
-3. Xuất ra Top 5 món ăn được xem nhiều nhất trong 24 giờ qua, kèm số lượt xem
-4. Nếu địa điểm không có mô tả tiếng Anh thì -> trả về "Chưa có bản dịch", có thì -> trả về tên tiếng Anh của địa điểm
-5. Xuất ra số lượt quét QR theo từng loại thiết bị (iOS / Android / khác) trong 7 ngày qua
-6. Nếu quét QR ở ngoài vùng GPS 500m của địa điểm thì -> báo "Ngoài khu vực", trong vùng thì -> cho phép nghe thuyết minh
-7. Xuất ra tổng doanh thu các đơn checkout thành công theo từng ngày trong tháng này
-8. Nếu món ăn chưa có file audio cho ngôn ngữ đang chọn thì -> dùng audio tiếng Việt, có thì -> phát audio đúng ngôn ngữ đó
-9. Xuất ra danh sách người dùng chưa từng ghé (không có bản ghi view nào trong activity_logs), kèm ngày tạo tài khoản
-10. Nếu giờ hiện tại nằm ngoài giờ mở cửa của địa điểm thì -> in "Quán đã đóng cửa", trong giờ thì -> in "Quán đang mở cửa"
-11. Xuất ra tỷ lệ khách replay lại thuyết minh (số lượt play / số lượt view) của từng địa điểm trong 30 ngày qua
-12. Nếu một địa điểm có ít hơn 3 món ăn thì -> đánh dấu "Cần bổ sung menu", từ 3 món trở lên thì -> đánh dấu "Menu đạt chuẩn"
+3. **Xuất ra Top 5 món ăn được xem nhiều nhất trong 24 giờ qua, kèm số lượt xem**
+   - Câu trả lời: 
+   ```sql
+   SELECT d.name, COUNT(ap.id) as view_count
+   FROM dishes d
+   JOIN audio_play_logs ap ON ap.dish_id = d.id
+   WHERE ap.created_at >= NOW() - INTERVAL '24 hours'
+   GROUP BY d.id, d.name
+   ORDER BY view_count DESC
+   LIMIT 5;
+   ```
+
+4. **Nếu địa điểm không có mô tả tiếng Anh thì -> trả về "Chưa có bản dịch", có thì -> trả về tên tiếng Anh của địa điểm**
+   - Câu trả lời:
+   ```sql
+   SELECT cp.id, cp.name,
+          CASE WHEN cpt.description_en IS NULL THEN 'Chưa có bản dịch' ELSE cpt.description_en END as description_en
+   FROM culinary_places cp
+   LEFT JOIN culinary_place_translations cpt ON cpt.place_id = cp.id AND cpt.language = 'en';
+   ```
+
+5. **Xuất ra số lượng quét QR theo từng loại thiết bị (iOS / Android / khác) trong 7 ngày qua**
+   - Câu trả lời:
+   ```sql
+   SELECT q.device_type, COUNT(q.id) as scan_count
+   FROM qr_codes q
+   WHERE q.created_at >= NOW() - INTERVAL '7 days'
+   GROUP BY q.device_type
+   UNION ALL
+   SELECT 'khác' as device_type, COUNT(q.id) 
+   FROM qr_codes q
+   WHERE q.created_at >= NOW() - INTERVAL '7 days'
+   AND q.device_type NOT IN ('iOS', 'Android')
+   GROUP BY q.device_type;
+   ```
+
+6. **Nếu quét QR ở ngoài vùng GPS 500m của địa điểm thì -> báo "Ngoài khu vực", trong vùng thì -> cho phép nghe thuyết minh**
+   - Câu trả lời:
+   ```sql
+   SELECT CASE 
+         WHEN ST_Distance(qr.location::geography, cp.location::geography) > 500 THEN 'Ngoài khu vực'
+         ELSE 'cho phép nghe thuyết minh'
+       END as status
+   FROM qr_codes qr
+   JOIN culinary_places cp ON cp.id = qr.place_id
+   WHERE qr.id = <qr_id>;
+   ```
+
+7. **Xuất ra tổng doanh thu các đơn checkout thành công theo từng ngày trong tháng này**
+   - Câu trả lời:
+   ```sql
+   SELECT DATE(p.created_at) as order_date, SUM(p.amount) as daily_revenue
+   FROM payment_transactions p
+   WHERE p.status = 'success'
+   GROUP BY DATE(p.created_at)
+   ORDER BY order_date;
+   ```
+
+8. **Nếu món ăn chưa có file audio cho ngôn ngữ đang chọn thì -> dùng audio tiếng Việt, có thì -> phát audio đúng ngôn ngữ đó**
+   - Câu trả lời:
+   ```sql
+   SELECT CASE 
+         WHEN da.audio_path IS NULL THEN 'dùng audio tiếng Việt'
+         ELSE 'phát audio đúng ngôn ngữ đó'
+       END as action,
+       COALESCE(da.audio_path, dv.audio_path) as audio_path
+   FROM dishes d
+   LEFT JOIN dish_audio_guides da ON da.dish_id = d.id AND da.language = <current_language>
+   LEFT JOIN audio_guides dv ON dv.dish_id = d.id AND dv.is_default = true
+   WHERE d.id = <dish_id>;
+   ```
+
+9. **Xuất ra danh sách người dùng chưa từng ghé (không có bản ghi view nào trong activity_logs), kèm ngày tạo tài khoản**
+   - Câu trả lời:
+   ```sql
+   SELECT u.id, u.username, u.created_at
+   FROM users u
+   WHERE u.id NOT IN (SELECT DISTINCT user_id FROM activity_logs)
+   ORDER BY u.created_at;
+   ```
+
+10. **Nếu giờ hiện tại nằm ngoài giờ mở cửa của địa điểm thì -> in "Quán đã đóng cửa", trong giờ thì -> in "Quán đang mở cửa"**
+    - Câu trả lời:
+    ```sql
+    SELECT cp.name,
+           CASE 
+             WHEN EXTRACT(HOUR FROM CURRENT_TIME) < cp.opening_hour OR EXTRACT(HOUR FROM CURRENT_TIME) > cp.closing_hour THEN 'Quán đã đóng cửa'
+             ELSE 'Quán đang mở cửa'
+           END as status
+    FROM culinary_places cp;
+    ```
+
+11. **Xuất ra tỷ lệ khách replay lại thuyết minh (số lượt play / số lượt view) của từng địa điểm trong 30 ngày qua**
+    - Câu trả lời:
+    ```sql
+    SELECT cp.name,
+           COUNT(DISTINCT CASE WHEN ap.action = 'play' THEN ap.id END) as plays,
+           COUNT(DISTINCT ap.id) as views,
+           CASE WHEN COUNT(DISTINCT ap.id) = 0 THEN 0
+                ELSE COUNT(DISTINCT CASE WHEN ap.action = 'play' THEN ap.id END)::float / COUNT(DISTINCT ap.id)
+           END as replay_rate
+    FROM culinary_places cp
+    LEFT JOIN audio_play_logs ap ON ap.place_id = cp.id
+    WHERE ap.created_at >= NOW() - INTERVAL '30 days'
+    GROUP BY cp.id, cp.name;
+    ```
+
+12. **Nếu một địa điểm có ít hơn 3 món ăn thì -> đánh dấu "Cần bổ sung menu", từ 3 món trở lên thì -> đánh dấu "Menu đạt chuẩn"**
+    - Câu trả lời:
+    ```sql
+    SELECT cp.id, cp.name,
+           CASE WHEN COUNT(d.id) < 3 THEN 'Cần bổ sung menu'
+                ELSE 'Menu đạt chuẩn' END as menu_status
+    FROM culinary_places cp
+    LEFT JOIN dishes d ON d.place_id = cp.id
+    GROUP BY cp.id, cp.name;
+    ```
