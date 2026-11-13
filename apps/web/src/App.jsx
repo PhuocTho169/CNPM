@@ -35,6 +35,8 @@ import FoodRoutes from './pages/FoodRoutes';
 import MapPage from './pages/MapPage';
 import About from './pages/About';
 import DishDetail from './pages/DishDetail';
+import CheckoutResult from './pages/CheckoutResult';
+import NotFound from './pages/NotFound';
 import AdminLogin from './admin/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import Dashboard from './admin/Dashboard';
@@ -51,6 +53,10 @@ export default function App() {
   return (
     <ErrorBoundary>
     <Routes>
+      {/* Standalone VNPay-QR scan landing: the URL encoded in the paywall QR.
+          Kept outside PublicLayout so the scanning phone gets a single card,
+          not the full site shell. */}
+      <Route path="/pay/:txid" element={<CheckoutResult />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
@@ -71,6 +77,8 @@ export default function App() {
         <Route path="/routes" element={<FoodRoutes />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/about" element={<About />} />
+        {/* 404 catch-all: still the public site (navbar + footer). */}
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
     </ErrorBoundary>

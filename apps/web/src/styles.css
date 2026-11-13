@@ -398,6 +398,76 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; }
   width: 52px; height: 52px; border-radius: 50%;
   background: #2e7d32; color: #fff; font-size: 1.5rem; font-weight: 800;
 }
+.pay-fail {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #b3261e; color: #fff; font-size: 1.5rem; font-weight: 800;
+}
+
+/* ---------- VNPay-QR payment banner (paywall unlock) ---------- */
+.vnpay-card { max-width: 340px; }
+.vnpay-brand {
+  display: inline-flex; align-items: center; gap: 0.45rem; margin-bottom: 0.7rem;
+}
+.vnpay-logo {
+  background: #0f5f9c; color: #fff; font-weight: 800; font-size: 0.85rem;
+  letter-spacing: 0.06em; padding: 0.28rem 0.6rem; border-radius: 8px;
+}
+.vnpay-mode {
+  color: #0f5f9c; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.14em;
+}
+.vnpay-qr {
+  display: block; margin: 0.3rem auto 0.5rem; width: 210px; height: 210px;
+  border: 1px solid #e4ddd2; border-radius: 12px; background: #fff;
+}
+.vnpay-hint { font-size: 0.85rem; color: var(--text-2); margin: 0.45rem auto 0.6rem; max-width: 260px; }
+.vnpay-waiting { font-size: 0.85rem; font-weight: 700; color: #0f5f9c; margin: 0.2rem 0 0.7rem; }
+.vnpay-cancel { color: var(--text-2); margin-bottom: 0.5rem; }
+.vnpay-en-note { font-size: 0.78rem; color: var(--text-2); margin: 0.6rem 0 0; }
+
+/* ---------- 404 ---------- */
+.page-404 {
+  min-height: 78vh; display: flex; align-items: center; justify-content: center;
+  padding: 2.5rem 1rem;
+  background:
+    radial-gradient(620px 340px at 50% 0%, rgba(255, 178, 122, 0.20), transparent 72%);
+}
+.page-404-card {
+  background: var(--surface, #fff); border: 1px solid #f3e5d4;
+  border-radius: 24px; max-width: 520px; width: 100%;
+  padding: 2.6rem 2rem 2.1rem; text-align: center;
+  box-shadow: 0 24px 70px rgba(24, 8, 0, 0.14);
+}
+.page-404-code {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  font-size: clamp(3.2rem, 10vw, 5rem); font-weight: 800; line-height: 1;
+  color: var(--primary-dark); letter-spacing: 0.04em;
+}
+/* The middle 0 is a steaming bowl — the 404 smells like District 4 too. */
+.page-404-bowl {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: clamp(3rem, 9vw, 4.4rem); aspect-ratio: 1; border-radius: 50%;
+  background: linear-gradient(160deg, #ffb27a, #f28c44); color: #fff;
+  font-size: clamp(1.9rem, 6vw, 2.9rem);
+  box-shadow: 0 10px 26px rgba(242, 140, 68, 0.42);
+  animation: page-404-bob 3.2s ease-in-out infinite;
+}
+@keyframes page-404-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-404-bowl { animation: none; }
+}
+.page-404-card h1 { font-size: 1.35rem; margin: 1rem 0 0.4rem; }
+.page-404-desc { color: var(--text-2); font-size: 0.95rem; margin: 0 0 1.5rem; }
+.page-404-actions {
+  display: flex; gap: 0.7rem; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 1.3rem;
+}
+.page-404-links { font-size: 0.86rem; color: var(--text-2); margin: 0; }
+.page-404-links a { color: var(--primary-dark); font-weight: 700; text-decoration: none; }
+.page-404-links a:hover { text-decoration: underline; }
 
 /* ---------- Route timeline ---------- */
 .route-stops { position: relative; padding-left: 1.8rem; margin: 1.2rem 0; }

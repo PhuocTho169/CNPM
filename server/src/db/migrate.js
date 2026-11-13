@@ -4,7 +4,24 @@ const { pool } = require('./index');
 
 const MIGRATIONS_DIR = path.join(__dirname, '..', '..', '..', 'database', 'migrations');
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function waitForDb(attempts = 30, delayMs = 2000) {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      await pool.query('SELECT 1');
+      if (i > 1) console.log(`[migrate] database ready (attempt ${i})`);
+      return;
+    } catch (err) {
+      console.warn(`[migrate] waiting for database (${i}/${attempts}): ${err.code || err.message}`);
+      await sleep(delayMs);
+    }
+  }
+  throw new Error('Database not reachable after retries');
+}
+
 async function migrate() {
+  await waitForDb();
   await pool.query(`CREATE TABLE IF NOT EXISTS schema_migrations (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,

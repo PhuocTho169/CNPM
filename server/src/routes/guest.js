@@ -1,4 +1,6 @@
 const express = require('express');
+const QRCode = require('qrcode');
+const config = require('../config');
 const db = require('../db');
 const entitlement = require('../services/entitlementService');
 const placeService = require('../services/placeService');
@@ -8,6 +10,53 @@ const { toIntOrNull } = require('../validators');
 const { attachGuestSession, requireLanguageUnlock } = require('../middleware/entitlement');
 
 const router = express.Router();
+
+// ---------------- VNPay-QR (sandbox payment) ----------------
+
+/** localhost origins are never scannable from another device. */
+function isLocalOrigin(origin) {
+  try {
+    return ['localhost', '127.0.0.1', '::1'].includes(new URL(origin).hostname);
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Target encoded in the VNPay-QR: a URL of the paywall web app that, when the
+ * QR is scanned and opened, confirms the checkout and unlocks all languages.
+ * Same base-URL rule as the place/dish QR codes: prefer a non-local
+ * PUBLIC_BASE_URL, otherwise fall back to the request Origin — the QR must
+ * resolve from the phone or second device doing the scan, not this machine.
+ */
+function vnpayTargetUrl(req, checkout) {
+  const base =
+    (!isLocalOrigin(config.publicBaseUrl) && config.publicBaseUrl) ||
+    req.headers.origin ||
+    config.publicBaseUrl;
+  return `${String(base).replace(/\/$/, '')}/pay/${encodeURIComponent(checkout.provider_transaction_id)}`;
+}
+
+/** SVG data URL: crisp at any size the paywall card renders it at. */
+async function buildVnpayQr(req, checkout) {
+  const url = vnpayTargetUrl(req, checkout);
+  const svg = await QRCode.toString(url, {
+    type: 'svg',
+    width: 512,
+    margin: 1,
+    color: { dark: '#0f5f9c', light: '#ffffff' },
+    errorCorrectionLevel: 'M',
+  });
+  return {
+    provider: 'VNPAY',
+    status: checkout.status,
+    amount: checkout.amount,
+    currency: checkout.currency,
+    provider_transaction_id: checkout.provider_transaction_id,
+    url,
+    qr_svg: `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`,
+  };
+}
 
 // ---------- Public: guest session lifecycle ----------
 
@@ -197,6 +246,7 @@ router.post('/checkouts', attachGuestSession, async (req, res, next) => {
     if (result.conflict) {
       throw new ApiError(409, 'ALREADY_UNLOCKED', 'This language is already unlocked for this guest session.');
     }
+    const vnpay = await buildVnpayQr(req, result.checkout);
     res.status(201).json({
       success: true,
       data: {
@@ -204,6 +254,7 @@ router.post('/checkouts', attachGuestSession, async (req, res, next) => {
         reused: !!result.reused,
         language_code: language.code,
         language_name: language.native_name,
+        vnpay,
       },
     });
   } catch (err) {
@@ -272,6 +323,43 @@ router.post('/checkouts/:id/confirm', attachGuestSession, async (req, res, next)
 });
 
 // ---------- Guest-scoped content access ----------
+
+/**
+ * POST /api/guest-sessions/vnpay/:providerTransactionId/confirm — the page that
+ * the VNPay-QR encodes calls THIS endpoint when the QR is scanned: scanning =
+ * paying (sandbox, instant, no real money). The pending checkout flips to
+ * success and every active language joins purchased_languages. The scanning
+ * device is not the guest's session, so the route is keyed by the opaque
+ * provider_transaction_id and needs no guest session.
+ */
+router.post('/vnpay/:providerTransactionId/confirm', async (req, res, next) => {
+  try {
+    const providerTransactionId = String(req.params.providerTransactionId || '');
+    if (!providerTransactionId) {
+      throw new ApiError(400, 'VALIDATION_ERROR', 'provider_transaction_id is required.');
+    }
+
+    const result = await entitlement.confirmCheckoutByProviderId(providerTransactionId);
+    if (result.notFound) throw new ApiError(404, 'CHECKOUT_NOT_FOUND', 'VNPay transaction not found.');
+    if (result.failed) {
+      throw new ApiError(409, 'CHECKOUT_FAILED', 'This transaction has failed and cannot be confirmed. Start a new one.');
+    }
+
+    return success(res, {
+      checkout: result.checkout,
+      already_confirmed: !!result.already,
+      guest: result.guest
+        ? {
+            display_id: result.guest.display_id,
+            free_language_id: result.guest.free_language_id,
+            purchased_languages: result.guest.purchased_languages,
+          }
+        : null,
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 /** GET /api/guest-sessions/culinary-places/:placeId/translation?language=vi */
 router.get('/culinary-places/:placeId/translation', attachGuestSession, requireLanguageUnlock, async (req, res, next) => {

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
 import AudioPlayer from '../components/AudioPlayer';
+import LanguageBanner from '../components/LanguageBanner';
 import DishAudioButton from '../components/DishAudioButton';
 import DishCard from '../components/DishCard';
 import { dishBanner } from '../utils/dishBanner';
@@ -76,6 +77,9 @@ export default function DishDetail() {
 
   return (
     <div>
+      {/* First thing on screen: the language-selection banner (2 free, 3rd+ pay 20.000đ once) */}
+      <LanguageBanner />
+
       {/* Hero image */}
       <div className="guide-hero">
         {dish.image_url ? (

@@ -5,7 +5,8 @@
    - Câu trả lời: `SELECT COUNT(*) FROM users WHERE status = 'active';` hoặc `SELECT COUNT(DISTINCT session_id) FROM activity_logs WHERE created_at >= NOW() - INTERVAL '5 minutes';`
 
 2. **Nếu QR quét không được thì -> Hello hello, được thì hello**
-   - Câu trả lời: `SELECT CASE WHEN qr_status = 'success' THEN 'hello' ELSE 'Hello hello' END FROM qr_codes ORDER BY created_at DESC LIMIT 1;`
+   - Câu trả lời: 
+SELECT CASE WHEN EXISTS (SELECT 1 FROM activity_logs WHERE event_type = 'scan' ORDER BY created_at DESC LIMIT 1) THEN 'Hello" else 'Hello Hello' END;
 
 ## 10 câu hỏi mới
 
@@ -24,11 +25,7 @@
 4. **Nếu địa điểm không có mô tả tiếng Anh thì -> trả về "Chưa có bản dịch", có thì -> trả về tên tiếng Anh của địa điểm**
    - Câu trả lời:
    ```sql
-   SELECT cp.id, cp.name,
-          CASE WHEN cpt.description_en IS NULL THEN 'Chưa có bản dịch' ELSE cpt.description_en END as description_en
-   FROM culinary_places cp
-   LEFT JOIN culinary_place_translations cpt ON cpt.place_id = cp.id AND cpt.language = 'en';
-   ```
+   SELECT CASE WHEN EXISTS (SELECT 1 FROM activity_logs WHERE event_type = 'scan' ORDER BY created_at DESC LIMIT 1) THEN 'Hello' else 'Hello Hello' END;   ```
 
 5. **Xuất ra số lượng quét QR theo từng loại thiết bị (iOS / Android / khác) trong 7 ngày qua**
    - Câu trả lời:
@@ -126,3 +123,110 @@
     LEFT JOIN dishes d ON d.place_id = cp.id
     GROUP BY cp.id, cp.name;
     ```
+
+
+in ra so luong truy cap hom nay
+SELECT event_type, COUNT(*)::int AS cnt FROM activity_logs WHERE created_at >= NOW() - INTERVAL '1 day' GROUP BY event_type ORDER BY cnt DESC;
+
+
+
+1) Đang truy cập (5 phút) — active session gần nhất trong 5 phút
+(nếu dùng guest_sessions làm active session)
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS active_now FROM guest_sessions WHERE expires_at > NOW() AND created_at >= NOW() - INTERVAL '5 minutes';"
+
+Nếu “đang truy cập” đo bằng activity_logs gần đây:
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS active_now FROM activity_logs WHERE created_at >= NOW() - INTERVAL '5 minutes';"
+
+────────────────────────────────────────────────────────────────────────────────
+
+2) Truy cập hôm nay — bạn đã xác nhận dùng activity_logs, giữ nguyên semantics UTC “1 ngày”
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS access_today FROM activity_logs WHERE created_at >= NOW() - INTERVAL '1 day';"
+
+────────────────────────────────────────────────────────────────────────────────
+
+3) Total Places
+
+// bash
+SELECT COUNT(*) AS total_places FROM culinary_places;
+
+────────────────────────────────────────────────────────────────────────────────
+
+4) Published — số places có trạng thái published (nếu schema có trường  published  /  status )
+
+// bash
+SELECT COUNT(*) AS total_places FROM dishes;
+
+Nếu dùng status Enum/varchar:
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS published_places FROM culinary_places WHERE status = 'published';"
+
+────────────────────────────────────────────────────────────────────────────────
+
+5) Dishes
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS total_dishes FROM dishes;"
+
+────────────────────────────────────────────────────────────────────────────────
+
+6) Languages
+
+// bash
+
+SELECT COUNT(DISTINCT language_id) as total_language FROM translations;
+────────────────────────────────────────────────────────────────────────────────
+
+7) Audio Guides — số thực thể có audio guide (đối tượng nour/place/dish có bản audio)
+
+Nếu có bảng  narrations  (đối tượng + language):
+
+// bash
+SELECT COUNT(*) AS total_audio_guides FROM media_files WHERE kind = 'audio';
+Nếu audio gắn theo  translations  có file audio/media:
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS audio_guides FROM translations WHERE audio_url IS NOT NULL AND audio_url <> '';"
+
+────────────────────────────────────────────────────────────────────────────────
+
+8) QR Codes — số QR đã tạo (nếu có bảng  qr_codes )
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS total_qr_codes FROM qr_codes;"
+
+Nếu QR gắn theo checkout/menu link, chọn bảng thực tế chứa QR.
+
+────────────────────────────────────────────────────────────────────────────────
+
+9) QR Scans — số lần quét QR (nếu lưu trong  activity_logs  với event_type  scan )
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS qr_scans FROM activity_logs WHERE event_type = 'scan';"
+
+Nếu scan riêng biệt trong bảng  qr_scans :
+
+// bash
+docker exec d4-postgres psql -U district4_user -d district4_food -c "SELECT COUNT(*)::int AS qr_scans FROM qr_scans;"
+
+────────────────────────────────────────────────────────────────────────────────
+
+10) Audio Plays — số lần phát audio (nếu lưu event_type  play  trong activity_logs)
+
+// bash
+istrict4_food=# SELECT COUNT(*) as audio_play FROM activity_logs WHERE event_type = 'play';
+ audio_play 
+------------
+        160
+(1 row)
+
+district4_food=# 
+
+// Them place neu failed -> lol , success -> haha
+DO $$ BEGIN INSERT INTO culinary_places(code , address , latitude , longitude , status) VALUES ('Q4-Coffee' , '120 VVK' , 10.223, 12.3332 , 'PUBLISHED'); RAISE NOTICE 'success'; EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'failed'; END $$;

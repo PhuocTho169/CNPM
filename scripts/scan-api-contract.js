@@ -13,16 +13,48 @@ const ROOT = path.resolve(__dirname, '..');
 
 // ---- 1. routes the backend registers ----
 const routesFile = path.join(ROOT, 'server', 'src', 'routes', 'index.js');
-const routeSrc = fs.readFileSync(routesFile, 'utf8');
 const routes = new Set();
 
-for (const m of routeSrc.matchAll(/router\.(get|post|put|patch|delete)\(\s*'([^']+)'/g)) {
-  routes.add(`${m[1].toUpperCase()} ${m[2]}`);
+/**
+ * Collect `router.<verb>('/path')` routes from one router file, optionally
+ * prefixing them with the path of the parent mount. Server routes live in two
+ * files: the flat router (index.js) and the guest-session sub-router
+ * (guest.js), which index.js mounts at /guest-sessions via `router.use`.
+ */
+function collectRoutes(routerSrc, baseRoutesDir, prefix = '') {
+  for (const m of routerSrc.matchAll(/router\.(get|post|put|patch|delete)\(\s*'([^']+)'/g)) {
+    // '/guest-sessions/' + '/me' must collapse to '/guest-sessions/me'.
+    const joined = (prefix + m[2]).replace(/\/\//g, '/').replace(/\/$/, '');
+    routes.add(`${m[1].toUpperCase()} ${joined === '/' ? '' : joined}`.trim());
+  }
+
+  // Sub-router mounts: router.use('/guest-sessions', guest) — resolve the
+  // required module and collect its routes with the mount as prefix.
+  for (const m of routerSrc.matchAll(/router\.use\(\s*'([^']+)',\s*([A-Za-z_$][\w$]*)\s*\)/g)) {
+    const mountPrefix = m[1].replace(/\/$/, '');
+    const req = routerSrc.match(new RegExp(`const\\s+${m[2]}\\s*=\\s*require\\('([^']+)'\\)`));
+    if (!req) continue; // inline router — its own routes were collected above
+    // require paths omit the extension; add it when the file has one on disk.
+    const resolved = path.resolve(baseRoutesDir, req[1]);
+    const candidates = [resolved, `${resolved}.js`];
+    const subPath = candidates.find((p) => fs.existsSync(p));
+    if (!subPath) {
+      console.warn(`Scanner: không tìm thấy router con ${resolved}`);
+      continue;
+    }
+    try {
+      collectRoutes(
+        fs.readFileSync(subPath, 'utf8'),
+        path.dirname(subPath),
+        `${mountPrefix}/`
+      );
+    } catch (e) {
+      console.warn(`Scanner: không đọc được router con ${subPath}: ${e.message}`);
+    }
+  }
 }
 
-// A router.<verb>('/x') inside a mounted sub-router becomes /prefix/x; this
-// project mounts a single flat router, but guard anyway.
-const mounted = routeSrc.match(/app\.use\(\s*'([^']+)'/);
+collectRoutes(fs.readFileSync(routesFile, 'utf8'), path.dirname(routesFile));
 
 // ---- 2. calls the frontends make ----
 function walk(dir, out = []) {
@@ -154,4 +186,3 @@ if (problems.length) {
 } else {
   console.log('Mọi endpoint frontend gọi đều có route trong backend. ✓');
 }
-void mounted;

@@ -223,6 +223,30 @@ async function confirmCheckout(checkoutId) {
   return { checkout: successRow || checkout, guest };
 }
 
+/**
+ * VNPay-QR scan confirm (sandbox provider). The VNPay-QR payload carries the
+ * checkout's provider_transaction_id; when the guest scans the QR the scan page
+ * calls this path instead of the guest-owned confirm endpoint — the scanning
+ * device is not the guest's session. A pending checkout flips to success and
+ * the full-catalog entitlement is granted with the exact same one-transition
+ * logic as confirmCheckout; the receipt is updated to provider 'VNPAY'.
+ * Idempotent like every other confirm path.
+ */
+async function confirmCheckoutByProviderId(providerTransactionId) {
+  const checkout = await db.getOne(
+    'SELECT * FROM checkouts WHERE provider_transaction_id = $1',
+    [providerTransactionId]
+  );
+  if (!checkout) return { notFound: true };
+
+  // Record the (mock) payment channel while the row is still pending.
+  if (checkout.status === 'pending') {
+    await db.query(`UPDATE checkouts SET provider = 'VNPAY' WHERE id = $1`, [checkout.id]);
+    checkout.provider = 'VNPAY';
+  }
+  return confirmCheckout(checkout.id);
+}
+
 /** All checkouts ever made by one guest, newest first. */
 async function listCheckouts(guestSessionId) {
   return db.getMany(
@@ -257,6 +281,7 @@ module.exports = {
   hasLanguageUnlock,
   createCheckout,
   confirmCheckout,
+  confirmCheckoutByProviderId,
   listCheckouts,
   getCheckoutForGuest,
 };

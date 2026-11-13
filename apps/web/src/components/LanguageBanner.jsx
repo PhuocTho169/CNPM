@@ -27,9 +27,21 @@ export default function LanguageBanner({ onSelected }) {
   const [openManual, setOpenManual] = useState(false); // opened by a locked chip click
   const [payPick, setPayPick] = useState(null);        // {code, native_name, id} behind the paywall
   const [paying, setPaying] = useState(false);
-  const [payScreen, setPayScreen] = useState(null);    // 'processing' | 'success' — dedicated payment banner
+  const [payScreen, setPayScreen] = useState(null);    // 'vnpay' | 'success' — dedicated payment banner
+  const [vnpay, setVnpay] = useState(null);            // { qr_svg, amount, currency, provider_transaction_id }
   const [err, setErr] = useState(null);
   const timer = useRef(null);
+  const pollRef = useRef(null);
+
+  /** Stop the VNPay status poller (unmount / cancel / success). Declared
+   * BEFORE the effects below — they list it in their dependency arrays, and a
+   * later declaration would throw "Cannot access before initialization" on
+   * every render. */
+  const clearPoll = useCallback(() => {
+    if (!pollRef.current) return;
+    clearInterval(pollRef.current);
+    pollRef.current = null;
+  }, []);
 
   const chosenIds = [...freeLanguages, ...purchasedLanguages].map(Number);
   const freeSlotsUsed = freeLanguages.length;
@@ -51,15 +63,19 @@ export default function LanguageBanner({ onSelected }) {
       .finally(() => setLoaded(true));
   }, [guestSession, setFreeLanguages, setPurchasedLanguages]);
 
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
-
   // The navbar 🌐 button re-opens the banner anywhere on public pages via a
   // window event — the banner instance lives inside PlaceGuide nationally.
   useEffect(() => {
-    const open = () => { setLoaded(true); setPayPick(null); setErr(null); setPayScreen(null); setOpenManual(true); };
+    const open = () => {
+      setLoaded(true);
+      setErr(null);
+      setPayPick(null); setPayScreen(null); setOpenManual(true); clearPoll();
+    };
     window.addEventListener('open-language-banner', open);
     return () => window.removeEventListener('open-language-banner', open);
-  }, []);
+  }, [clearPoll]);
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); clearPoll(); }, [clearPoll]);
 
   const lockedPills = languages.length > 0 && languages.every((l) => l.id === undefined);
   const forced = loaded && !lockedPills && chosenIds.length === 0 && languages.length > 0;
@@ -103,43 +119,77 @@ export default function LanguageBanner({ onSelected }) {
     setPayPick(l);
   }, [chosenIds, freeSlotsLeft, unlockAll, paying, setLang, setFreeLanguages, setPurchasedLanguages, onSelected]);
 
-  // One checkout (20.000đ) + sandbox confirm → server grants the FULL catalog
-  // into purchased_languages, so this payment also unlocks every other chip.
+  /**
+   * Payment confirmed (the QR scan already set the server state): adopt the
+   * refreshed entitlements, switch the active language, show the success card,
+   * then close both banners. Runs once — the poller is removed first.
+   */
+  const finishPayment = useCallback((pick) => {
+    clearPoll();
+    api.get('/guest-sessions/me')
+      .then((res) => {
+        const d = res.data.data || {};
+        setFreeLanguages(d.free_languages || []);
+        setPurchasedLanguages(d.purchased_languages || []);
+      })
+      .catch(() => { /* even if the refresh fails, success is already shown */ })
+      .finally(() => {
+        setPayPick(null);
+        setPayScreen('success');
+        timer.current = setTimeout(() => {
+          setPayScreen(null); // close payment banner
+          setPaying(false);
+          setOpenManual(false); // close language banner too
+        }, 1800);
+        if (pick) { setLang(pick.code); onSelected?.(pick.code); }
+      });
+  }, [clearPoll, setLang, onSelected]);
+
+  /**
+   * Pay 20.000đ to unlock all languages — VNPay-QR flow (sandbox):
+   *   1. POST /checkouts → pending checkout + server-rendered VNPay QR
+   *   2. banner shows the QR; scanning it (with any bank/camera app) opens
+   *      /pay/<txid>, which confirms the checkout server-side immediately
+   *   3. this page polls the checkout status and unlocks every language on
+   *      success. No real money: the confirm is mocked, as the product demands.
+   */
   const handlePay = useCallback(() => {
     if (!payPick || paying) return;
     setPaying(true);
     setErr(null);
-    setPayScreen('processing'); // dedicated payment banner over the language banner
-    const t0 = Date.now(); // sandbox confirm is instant — keep the spinner visible
+    setVnpay(null);
     api.post('/guest-sessions/checkouts', { language_id: Number(payPick.id) })
       .then((res1) => {
         const checkout = res1.data.data || {};
-        return api.post(`/guest-sessions/checkouts/${checkout.id}/confirm`)
-          .then((res2) => {
-            const guest = res2.data.data?.guest || {};
-            const unlocked = guest.purchased_languages || [];
-            const finish = () => {
-              setPurchasedLanguages(unlocked.map(Number));
-              setLang(payPick.code);
-              setPayPick(null);
-              setPayScreen('success');
-              timer.current = setTimeout(() => {
-                setPayScreen(null); // close payment banner
-                setPaying(false);
-                setOpenManual(false); // close language banner too
-              }, 1800);
-            };
-            const elapsed = Date.now() - t0;
-            if (elapsed < 600) timer.current = setTimeout(finish, 600 - elapsed);
-            else finish();
-          });
+        setVnpay(checkout.vnpay || null);
+        setPayScreen('vnpay'); // dedicated VNPay-QR banner over the language banner
+
+        clearPoll();
+        let polls = 0;
+        pollRef.current = setInterval(() => {
+          polls += 1;
+          if (polls > 240) { clearPoll(); return; } // ~6 min, then give up silently
+          api.get(`/guest-sessions/checkouts/${checkout.id}`)
+            .then((res) => {
+              if (res.data.data?.status === 'success') finishPayment(payPick);
+            })
+            .catch(() => { /* transient server hiccup — next poll retries */ });
+        }, 1500);
       })
       .catch((e) => {
         setPayScreen(null);
         setErr(e?.response?.data?.message || 'Payment failed');
         setPaying(false);
       });
-  }, [payPick, paying, setLang]);
+  }, [payPick, paying, clearPoll, finishPayment]);
+
+  /** Close the VNPay-QR banner without confirming (checkout stays pending). */
+  const cancelVnpay = useCallback(() => {
+    clearPoll();
+    setPayScreen(null);
+    setVnpay(null);
+    setPaying(false);
+  }, [clearPoll]);
 
   if (!show) return null;
 
@@ -203,22 +253,35 @@ export default function LanguageBanner({ onSelected }) {
       </div>
 
       {/* Dedicated payment banner shown from the moment the visitor taps Pay,
-          through the sandbox confirmation, until the success screen closes. */}
+          through the VNPay-QR scan, until the success screen closes. */}
       {payScreen && (
         <div className="pay-overlay">
-          <div className="pay-card" role="alertdialog" aria-live="polite">
-            {payScreen === 'processing' ? (
+          <div className="pay-card vnpay-card" role="alertdialog" aria-live="polite">
+            {payScreen === 'vnpay' ? (
               <>
-                <span className="pay-spinner" aria-hidden="true" />
-                <div className="pay-amount">20.000₫</div>
-                <p className="pay-title">{t('langPayProcessing')}</p>
-                <p className="pay-sub">SANDBOX · Vietnamese dong · VND</p>
+                <div className="vnpay-brand" aria-hidden="true">
+                  <span className="vnpay-logo">VNPAY</span>
+                  <span className="vnpay-mode">QR</span>
+                </div>
+                {vnpay?.qr_svg
+                  ? <img className="vnpay-qr" src={vnpay.qr_svg} alt="VNPay QR" width={210} height={210} />
+                  : <span className="pay-spinner" aria-hidden="true" />}
+                <div className="pay-amount">
+                  {new Intl.NumberFormat('vi-VN').format(vnpay?.amount || 20000)}₫
+                </div>
+                <p className="pay-title">{t('vnpayPayTitle')}</p>
+                <p className="vnpay-hint">{t('vnpayScanHint')}</p>
+                <p className="vnpay-waiting">⏳ {t('vnpayWaiting')}</p>
+                <button type="button" className="btn btn-ghost btn-sm vnpay-cancel" onClick={cancelVnpay}>
+                  {t('vnpayCancel')}
+                </button>
+                <p className="pay-sub">VNPAY · {vnpay?.currency || 'VND'} · SANDBOX</p>
               </>
             ) : (
               <>
                 <span className="pay-check" aria-hidden="true">✔</span>
                 <div className="pay-amount">{t('langPayDone')}</div>
-                <p className="pay-sub">20.000₫ · SANDBOX · VND</p>
+                <p className="pay-sub">20.000₫ · VNPAY · VND</p>
               </>
             )}
           </div>
