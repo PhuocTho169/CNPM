@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, apiErrorMessage } from '../api/client';
 
@@ -13,19 +13,30 @@ export default function AdminPlaces() {
   const [status, setStatus] = useState('');
   const [category, setCategory] = useState('');
 
+  const requestId = useRef(0);
+
   function load() {
+    const id = ++requestId.current;
     setLoading(true);
+    setError(null);
     const qs = new URLSearchParams({ limit: 50, lang: 'vi' });
     if (q) qs.set('q', q);
     if (status) qs.set('status', status);
     if (category) qs.set('category', category);
     api.get(`/places?${qs}`)
-      .then((res) => setPlaces(res.data.data || []))
-      .catch((e) => setError(apiErrorMessage(e)))
-      .finally(() => setLoading(false));
+      .then((res) => { if (id === requestId.current) setPlaces(res.data.data || []); })
+      .catch((e) => { if (id === requestId.current) setError(apiErrorMessage(e)); })
+      .finally(() => { if (id === requestId.current) setLoading(false); });
   }
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [q, status, category]);
+  // Typing fired one request per keystroke and the responses could arrive out
+  // of order, letting an old query overwrite the newest result. Debounce the
+  // filter change and drop every response that is not the latest request.
+  useEffect(() => {
+    const timer = setTimeout(load, 300);
+    return () => clearTimeout(timer);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [q, status, category]);
   useEffect(() => {
     api.get('/categories').then((res) => setCategories(res.data.data || [])).catch(() => {});
   }, []);

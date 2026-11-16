@@ -1,15 +1,5 @@
--- 008: Demo accounts, culinary routes (names live in translations)
--- pgcrypto provides bcrypt-compatible password hashes usable by bcryptjs
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
--- DEVELOPMENT-ONLY demo accounts (see README)
-INSERT INTO users (email, password_hash, full_name, role)
-VALUES ('admin@district4.local', crypt('Admin@123456', gen_salt('bf', 10)), 'System Administrator', 'ADMIN')
-ON CONFLICT (email) DO NOTHING;
-
-INSERT INTO users (email, password_hash, full_name, role)
-VALUES ('staff@district4.local', crypt('Staff@123456', gen_salt('bf', 10)), 'Content Staff', 'STAFF')
-ON CONFLICT (email) DO NOTHING;
+-- 008: Culinary routes (names live in translations)
+-- Demo login accounts live in 014_demo_users.sql, which seed.js skips in production.
 
 -- Culinary routes
 INSERT INTO culinary_routes (code, estimated_duration, distance, difficulty, status) VALUES

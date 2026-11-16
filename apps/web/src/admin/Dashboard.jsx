@@ -154,7 +154,21 @@ export default function Dashboard() {
         </div>
         <div className="chart-box">
           <h3>⭐ Signature dishes</h3>
-          <BarList items={stats.popular_dishes || []} valueKey="_unused" labelKey="name" />
+          {/* The API returns signature dishes without a usage metric, so a bar
+              chart showed every dish at "1" — a number the visitor cannot use.
+              List them with their price instead of inventing a bar length. */}
+          {(stats.popular_dishes || []).length === 0 ? (
+            <div className="empty-state">No signature dish yet</div>
+          ) : (
+            <ul className="signature-list">
+              {(stats.popular_dishes || []).map((d) => (
+                <li key={d.id}>
+                  <strong>{d.name || `#${d.id}`}</strong>
+                  {d.price ? <span>{d.price}</span> : null}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </>

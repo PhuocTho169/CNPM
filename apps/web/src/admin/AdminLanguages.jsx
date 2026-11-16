@@ -14,7 +14,12 @@ export default function AdminLanguages() {
   }
   useEffect(load, []);
 
+  // The API rejects an incomplete language with a generic 400; checking the
+  // required fields here keeps the form from sending a request it knows will fail.
+  const canSave = !!(draft.code.trim() && draft.name.trim() && draft.native_name.trim());
+
   async function save() {
+    if (!canSave) { setError('Mã, tên và tên theo ngôn ngữ là bắt buộc.'); return; }
     setError(null);
     try {
       if (draft.id) await api.put(`/languages/${draft.id}`, draft);
@@ -47,7 +52,10 @@ export default function AdminLanguages() {
         <span style={{ color: 'var(--text-2)', fontSize: '0.85rem' }}>Đăng ký ngôn ngữ mới mà không cần sửa code</span>
       </div>
       {flash && <div className="success-banner">{flash}</div>}
-      {error && <div className="error-banner">{error}</div>}        <div className="admin-form" style={{ marginBottom: '1.4rem' }}>        <div className="form-field"><label>Mã (2 chữ cái) *</label>
+      {error && <div className="error-banner">{error}</div>}
+
+      <div className="admin-form" style={{ marginBottom: '1.4rem' }}>
+        <div className="form-field"><label>Mã (2 chữ cái) *</label>
           <input value={draft.code} onChange={(e) => setDraft({ ...draft, code: e.target.value.toLowerCase() })} placeholder="en" disabled={!!draft.id} /></div>
         <div className="form-field"><label>Tên *</label>
           <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="English" /></div>
@@ -59,15 +67,19 @@ export default function AdminLanguages() {
         <div className="form-field"><label>Ghi chú voice / TTS</label>
           <input value={draft.voice_note} onChange={(e) => setDraft({ ...draft, voice_note: e.target.value })} placeholder="Edge: fr-FR-HenriNeural, Google: fr-FR-Neural2-A" />
           <div style={{ fontSize: '0.75rem', color: 'var(--text-2)', marginTop: 4 }}>Mỗi provider một mục, để trống thì tự lấy giọng mặc định</div></div>
-          <div className="form-field" style={{ flexDirection: 'row', alignItems: 'flex-end', gap: '0.5rem' }}>
-          <button className="btn btn-orange" onClick={save}>{draft.id ? 'Lưu' : 'Thêm'}</button>
+        <div className="form-field" style={{ flexDirection: 'row', alignItems: 'flex-end', gap: '0.5rem' }}>
+          <button className="btn btn-orange" onClick={save} disabled={!canSave} title={canSave ? undefined : 'Điền mã, tên và tên gốc trước khi lưu'}>
+            {draft.id ? 'Lưu' : 'Thêm'}
+          </button>
           {draft.id && <button className="btn btn-ghost" onClick={() => setDraft(EMPTY)}>Hủy</button>}
-          </div>
-        </div>      <div className="admin-table-wrap">
+        </div>
+      </div>
+
+      <div className="admin-table-wrap">
         <table className="admin-table">
           <thead><tr><th>Mã</th><th>Tên</th><th>Tên gốc</th><th>Trạng thái</th><th>BCP-47 locale (voice + TTS)</th><th>Ghi chú voice / TTS</th><th>Thao tác</th></tr></thead>
           <tbody>
-            {            rows.map((l) => (
+            {rows.map((l) => (
               <tr key={l.id}>
                 <td><code>{l.code.toUpperCase()}</code></td>
                 <td>{l.name}</td>
@@ -84,6 +96,9 @@ export default function AdminLanguages() {
                 </td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr><td colSpan={7}><div className="empty-state">Chưa có ngôn ngữ nào. Thêm ngôn ngữ đầu tiên ở biểu mẫu phía trên.</div></td></tr>
+            )}
           </tbody>
         </table>
       </div>

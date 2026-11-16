@@ -7,29 +7,35 @@ const { ApiError } = require('../utils/errors');
  * The cookie stores the display id (`g_hex…`), the PK is a UUID — match either.
  */
 async function attachGuestSession(req, res, next) {
-  const id =
-    (req.cookies && req.cookies.guest_session_id) ||
-    req.query.guest_session_id ||
-    null;
-  if (!id) return next();
+  try {
+    const id =
+      (req.cookies && req.cookies.guest_session_id) ||
+      req.query.guest_session_id ||
+      null;
+    if (!id) return next();
 
-  const session = await db.getOne(
-    `SELECT id, display_id, free_language_id, free_language_id_2, purchased_languages, expires_at
-     FROM guest_sessions
-     WHERE id::text = $1 OR display_id = $1`,
-    [String(id)]
-  );
-  if (!session) return next();
+    const session = await db.getOne(
+      `SELECT id, display_id, free_language_id, free_language_id_2, purchased_languages, expires_at
+       FROM guest_sessions
+       WHERE id::text = $1 OR display_id = $1`,
+      [String(id)]
+    );
+    if (!session) return next();
 
-  // Expired sessions are deleted lazily and treated as "no session": the first
-  // visit language selector is shown instead of an error.
-  if (session.expires_at && new Date(session.expires_at) < new Date()) {
-    await db.query('DELETE FROM guest_sessions WHERE id = $1', [session.id]);
+    // Expired sessions are deleted lazily and treated as "no session": the first
+    // visit language selector is shown instead of an error.
+    if (session.expires_at && new Date(session.expires_at) < new Date()) {
+      await db.query('DELETE FROM guest_sessions WHERE id = $1', [session.id]);
+      return next();
+    }
+
+    req.guestSession = session;
     return next();
+  } catch (err) {
+    // Express 4 does not catch rejected async middleware promises; without this
+    // a transient DB error would leave the request hanging forever.
+    return next(err);
   }
-
-  req.guestSession = session;
-  next();
 }
 
 /**

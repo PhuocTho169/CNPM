@@ -1,0 +1,6 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+      html,body{margin:0;padding:0;background:#0d1117;}
+      .hdr{background:#161b22;color:#e6edf3;font:700 14px 'Segoe UI',Arial;padding:10px 16px;
+           border-bottom:1px solid #30363d;}
+      .body{padding:14px 18px;font:13px/23px Consolas,'Courier New',monospace;}
+    </style></head><body><div class="hdr">KIỂM THỬ API SAU KHI SỬA (server thật + PostgreSQL)</div><div class="body"><div style="color:#79c0ff">$ pnpm --filter server migrate / seed  → done</div><div style="color:#79c0ff">$ curl .../api/auth/login  (admin@district4.local)</div><div style="color:#7ee787">login OK</div><div style="color:#7ee787">POST /api/places  { zone_radius: 40 }   → tạo thành công (id=11)</div><div style="color:#7ee787">DELETE /api/places/11                   → cleanup delete: 200</div><div style="color:#e6edf3">&nbsp;</div><div style="color:#79c0ff">$ curl -X DELETE .../guest-sessions/&lt;id-của-người-khác&gt;</div><div style="color:#7ee787">cross-delete: 403</div><div style="color:#7ee787">self-delete:  200</div><div style="color:#79c0ff">$ curl -X POST .../guest-sessions/languages/2/purchase</div><div style="color:#7ee787">purchase route removed: 404</div></div></body></html>

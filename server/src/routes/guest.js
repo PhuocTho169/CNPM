@@ -112,8 +112,17 @@ router.get('/me', attachGuestSession, async (req, res, next) => {
 /** DELETE /api/guest-sessions/:id — invalidate the session (server-side). */
 router.delete('/:id', attachGuestSession, async (req, res, next) => {
   try {
-    const target = String(req.params.id || '') || req.guestSession.id;
-    await entitlement.invalidateGuestSession(target);
+    if (!req.guestSession) {
+      throw new ApiError(401, 'GUEST_SESSION_REQUIRED', 'Create a guest session first.');
+    }
+    const target = String(req.params.id || req.guestSession.id);
+    const ownsSession =
+      target === String(req.guestSession.id) ||
+      target === String(req.guestSession.display_id);
+    if (!ownsSession) {
+      throw new ApiError(403, 'FORBIDDEN', 'You can only revoke your own guest session.');
+    }
+    await entitlement.invalidateGuestSession(req.guestSession.id);
     res.clearCookie('guest_session_id');
     res.json({ success: true, data: { revoked: true } });
   } catch (err) {
@@ -187,39 +196,6 @@ router.get('/languages', attachGuestSession, async (req, res, next) => {
     res.json({
       success: true,
       data: { languages, free_language_id, purchased_languages, unlocked },
-    });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-/**
- * POST /api/guest-sessions/languages/:languageId/purchase — sandbox grant.
- * Replaces the old checkout/webhook flow: the row is updated instantly and the
- * language joins purchased_languages.
- */
-router.post('/languages/:languageId/purchase', attachGuestSession, async (req, res, next) => {
-  try {
-    if (!req.guestSession) {
-      throw new ApiError(404, 'GUEST_SESSION_NOT_FOUND', 'Create a guest session first.');
-    }
-    const languageId = toIntOrNull(req.params.languageId);
-    if (!languageId) {
-      throw new ApiError(400, 'VALIDATION_ERROR', 'language_id is required.');
-    }
-    const language = await db.getOne('SELECT id, code FROM languages WHERE id = $1', [languageId]);
-    if (!language) throw new ApiError(404, 'LANGUAGE_NOT_FOUND', 'Language not found.');
-
-    const row = await entitlement.purchaseLanguage(req.guestSession.id, languageId);
-    res.status(201).json({
-      success: true,
-      data: {
-        guest_session_id: row.id,
-        free_language_id: row.free_language_id,
-        purchased_languages: row.purchased_languages,
-        granted: { language_id: languageId, language_code: language.code },
-        sandbox: true,
-      },
     });
   } catch (err) {
     return next(err);

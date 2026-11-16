@@ -311,11 +311,6 @@ async function create(data) {
      data.is_recommended ?? false, data.status || 'DRAFT',
      data.zone_radius ?? 100, data.zone_exit_buffer ?? 20]
   );
-  if (row.zone_radius >= 0 && row.zone_radius <= 50) {
-    alert('Ban kinh ko duoc vuot qua 50m ');
-    console.log("Ban kinh  da vuot qua 50m");
-    return;
-  }
   // Tự động tạo QR code khi place được publish
   if (row && row.status === 'PUBLISHED') {
     try {

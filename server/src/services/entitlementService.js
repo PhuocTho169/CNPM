@@ -111,19 +111,6 @@ async function hasFreeLanguageConflict(guestSessionId, languageId) {
   return taken.length >= 2 && !taken.includes(Number(languageId));
 }
 
-/** Sandbox purchase: append the language to purchased_languages. */
-async function purchaseLanguage(guestSessionId, languageId) {
-  return db.getOne(
-    `UPDATE guest_sessions
-        SET purchased_languages = array_append(purchased_languages, $2),
-            expires_at = GREATEST(expires_at, now() + interval '90 days')
-      WHERE id = $1
-        AND NOT ($2 = ANY(purchased_languages))
-      RETURNING id, free_language_id, purchased_languages, expires_at`,
-    [guestSessionId, languageId]
-  );
-}
-
 /** free (either slot) OR purchased — the entire unlock rule, single row. */
 async function hasLanguageUnlock(guestSession, languageId) {
   if (!guestSession) return false;
@@ -277,7 +264,6 @@ module.exports = {
   getEntitlements,
   grantFreeLanguage,
   hasFreeLanguageConflict,
-  purchaseLanguage,
   hasLanguageUnlock,
   createCheckout,
   confirmCheckout,

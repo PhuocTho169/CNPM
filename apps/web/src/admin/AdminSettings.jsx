@@ -54,7 +54,11 @@ export default function AdminSettings() {
           <li><strong>JWT_SECRET</strong> — change the default value in <code>server/.env</code> before any real deployment.</li>
           <li><strong>PUBLIC_BASE_URL</strong> — must match the public website URL so QR codes point to the right guide pages.</li>
           <li><strong>TTS_PROVIDER</strong> — leave empty for the free keyless Google Translate voices; set <code>google</code>/<code>elevenlabs</code> (+ <code>TTS_API_KEY</code>) or <code>edge</code> to prefer that provider. When it fails or has no voice for a language, the server automatically falls back to the free voice, so narration is never missing. <code>none</code> turns server TTS off.</li>
-          <li>Demo accounts are <strong>development-only</strong>: admin@district4.local / staff@district4.local. Remove them in production.</li>
+          {import.meta.env.DEV ? (
+            <li>Demo accounts are <strong>development-only</strong>: admin@district4.local / staff@district4.local. Remove them in production.</li>
+          ) : (
+            <li>Demo accounts are not part of a production deployment — remove any seeded demo user before going live.</li>
+          )}
         </ul>
       </div>
     </>

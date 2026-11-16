@@ -184,17 +184,6 @@ export default function PlaceGuide() {
             <div className="prose">{currentTranslation.description}</div>
           </section>
         )}
- {currentTranslation?.tourist_tips && (
-          <section className="guide-section">
-            <h2>{t('touristTips')}</h2>
-            <ul className="tips-list">
-              {currentTranslation.tourist_tips.split(' • ').filter(Boolean).map((tip, i) => (
-                <li key={i}>{tip}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-
         {/* What to try */}
         {place.dishes?.length > 0 && (
           <section className="guide-section">

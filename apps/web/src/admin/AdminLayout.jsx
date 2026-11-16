@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom';
 import { useAdmin, tokenStore } from './adminApi';
 import { useApp } from '../context/AppContext';
+
+const ADMIN_ROLES = ['ADMIN', 'STAFF'];
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', icon: '📊', end: true },
@@ -17,9 +20,18 @@ export default function AdminLayout() {
   const { user, checked } = useAdmin();
   const { logout: logoutPublic } = useApp();
   const navigate = useNavigate();
+  const allowed = !!user && ADMIN_ROLES.includes(user.role);
+
+  // Opening /admin with a visitor token must not keep a signed-in shell around.
+  useEffect(() => {
+    if (checked && user && !allowed) {
+      tokenStore.clear();
+      logoutPublic();
+    }
+  }, [checked, user, allowed, logoutPublic]);
 
   if (!checked) return <div className="spinner" />;
-  if (!user) return <Navigate to="/admin/login" replace />;
+  if (!allowed) return <Navigate to="/admin/login" replace />;
 
   return (
     <div className="admin-layout">

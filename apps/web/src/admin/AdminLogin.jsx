@@ -21,8 +21,14 @@ export default function AdminLogin() {
     setError(null);
     try {
       const res = await api.post('/auth/login', { email, password });
+      const account = res.data.data.user || res.data.data;
+      // The API already refuses admin endpoints to VISITOR accounts, but without
+      // this check such an account still lands inside the admin shell.
+      if (!['ADMIN', 'STAFF'].includes(account.role)) {
+        throw new Error('This account does not have access to the admin area.');
+      }
       tokenStore.set(res.data.data.token);
-      setUser(res.data.data.user || res.data.data);
+      setUser(account);
       navigate('/admin');
     } catch (err) {
       setError(apiErrorMessage(err));
@@ -50,11 +56,13 @@ export default function AdminLogin() {
         <button className="btn btn-orange" style={{ width: '100%', justifyContent: 'center', marginTop: '1.2rem' }} disabled={busy}>
           {busy ? '…' : 'Login'}
         </button>
-        <div className="hint">
-          <strong>Development-only demo accounts</strong><br />
-          admin@district4.local / Admin@123456<br />
-          staff@district4.local / Staff@123456
-        </div>
+        {import.meta.env.DEV && (
+          <div className="hint">
+            <strong>Development-only demo accounts</strong><br />
+            admin@district4.local / Admin@123456<br />
+            staff@district4.local / Staff@123456
+          </div>
+        )}
         <Link to="/" style={{ display: 'block', textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: 'var(--text-2)' }}>
           ← Back to public site
         </Link>

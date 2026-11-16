@@ -22,11 +22,10 @@ export function directionsUrl({ latitude, longitude }, origin) {
 }
 
 /** OpenStreetMap fallback — no Google account, no tracking params.
- *  Uses the German OSM mirror: the main www.openstreetmap.org host is
- *  unreachable (NXDOMAIN) on some networks, and a dead link must not
- *  dead-end the "open map" button. */
+ *  Canonical openstreetmap.org URL: mlat/mlon drop the marker, and the
+ *  #map=zoom/lat/lon hash opens centred at street level. */
 export function osmMapUrl({ latitude, longitude }) {
-  return `https://www.openstreetmap.de/karte.html?zoom=17&lat=${latitude}&lon=${longitude}`;
+  return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
 }
 
 /** Straight-line distance in metres, or null when either point is missing. */

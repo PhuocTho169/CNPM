@@ -21,14 +21,15 @@ export default function AdminDishes() {
     return api.get(`/dishes?${qs}`).then((res) => setDishes(res.data.data || []));
   };
 
+  // The list has no filters, so the artificial 300 ms delay only made the page
+  // feel slower. Load as soon as the page mounts.
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(true);
-      loadDishes()
-        .catch((e) => setError(apiErrorMessage(e)))
-        .finally(() => setLoading(false));
-    }, 300);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    setLoading(true);
+    loadDishes()
+      .catch((e) => { if (!cancelled) setError(apiErrorMessage(e)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const qrDish = dishes.find((d) => d.id === qrDishId) || null;

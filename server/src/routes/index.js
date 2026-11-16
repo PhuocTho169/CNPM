@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { attachGuestSession, requireLanguageUnlock } = require('../middleware/entitlement');
 const { runUpload } = require('../middleware/upload');
@@ -16,7 +17,21 @@ const router = express.Router();
 router.get('/health', health.health);
 
 // ---------- Auth ----------
-router.post('/auth/login', auth.login);
+// Login is the one public write where guessing pays off, so it gets its own
+// limiter on top of the global /api one: successful logins are not counted.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  message: {
+    success: false,
+    code: 'TOO_MANY_ATTEMPTS',
+    message: 'Too many login attempts. Please try again in 15 minutes.',
+  },
+});
+router.post('/auth/login', loginLimiter, auth.login);
 router.get('/auth/me', authenticate, auth.me);
 
 // ---------- Users & roles (ADMIN only) ----------
