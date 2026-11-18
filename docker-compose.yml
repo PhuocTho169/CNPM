@@ -17,6 +17,7 @@ services:
       retries: 12
       start_period: 10s
 
+
   server:
     build:
       context: .
@@ -33,23 +34,45 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    command: sh -c "node src/db/migrate.js && node src/db/seed.js && npx nodemon --legacy-watch src/index.js"
     volumes:
+      # Dev: mount source so code changes are picked up without rebuilding.
+      - ./server:/app/server
+      - ./database:/app/database
       # WORKDIR is /app/server and UPLOAD_DIR=uploads is relative, so the real
       # path is /app/server/uploads. Bind-mount the host dir instead of a named
       # volume: the TTS files referenced by media_files live here, and a named
       # volume shadows this dir, making every /uploads/audio URL 404 (no audio).
       - ./server/uploads:/app/server/uploads
 
+
   admin-web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
+    # Dev: Vite dev server instead of the nginx production build so code edits
+    # hot-reload without rebuilding the image.
+    image: node:22-alpine3.20
+    working_dir: /app
     container_name: d4-web
+    environment:
+      VITE_PROXY_TARGET: http://server:5000
+      VITE_USE_POLLING: "true"
+      COREPACK_ENABLE_STRICT: "0"
+    command: >
+      sh -c "corepack enable &&
+             corepack install &&
+             pnpm install --filter web &&
+             pnpm --filter web dev --host 0.0.0.0"
+    volumes:
+      - .:/app
+      - root_node_modules:/app/node_modules
+      - web_node_modules:/app/apps/web/node_modules
     ports:
-      - "8080:80"
+      - "8080:5173"
     depends_on:
       - server
+
 
 volumes:
   postgres_data:
     name: district4_postgres_data
+  root_node_modules:
+  web_node_modules:

@@ -13,6 +13,11 @@ export default defineConfig({
     watch: process.env.VITE_USE_POLLING === 'true'
       ? { usePolling: true, interval: 300 }
       : undefined,
+    // trycloudflare assigns a random subdomain each restart; add the current
+    // host here, or set allowedHosts: true / VITE_ALLOWED_HOSTS for dev.
+    allowedHosts: [
+      'urgency-darn-freeway.ngrok-free.dev',
+    ],
     proxy: {
       '/api': { target: proxyTarget, changeOrigin: true },
       '/uploads': { target: proxyTarget, changeOrigin: true },

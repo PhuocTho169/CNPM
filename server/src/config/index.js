@@ -8,7 +8,7 @@ const config = {
     'postgresql://district4_user:district4_password@localhost:5432/district4_food',
   jwtSecret: process.env.JWT_SECRET || 'dev_only_secret_change_me',
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
-  publicBaseUrl: process.env.PUBLIC_BASE_URL || 'http://localhost:5173',
+  publicBaseUrl: process.env.PUBLIC_BASE_URL || ['http://localhost:5173'],
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   ttsProvider: process.env.TTS_PROVIDER || '',
   ttsApiKey: process.env.TTS_API_KEY || '',
