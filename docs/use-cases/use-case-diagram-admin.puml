@@ -1,0 +1,43 @@
+@startuml
+' Use Case Diagram — CMS quản trị
+' Nguồn: docs/use-cases/use-case-specifications.md (UC-12..UC-19)
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Quản trị viên" as Admin
+actor "Nhân viên" as Staff
+actor "Nhà cung cấp TTS" as TTS
+
+rectangle "District 4 Culinary Guide — Admin CMS" {
+  usecase UC12 as "UC-12\nĐăng nhập quản trị"
+  usecase UC13 as "UC-13\nQuản lý địa điểm ẩm thực"
+  usecase UC14 as "UC-14\nQuản lý món ăn"
+  usecase UC15 as "UC-15\nQuản lý bản dịch, media, QR và TTS"
+  usecase UC16 as "UC-16\nQuản lý danh mục và ngôn ngữ"
+  usecase UC17 as "UC-17\nQuản lý lộ trình ẩm thực"
+  usecase UC18 as "UC-18\nQuản lý người dùng và phân quyền"
+  usecase UC19 as "UC-19\nXem thống kê và trạng thái hệ thống"
+}
+
+Admin -- UC12
+Staff -- UC12
+Admin -- UC13
+Staff -- UC13
+Admin -- UC14
+Staff -- UC14
+Admin -- UC15
+Staff -- UC15
+Admin -- UC16
+Staff -- UC16
+Admin -- UC17
+Staff -- UC17
+Admin -- UC18
+Admin -- UC19
+Staff -- UC19
+
+UC13 ..> UC15 : <<include>>
+UC14 ..> UC15 : <<include>>
+UC17 ..> UC15 : <<include>>
+UC15 -- TTS
+@enduml

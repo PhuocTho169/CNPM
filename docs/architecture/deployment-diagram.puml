@@ -1,0 +1,52 @@
+@startuml
+' Deployment Diagram — Docker Compose
+skinparam shadowing false
+skinparam node {
+  BorderColor #555555
+  BackgroundColor #F8F8F8
+}
+
+node "Thiết bị khách" as ClientNode {
+  node "Trình duyệt web" as Browser
+  node "Điện thoại\n(Expo Go / bản build)" as Phone
+}
+
+node "Máy chủ Docker" as Host {
+  node "d4-web\nnginx:alpine3.20" as Nginx {
+    artifact "SPA dist/\n(React build)" as Dist
+    port "80 → host 8080" as P80
+  }
+
+  node "d4-server\nnode:22-alpine3.20" as Server {
+    artifact "Express API\n:5000" as Api
+    folder "/app/server/uploads\n(bind mount)" as Uploads
+  }
+
+  node "d4-postgres\npostgres:16" as PgNode {
+    database "district4_food\n:5432" as DB
+    storage "volume\ndistrict4_postgres_data" as PgVol
+  }
+}
+
+cloud "VNPay Sandbox" as VNPay
+cloud "TTS providers" as TTS
+cloud "OpenStreetMap" as OSM
+
+Browser --> Nginx : HTTP :8080
+Phone --> Api : HTTP :5001 (LAN)
+Nginx --> Dist : try_files
+Nginx --> Api : proxy /api, /uploads
+Api --> DB : DATABASE_URL :5432
+DB --> PgVol
+Api --> Uploads
+Api ..> TTS : HTTPS
+Api ..> VNPay : QR xác nhận (sandbox)
+Browser ..> OSM : tile / chỉ đường
+
+note right of Server
+  Khởi động:
+  node src/db/migrate.js
+  && node src/db/seed.js
+  && node src/index.js
+end note
+@enduml

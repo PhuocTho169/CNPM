@@ -1,0 +1,113 @@
+erDiagram
+    LANGUAGES {
+        int id PK
+        varchar code UK
+        varchar name
+        varchar native_name
+        boolean is_active
+        varchar bcl
+        varchar voice_note
+    }
+
+    CATEGORIES {
+        int id PK
+        varchar code UK
+        varchar name
+        varchar applies_to
+        varchar icon
+        boolean is_active
+    }
+
+    CULINARY_PLACES {
+        int id PK
+        varchar code UK
+        int category_id FK
+        varchar address
+        float latitude
+        float longitude
+        varchar phone
+        varchar website
+        varchar price_range
+        int price_min
+        int price_max
+        time opening_time
+        time closing_time
+        boolean is_recommended
+        varchar status
+        int zone_radius
+        int zone_exit_buffer
+    }
+
+    DISHES {
+        int id PK
+        varchar code UK
+        int culinary_place_id FK
+        int category_id FK
+        varchar price
+        varchar image_url
+        boolean is_signature
+        varchar status
+    }
+
+    TRANSLATIONS {
+        int id PK
+        varchar entity_type
+        int entity_id
+        int language_id FK
+        varchar name
+        text short_description
+        text description
+        text history
+        text cultural_significance
+        text tourist_tips
+        text ingredients
+        text cultural_information
+    }
+
+    MEDIA_FILES {
+        int id PK
+        varchar entity_type
+        int entity_id
+        varchar kind
+        varchar url
+        varchar alt_text
+        int duration
+        int file_size
+        varchar mime_type
+        varchar source
+        int sort_order
+        boolean is_primary
+        jsonb metadata
+    }
+
+    CULINARY_ROUTES {
+        int id PK
+        varchar code UK
+        varchar estimated_duration
+        varchar distance
+        varchar difficulty
+        varchar cover_image_url
+        varchar status
+    }
+
+    ROUTE_STOPS {
+        int id PK
+        int route_id FK
+        int culinary_place_id FK
+        int position
+        text note
+    }
+
+    CATEGORIES ||--o{ CULINARY_PLACES : "phân loại"
+    CATEGORIES ||--o{ DISHES : "phân loại"
+    CULINARY_PLACES ||--o{ DISHES : "có món"
+    CULINARY_ROUTES ||--o{ ROUTE_STOPS : "gồm"
+    CULINARY_PLACES ||--o{ ROUTE_STOPS : "là điểm dừng"
+    LANGUAGES ||--o{ TRANSLATIONS : "bản dịch"
+
+    CULINARY_PLACES ||..o{ TRANSLATIONS : "logic: entity_type='place'"
+    DISHES ||..o{ TRANSLATIONS : "logic: entity_type='dish'"
+    CULINARY_ROUTES ||..o{ TRANSLATIONS : "logic: entity_type='route'"
+    CULINARY_PLACES ||..o{ MEDIA_FILES : "logic: ảnh/QR"
+    DISHES ||..o{ MEDIA_FILES : "logic: ảnh/QR"
+    TRANSLATIONS ||..o| MEDIA_FILES : "logic: 1 audio"

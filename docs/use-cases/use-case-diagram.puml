@@ -1,0 +1,50 @@
+@startuml
+' Use Case Diagram — trải nghiệm khách (visitor)
+' Nguồn: docs/use-cases/use-case-specifications.md (UC-01..UC-11)
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Khách" as Khach
+actor "VNPay Sandbox" as VNPay
+actor "Nhà cung cấp TTS" as TTS
+actor "OpenStreetMap" as OSM
+
+rectangle "District 4 Culinary Guide — Website & Mobile" {
+  usecase UC01 as "UC-01\nQuét mã QR mở hướng dẫn địa điểm"
+  usecase UC02 as "UC-02\nXem hướng dẫn địa điểm đa ngôn ngữ"
+  usecase UC03 as "UC-03\nChọn ngôn ngữ miễn phí"
+  usecase UC04 as "UC-04\nMở khoá toàn bộ ngôn ngữ qua VNPay-QR"
+  usecase UC05 as "UC-05\nNghe thuyết minh địa điểm"
+  usecase UC06 as "UC-06\nXem và nghe thuyết minh món ăn"
+  usecase UC07 as "UC-07\nKhám phá và tìm kiếm địa điểm, món ăn"
+  usecase UC08 as "UC-08\nXem bản đồ và chỉ đường"
+  usecase UC09 as "UC-09\nXem lộ trình ẩm thực"
+  usecase UC10 as "UC-10\nNhận thuyết minh tự động theo vùng GPS"
+  usecase UC11 as "UC-11\nLưu yêu thích và lịch sử"
+}
+
+Khach -- UC01
+Khach -- UC02
+Khach -- UC03
+Khach -- UC04
+Khach -- UC05
+Khach -- UC06
+Khach -- UC07
+Khach -- UC08
+Khach -- UC09
+Khach -- UC10
+Khach -- UC11
+
+UC01 ..> UC02 : <<include>>
+UC02 ..> UC03 : <<include>>
+UC02 ..> UC05 : <<include>>
+UC04 ..> UC03 : <<extend>>\n(khi hết 2 slot miễn phí)
+UC10 ..> UC05 : <<include>>
+
+UC04 -- VNPay
+UC05 -- TTS
+UC06 -- TTS
+UC10 -- TTS
+UC08 -- OSM
+@enduml

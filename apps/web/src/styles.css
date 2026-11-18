@@ -544,10 +544,116 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; 
 .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 7px; }
 .line-chart { width: 100%; height: 180px; }
 
-.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(140deg, #4e2600, var(--primary-dark), var(--primary)); padding: 1rem; }
-.login-card { background: #fff; border-radius: 18px; padding: 2.2rem; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
-.login-card h1 { font-size: 1.3rem; margin-bottom: 0.4rem; }
-.login-card .hint { font-size: 0.82rem; color: var(--text-2); background: #fff7ec; border-radius: 8px; padding: 0.6rem 0.8rem; margin-top: 1rem; }
+/* ---------- Admin login page (/admin/login) ----------
+   Dùng cho: src/admin/AdminLogin.jsx — mọi class bắt đầu bằng "al-" (admin login),
+   không đụng tới class nào khác trong file này.
+   (Thay cho khối .login-page / .login-card cũ, không còn file nào dùng.)
+   Màu lấy từ :root ở đầu file: --primary, --primary-dark, --bg, --text, --text-2, --border.
+   Font Playfair Display + Karla đã nạp ở dòng 1.
+   Bố cục: [ form (trái) | ảnh phở (phải) ]. Dưới 860px: ảnh nằm trên, form nằm dưới.
+   Đổi ảnh: sửa HERO_IMAGE_URL trong AdminLogin.jsx, không sửa ở đây. */
+.al-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  background: var(--bg);
+}
+
+/* Cột trái: form */
+.al-form-side { display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.al-form {
+  width: 100%; max-width: 380px;
+  zoom: 1.25;
+  /* Hiệu ứng duy nhất của trang: form hiện lên một lần lúc mở trang */
+  animation: al-rise 0.5s ease-out both;
+}
+.al-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.2rem; font-weight: 700; line-height: 1.15; color: var(--text);
+}
+.al-subtitle {
+  margin: 0.6rem 0 1.8rem; max-width: 32ch;
+  color: var(--text-2); font-family: 'Karla', 'Segoe UI', sans-serif; font-size: 1rem;
+}
+
+/* Ô nhập liệu */
+.al-field { margin-bottom: 1.1rem; }
+.al-field label {
+  display: block; margin-bottom: 0.35rem;
+  font-family: 'Karla', 'Segoe UI', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--text);
+}
+.al-field input {
+  width: 100%; padding: 0.85rem 1rem;
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface); color: var(--text); font-size: 0.95rem;
+  transition: border-color .15s, box-shadow .15s;
+}
+.al-field input::placeholder { color: #a89c90; }
+.al-field input:focus-visible {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.18);
+}
+/* Ô mật khẩu: nút con mắt nằm đè bên phải */
+.al-password-wrap { position: relative; }
+.al-password-wrap input { padding-right: 3rem; }
+.al-eye {
+  position: absolute; top: 0; right: 0.4rem; bottom: 0; width: 2.4rem;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; background: none; color: var(--text-2); border-radius: 10px;
+}
+.al-eye:hover { color: var(--text); }
+.al-eye:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+/* Nút đăng nhập */
+.al-submit {
+  width: 100%; margin-top: 0.4rem; padding: 0.9rem 1rem;
+  border: 0; border-radius: 12px;
+  background: var(--primary); color: #fff; font-size: 1rem; font-weight: 600;
+  transition: background .15s;
+}
+.al-submit:hover:not(:disabled) { background: var(--primary-dark); }
+.al-submit:focus-visible { outline: 3px solid rgba(230, 81, 0, 0.4); outline-offset: 2px; }
+.al-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+/* Thông báo lỗi */
+.al-error {
+  margin-bottom: 1.1rem; padding: 0.7rem 0.9rem; border-radius: 10px;
+  background: #fdecea; color: #b3261e; font-size: 0.9rem;
+}
+/* Khung tài khoản demo (bật/tắt bằng SHOW_DEMO_HINT trong AdminLogin.jsx) */
+.al-hint {
+  margin-top: 1.4rem; padding: 0.7rem 0.9rem; border-radius: 10px;
+  background: #fff7ec; color: var(--text-2); font-size: 0.82rem; line-height: 1.55;
+}
+.al-back { display: block; margin-top: 1.2rem; text-align: center; font-size: 0.85rem; color: var(--text-2); }
+.al-back:hover { color: var(--primary); }
+
+/* Cột phải: ảnh. Ảnh đặt position:absolute để chiều cao thật của ảnh (949px)
+   không làm cao cả trang; object-fit:cover cắt ảnh cho vừa khung. */
+.al-photo-side { position: relative; min-height: 240px; }
+.al-photo {
+  position: absolute; inset: 1rem;
+  width: calc(100% - 2rem); height: calc(100% - 2rem);
+  object-fit: cover;
+  object-position: center;   /* đổi thành "center 40%" nếu muốn dịch vùng cắt */
+  border-radius: 24px;
+}
+
+@keyframes al-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Màn hình nhỏ: ảnh thành dải ngang phía trên */
+@media (max-width: 860px) {
+  .al-page { grid-template-columns: minmax(0, 1fr); }
+  .al-photo-side { order: -1; height: 200px; min-height: 0; }
+  .al-photo { inset: 0.75rem; width: calc(100% - 1.5rem); height: calc(100% - 1.5rem); border-radius: 18px; }
+  .al-form-side { padding: 1.5rem 1.25rem 2.5rem; align-items: flex-start; }
+}
+/* Người dùng bật "giảm chuyển động" thì tắt hiệu ứng */
+@media (prefers-reduced-motion: reduce) {
+  .al-form { animation: none; }
+}
 .error-banner { background: #fdecea; color: #b3261e; border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.88rem; margin-bottom: 0.8rem; }
 .success-banner { background: #e7f4ea; color: #2e7d32; border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.88rem; margin-bottom: 0.8rem; }
 

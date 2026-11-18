@@ -1,0 +1,56 @@
+@startuml
+' Component Diagram — District 4 Culinary Guide
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Khách" as Guest
+actor "Admin / Staff" as Staff
+
+package "Client" {
+  component "Website khách\nReact 18 + Vite 5" as Web
+  component "CMS quản trị\n(trong cùng SPA web)" as AdminUI
+  component "Ứng dụng di động\nExpo SDK 51 / RN 0.74" as Mobile
+}
+
+package "Edge" {
+  component "nginx\nphục vụ SPA + proxy /api, /uploads" as Nginx
+}
+
+package "Express API (Node.js)" {
+  component "Routes\n/api, /api/guest-sessions" as Routes
+  component "Middleware\nJWT, role, guest session,\nlanguage paywall, upload" as MW
+  component "Controllers\nauth, place, catalog,\nmedia, geo, health" as Controllers
+  component "Services\nauth, entitlement, place,\ncatalog, media/TTS, stats" as Services
+  component "DB helper\npg Pool + transaction" as DBHelper
+}
+
+database "PostgreSQL 16" as DB
+folder "server/uploads\nảnh · audio · QR" as Uploads
+
+cloud "VNPay Sandbox\n(xác nhận QR)" as VNPay
+cloud "TTS providers\nGoogle / ElevenLabs / Edge" as TTS
+cloud "OpenStreetMap\n(tile + chỉ đường)" as OSM
+
+Guest --> Web : HTTPS
+Guest --> Mobile : LAN / HTTPS
+Staff --> AdminUI : HTTPS
+
+Web --> Nginx : /api, /uploads
+AdminUI --> Nginx : /api
+Nginx --> Web : phục vụ dist/
+Nginx --> Routes : proxy_pass
+Mobile --> Routes : JSON over HTTP(S)
+
+Routes --> MW
+MW --> Controllers
+Controllers --> Services
+Services --> DBHelper
+DBHelper --> DB
+
+Services --> Uploads : đọc/ghi file
+Services --> TTS : sinh audio (fallback)
+Web --> VNPay : mở /pay/:tid sau khi quét QR
+Services ..> VNPay : QR trỏ tới trang xác nhận (sandbox)
+Web --> OSM : tile + URL chỉ đường
+@enduml

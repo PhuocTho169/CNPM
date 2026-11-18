@@ -1,0 +1,81 @@
+erDiagram
+    USERS {
+        int id PK
+        varchar email UK
+        varchar password_hash
+        varchar full_name
+        varchar role
+        boolean is_active
+        timestamptz last_login_at
+    }
+
+    LANGUAGES {
+        int id PK
+        varchar code UK
+        varchar name
+        boolean is_active
+    }
+
+    CULINARY_PLACES {
+        int id PK
+        varchar code UK
+        varchar status
+    }
+
+    TRANSLATIONS {
+        int id PK
+        varchar entity_type
+        int entity_id
+        int language_id FK
+        varchar name
+    }
+
+    GUEST_SESSIONS {
+        varchar id PK
+        varchar token_hash
+        varchar display_id UK
+        int free_language_id FK
+        int free_language_id_2 FK
+        int_array purchased_languages
+        timestamptz expires_at
+    }
+
+    CHECKOUTS {
+        int id PK
+        varchar guest_session_id FK
+        int language_id FK
+        int amount
+        varchar currency
+        varchar provider
+        varchar provider_transaction_id UK
+        varchar status
+        timestamptz paid_at
+        varchar idempotency_key UK
+    }
+
+    ACTIVITY_LOGS {
+        int id PK
+        varchar event_type
+        varchar session_id
+        int user_id FK
+        varchar guest_session_id FK
+        int culinary_place_id FK
+        int translation_id FK
+        int language_id FK
+        varchar device_type
+        varchar platform
+        jsonb metadata
+        timestamptz created_at
+    }
+
+    USERS ||--o{ ACTIVITY_LOGS : "thực hiện"
+    GUEST_SESSIONS ||--o{ ACTIVITY_LOGS : "phát sinh"
+    CULINARY_PLACES ||--o{ ACTIVITY_LOGS : "được ghi nhận"
+    TRANSLATIONS ||--o{ ACTIVITY_LOGS : "được phát"
+    LANGUAGES ||--o{ ACTIVITY_LOGS : "ngôn ngữ"
+
+    LANGUAGES ||--o{ GUEST_SESSIONS : "slot miễn phí"
+    GUEST_SESSIONS ||--o{ CHECKOUTS : "tạo"
+    LANGUAGES ||--o{ CHECKOUTS : "mở khoá"
+
+    LANGUAGES ||--o{ TRANSLATIONS : "bản dịch"
