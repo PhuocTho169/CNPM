@@ -312,6 +312,50 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; }
 .map-wrap { position: relative; }
 .map-wrap .map-actions { position: absolute; right: 0.8rem; bottom: 0.8rem; }
 
+/* Legend + overlap list shown under the map that draws GPS audio zones. */
+.zone-legend {
+  position: absolute; left: 0.7rem; bottom: 0.7rem; z-index: 500;
+  display: flex; gap: 0.9rem; flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.94); border: 1px solid var(--border);
+  border-radius: 9px; padding: 0.4rem 0.65rem; font-size: 0.76rem; color: var(--text-2);
+  box-shadow: 0 2px 8px rgba(60, 40, 20, 0.12);
+}
+.zone-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.zone-swatch { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.zone-swatch-zone { background: rgba(37, 99, 235, 0.16); border: 2px dashed #2563eb; }
+.zone-swatch-overlap { background: rgba(239, 68, 68, 0.5); border: 2px solid #b91c1c; }
+
+.zone-overlap-panel {
+  margin-top: 0.9rem; padding: 0.85rem 1rem;
+  background: #fff5f5; border: 1px solid #fecaca; border-radius: var(--radius);
+  color: #7f1d1d; font-size: 0.86rem;
+}
+.zone-overlap-panel p { margin: 0.25rem 0 0.55rem; color: #9a3412; }
+.zone-overlap-list { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+.zone-overlap-item {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: #fff; border: 1px solid #fca5a5; border-radius: 999px;
+  padding: 0.35rem 0.7rem; font-size: 0.8rem; font-weight: 600; color: #991b1b;
+  cursor: pointer;
+}
+.zone-overlap-item:hover { background: #fee2e2; }
+.zone-overlap-area { font-weight: 500; color: #b45309; }
+.zone-overlap-tooltip { font-weight: 700; color: #b91c1c; }
+
+/* Admin live preview of a place's audio zone and its overlaps. */
+.zone-preview {
+  margin-top: 1rem; padding: 1rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.zone-preview-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.7rem;
+}
+.zone-preview-head h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+.zone-preview-head p { font-size: 0.8rem; color: var(--text-2); }
+.zone-preview-map { width: 100%; border-radius: 10px; }
+.zone-preview-ok { margin-top: 0.7rem; font-size: 0.84rem; color: #2e7d32; }
+
 /* ---------- Explore page ---------- */
 .filter-bar {
   display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;

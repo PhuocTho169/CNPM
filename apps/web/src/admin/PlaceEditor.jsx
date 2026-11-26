@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api, apiErrorMessage } from '../api/client';
+import BaseMap, { ZONE_COLORS } from '../components/BaseMap';
 import { placeNarration } from '../utils/narration';
+import { findZoneIntersections, formatArea } from '../utils/zoneGeometry';
 import DishQrEditor from './DishQrEditor';
 
 const TABS = [
@@ -50,13 +52,21 @@ export default function PlaceEditor() {
   const [place, setPlace] = useState(isNew ? EMPTY_PLACE : null);
   const [languages, setLanguages] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [allPlaces, setAllPlaces] = useState([]);
   const [error, setError] = useState(null);
   const [flash, setFlash] = useState(null);
   const [busy, setBusy] = useState(false);
 
+  function loadAllPlaces() {
+    api.get('/places?limit=100&lang=vi')
+      .then((res) => setAllPlaces(res.data.data || []))
+      .catch(() => {});
+  }
+
   useEffect(() => {
     api.get('/languages').then((res) => setLanguages(res.data.data || [])).catch(() => {});
     api.get('/categories').then((res) => setCategories(res.data.data || [])).catch(() => {});
+    loadAllPlaces();
   }, []);
 
   useEffect(() => {
@@ -112,12 +122,69 @@ export default function PlaceEditor() {
         notify('Đã lưu');
       }
       setPlace((p) => ({ ...p, ...saved }));
+      loadAllPlaces();
     } catch (e) {
       setError(apiErrorMessage(e));
     } finally {
       setBusy(false);
     }
   }
+
+  // Live preview: the place being edited plus any existing place whose audio
+  // zone it overlaps. Computed as a hook so the map does not jump while typing,
+  // and kept above the early returns to preserve hook order.
+  const preview = useMemo(() => {
+    const rawLat = place?.latitude;
+    const rawLng = place?.longitude;
+    const draftLat = Number(rawLat);
+    const draftLng = Number(rawLng);
+    const hasCoords =
+      rawLat !== '' && rawLat != null &&
+      rawLng !== '' && rawLng != null &&
+      Number.isFinite(draftLat) && Number.isFinite(draftLng);
+    const draftId = place?.id ?? 'draft';
+    const draftRadius = Number(place?.zone_radius);
+
+    const current = {
+      ...place,
+      id: draftId,
+      latitude: draftLat,
+      longitude: draftLng,
+      zone_radius: Number.isFinite(draftRadius) && draftRadius > 0 ? draftRadius : 0,
+      translation: place?.translation || { name: place?.code || 'Địa điểm đang sửa' },
+    };
+    const others = allPlaces.filter((p) => p.id !== place?.id);
+    const all = hasCoords ? [current, ...others] : [];
+    const hits = findZoneIntersections(all, { focusId: draftId });
+
+    // Keep the map focused on the current zone and its overlaps instead of
+    // zooming all the way out to the whole district (where a 100 m lens is a
+    // few pixels wide).
+    const involved = new Set([draftId]);
+    hits.forEach((hit) => { involved.add(hit.aId); involved.add(hit.bId); });
+    const mapPlaces = all.filter((p) => involved.has(p.id));
+
+    const zones = mapPlaces
+      .filter((p) => Number(p.zone_radius) > 0)
+      .map((p, i) => ({
+        id: p.id,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        radius: p.zone_radius,
+        name: p.translation?.name || p.name || p.code,
+        color: ZONE_COLORS[i % ZONE_COLORS.length],
+        isFocus: p.id === draftId,
+      }));
+
+    const markers = mapPlaces.map((p) => ({
+      latitude: p.latitude,
+      longitude: p.longitude,
+      name: p.translation?.name || p.name || p.code,
+      isFocus: p.id === draftId,
+    }));
+
+    return { hasCoords, hits, zones, markers };
+  }, [place, allPlaces]);
 
   if (error && !place) return <div className="error-banner">{error}</div>;
   if (!place) return <div className="spinner" />;
@@ -238,6 +305,54 @@ export default function PlaceEditor() {
               </label>
             </div>
           </div>
+
+          <div className="zone-preview">
+            <div className="zone-preview-head">
+              <div>
+                <h3>Bản đồ vùng phát &amp; vùng giao</h3>
+                <p>Vùng tròn là bán kính phát thuyết minh; phần tô đỏ là khu vực hai địa điểm giao nhau.</p>
+              </div>
+              <div className="zone-legend" style={{ position: 'static' }}>
+                <span><i className="zone-swatch zone-swatch-zone" /> Vùng phát</span>
+                <span><i className="zone-swatch zone-swatch-overlap" /> Vùng giao</span>
+              </div>
+            </div>
+            {preview.hasCoords ? (
+              <>
+                <BaseMap
+                  center={[Number(place.latitude), Number(place.longitude)]}
+                  zoom={16}
+                  className="map-embed zone-preview-map"
+                  markers={preview.markers}
+                  zones={preview.zones}
+                  intersections={preview.hits}
+                  fit
+                  fitPadding={0.35}
+                  style={{ height: 320 }}
+                />
+                {preview.hits.length > 0 ? (
+                  <div className="zone-overlap-panel">
+                    <strong>⚠️ Vùng phát giao với {preview.hits.length} địa điểm</strong>
+                    <div className="zone-overlap-list">
+                      {preview.hits.map((hit) => (
+                        <span className="zone-overlap-item" key={hit.key} style={{ cursor: 'default' }}>
+                          <span>{hit.aName} ↔ {hit.bName}</span>
+                          <span className="zone-overlap-area">{formatArea(hit.areaM2)}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="zone-preview-ok">✅ Vùng phát không giao với địa điểm nào khác.</p>
+                )}
+              </>
+            ) : (
+              <div className="empty-state" style={{ padding: '1.6rem 1rem' }}>
+                Nhập vĩ độ và kinh độ để xem vùng phát trên bản đồ.
+              </div>
+            )}
+          </div>
+
           <button className="btn btn-orange" style={{ marginTop: '1.2rem' }} onClick={saveBasic} disabled={busy}>
             {busy ? 'Đang lưu…' : isNew ? 'Tạo địa điểm' : 'Lưu thông tin cơ bản'}
           </button>
