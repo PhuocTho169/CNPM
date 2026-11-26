@@ -1,6 +1,6 @@
 const authService = require('../services/authService');
-const { success, created } = require('../utils/errors');
-const { requireFields, isValidEmail } = require('../validators');
+const { success, created, ApiError } = require('../utils/errors');
+const { requireFields, isValidEmail, isRealEmailDomain } = require('../validators');
 
 async function login(req, res, next) {
   try {
@@ -11,10 +11,15 @@ async function login(req, res, next) {
       err.statusCode = 400;
       throw err;
     }
+    if (!(await isRealEmailDomain(req.body.email))) {
+      const err = new Error('Tên miền email không tồn tại hoặc không thể nhận thư.');
+      err.code = 'INVALID_EMAIL_DOMAIN';
+      err.statusCode = 400;
+      throw err;
+    }
     const result = await authService.login(req.body.email, req.body.password);
     return success(res, result);
   } catch (err) {
-    const { ApiError } = require('../utils/errors');
     if (!(err instanceof ApiError) && err.code) {
       return next(new ApiError(401, err.code, err.message));
     }
@@ -38,7 +43,10 @@ async function createUser(req, res, next) {
   try {
     requireFields(req.body, ['email', 'password', 'role']);
     if (!isValidEmail(req.body.email)) {
-      return next(new (require('../utils/errors').ApiError)(400, 'VALIDATION_ERROR', 'Invalid email format.'));
+      return next(new ApiError(400, 'VALIDATION_ERROR', 'Invalid email format.'));
+    }
+    if (!(await isRealEmailDomain(req.body.email))) {
+      return next(new ApiError(400, 'INVALID_EMAIL_DOMAIN', 'Tên miền email không tồn tại hoặc không thể nhận thư.'));
     }
     return created(res, await authService.createUser(req.body));
   } catch (err) { return next(err); }
@@ -59,7 +67,7 @@ async function resetPassword(req, res, next) {
 async function deleteUser(req, res, next) {
   try {
     if (Number(req.params.id) === req.user.sub) {
-      return next(new (require('../utils/errors').ApiError)(400, 'CANNOT_DELETE_SELF', 'You cannot delete your own account.'));
+      return next(new ApiError(400, 'CANNOT_DELETE_SELF', 'You cannot delete your own account.'));
     }
     await authService.deleteUser(req.params.id);
     return success(res, { id: Number(req.params.id), deleted: true });
