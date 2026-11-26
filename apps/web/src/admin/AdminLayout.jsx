@@ -1,4 +1,5 @@
-import { NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { NavLink, Outlet, Navigate, useNavigate, useOutletContext } from 'react-router-dom';
 import { useAdmin, tokenStore } from './adminApi';
 import { useApp } from '../context/AppContext';
 
@@ -8,15 +9,33 @@ const NAV = [
   { to: '/admin/dishes', label: 'Dishes', icon: '🥢' },
   { to: '/admin/categories', label: 'Categories', icon: '🏷️' },
   { to: '/admin/routes', label: 'Culinary Routes', icon: '🗺️' },
-  { to: '/admin/languages', label: 'Languages', icon: '🌐' },
-  { to: '/admin/users', label: 'Users & Roles', icon: '👥' },
+  // These two call ADMIN-only APIs (/languages write, /users), so STAFF must
+  // not see them: the link would only land on a 403.
+  { to: '/admin/languages', label: 'Languages', icon: '🌐', roles: ['ADMIN'] },
+  { to: '/admin/users', label: 'Users & Roles', icon: '👥', roles: ['ADMIN'] },
   { to: '/admin/settings', label: 'Settings', icon: '⚙️' },
 ];
+
+// Route guard for pages backed by ADMIN-only endpoints. It reads the user from
+// the layout's Outlet context, so it does not refetch /auth/me.
+export function AdminOnly({ children }) {
+  const { user } = useOutletContext();
+  if (user?.role !== 'ADMIN') return <Navigate to="/admin" replace />;
+  return children;
+}
 
 export default function AdminLayout() {
   const { user, checked } = useAdmin();
   const { logout: logoutPublic } = useApp();
   const navigate = useNavigate();
+
+  // Opening /admin with a visitor token must not keep a signed-in shell around.
+  useEffect(() => {
+    if (checked && user && user.role !== 'ADMIN' && user.role !== 'STAFF') {
+      tokenStore.clear();
+      logoutPublic();
+    }
+  }, [checked, user, logoutPublic]);
 
   if (!checked) return <div className="spinner" />;
   if (!user) return <Navigate to="/admin/login" replace />;
@@ -25,7 +44,7 @@ export default function AdminLayout() {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="brand">🍜 D4 Admin</div>
-        {NAV.map((item) => (
+        {NAV.filter((item) => !item.roles || item.roles.includes(user.role)).map((item) => (
           <NavLink key={item.to} to={item.to} end={item.end}>
             <span>{item.icon}</span> {item.label}
           </NavLink>
@@ -50,4 +69,4 @@ export default function AdminLayout() {
       </main>
     </div>
   );
-}
+}

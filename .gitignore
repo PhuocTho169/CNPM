@@ -1,14 +1,4 @@
+﻿.vs/
+.vs/
 node_modules/
-dist/
-.env
-server/.env
-apps/web/.env
-apps/mobile/.env
-server/uploads/*
-!server/uploads/images/.gitkeep
-!server/uploads/audio/.gitkeep
-!server/uploads/qr/.gitkeep
-*.log
-.DS_Store
-.expo/
-.qodo/
+.vs/

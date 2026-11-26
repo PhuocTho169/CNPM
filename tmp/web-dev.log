@@ -1,0 +1,835 @@
+$ vite
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m1341[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m8:19:51 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/PlaceEditor.jsx[22m
+[2m8:23:48 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLogin.jsx[22m
+[2m8:23:48 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m8:23:48 AM[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+[2m8:23:48 AM[22m [36m[1m[vite][22m[39m server restarted.
+[2m8:23:50 AM[22m [31m[1m[vite][22m[39m Pre-transform error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[39m
+ [90m 117 |[39m   [36mreturn[39m (
+[31m[1m>[22m[39m[90m 118 |[39m [33m<<[39m[33m<<[39m[33m<<[39m[33m<[39m [33mHEAD[39m
+ [90m     |[39m  [31m[1m^[22m[39m
+ [90m 119 |[39m     [33m<[39m[33mdiv[39m className[33m=[39m[32m"login-page"[39m[33m>[39m
+ [90m 120 |[39m       [33m<[39m[33mform[39m className[33m=[39m[32m"login-card"[39m onSubmit[33m=[39m{submit}[33m>[39m
+ [90m 121 |[39m         [33m<[39m[33mh1[39m[33m>[39m🍜 [33mDistrict[39m [35m4[39m [33mAdmin[39m[33m<[39m[33m/[39m[33mh1[39m[33m>[39m[0m
+[2m8:23:50 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:23:52 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:23:53 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:23:53 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:23:54 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:23:55 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:23:56 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:24:08 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:26:13 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:26:14 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:26:23 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:26:57 AM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\CNPM\apps\web\src\admin\AdminLogin.jsx: Unexpected token (118:1)
+
+[0m [90m 116 |[31m
+ [90m 117 |[31m   [36mreturn[31m (
+[31m[1m>[22m[31m[90m 118 |[31m [33m<<[31m[33m<<[31m[33m<<[31m[33m<[31m [33mHEAD[31m
+ [90m     |[31m  [31m[1m^[22m[31m
+ [90m 119 |[31m     [33m<[31m[33mdiv[31m className[33m=[31m[32m"login-page"[31m[33m>[31m
+ [90m 120 |[31m       [33m<[31m[33mform[31m className[33m=[31m[32m"login-card"[31m onSubmit[33m=[31m{submit}[33m>[31m
+ [90m 121 |[31m         [33m<[31m[33mh1[31m[33m>[31m🍜 [33mDistrict[31m [35m4[31m [33mAdmin[31m[33m<[31m[33m/[31m[33mh1[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/CNPM/apps/web/src/admin/AdminLogin.jsx[39m:118:1
+[33m  119|      <div className="login-page">
+  120|        <form className="login-card" onSubmit={submit}>
+  121|          <h1>🍜 District 4 Admin</h1>
+     |                    ^
+  122|          <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginBottom: '1.2rem' }}>
+  123|            Culinary Tourism &amp; Audio Guide CMS[39m
+      at constructor (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:369:19)
+      at JSXParserMixin.raise (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6622:19)
+      at JSXParserMixin.unexpected (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:6642:16)
+      at JSXParserMixin.jsxParseIdentifier (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4587:12)
+      at JSXParserMixin.jsxParseNamespacedName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4594:23)
+      at JSXParserMixin.jsxParseElementName (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4603:21)
+      at JSXParserMixin.jsxParseOpeningElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4679:22)
+      at JSXParserMixin.jsxParseElementAt (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4704:33)
+      at JSXParserMixin.jsxParseElement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4767:17)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4777:19)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12460:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10826:17)
+      at JSXParserMixin.parseMaybeAssignAllowInOrVoidPattern (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12527:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11706:28)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11362:23)
+      at JSXParserMixin.parseExprAtom (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:4782:20)
+      at JSXParserMixin.parseExprSubscripts (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11107:23)
+      at JSXParserMixin.parseUpdate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11092:21)
+      at JSXParserMixin.parseMaybeUnary (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:11072:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10925:61)
+      at JSXParserMixin.parseExprOps (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10930:23)
+      at JSXParserMixin.parseMaybeConditional (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10907:23)
+      at JSXParserMixin.parseMaybeAssign (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10857:21)
+      at JSXParserMixin.parseExpressionBase (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10810:23)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:39
+      at JSXParserMixin.allowInAnd (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12455:16)
+      at JSXParserMixin.parseExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:10806:17)
+      at JSXParserMixin.parseReturnStatement (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13176:28)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12832:21)
+      at JSXParserMixin.parseStatementLike (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12801:17)
+      at JSXParserMixin.parseStatementListItem (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12781:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13350:61)
+      at JSXParserMixin.parseBlockBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13343:10)
+      at JSXParserMixin.parseBlock (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13331:10)
+      at JSXParserMixin.parseFunctionBody (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12134:24)
+      at JSXParserMixin.parseFunctionBodyAndFinish (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12120:10)
+      at D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13479:12
+      at JSXParserMixin.withSmartMixTopicForbiddingContext (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12437:14)
+      at JSXParserMixin.parseFunction (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13478:10)
+      at JSXParserMixin.parseExportDefaultExpression (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13941:19)
+      at JSXParserMixin.parseExport (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:13862:25)
+      at JSXParserMixin.parseStatementContent (D:\CNPM\node_modules\.pnpm\@babel+parser@7.29.9\node_modules\@babel\parser\lib\index.js:12912:27)
+[2m8:27:04 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m8:27:30 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLogin.jsx[22m
+[2m8:27:30 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m12:49:10 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLayout.jsx[22m
+[2m12:49:10 PM[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/admin/AdminLayout.jsx[22m Could not Fast Refresh (new export)
+[2m12:49:10 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m12:49:17 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m12:54:52 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Home.jsx[22m
+[2m12:55:00 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/PublicLayout.jsx[22m
+[2m12:55:08 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Home.jsx[22m
+[2m12:55:16 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Home.jsx[22m

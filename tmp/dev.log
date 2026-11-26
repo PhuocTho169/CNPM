@@ -1,0 +1,197 @@
+$ concurrently -n server,web -c blue,green "pnpm --filter server dev" "pnpm --filter web dev"
+[server] $ nodemon src/index.js
+[web] $ vite
+[server] [33m[nodemon] 3.1.14[39m
+[server] [33m[nodemon] to restart at any time, enter `rs`[39m
+[server] [33m[nodemon] watching path(s): *.*[39m
+[server] [33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[server] [32m[nodemon] starting `node src/index.js`[39m
+[web] 
+[web]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m339[22m[2m[0m ms[22m
+[web] 
+[web]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[web] [2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[server] [server] District 4 Culinary Guide API running on port 5000
+[server] [server] Health: http://localhost:5000/api/health
+[server] [audio] 50 translation(s) missing audio — generating in background...
+[server] [audio]   ✓ place 1 en
+[server] [audio]   ✓ place 1 vi
+[server] [audio]   ✓ place 1 zh
+[server] [audio]   ✓ place 1 ko
+[server] [audio]   ✓ place 1 ja
+[server] [audio]   ✓ place 2 vi
+[server] [audio]   ✓ place 2 en
+[server] [audio]   ✓ place 2 zh
+[server] [audio]   ✓ place 2 ko
+[server] [audio]   ✓ place 2 ja
+[server] [audio]   ✓ place 3 vi
+[server] [audio]   ✓ place 3 en
+[server] [audio]   ✓ place 3 zh
+[server] [audio]   ✓ place 3 ko
+[server] [audio]   ✓ place 3 ja
+[server] [audio]   ✓ place 4 en
+[server] [audio]   ✓ place 4 vi
+[server] [audio]   ✓ place 4 zh
+[server] [audio]   ✓ place 4 ko
+[server] [audio]   ✓ place 4 ja
+[server] [audio]   ✓ place 5 en
+[server] [audio]   ✓ place 5 vi
+[server] [audio]   ✓ place 5 zh
+[server] [audio]   ✓ place 5 ko
+[server] [audio]   ✓ place 5 ja
+[server] [audio]   ✓ place 6 vi
+[server] [audio]   ✓ place 6 en
+[server] [audio]   ✓ place 6 zh
+[server] [audio]   ✓ place 6 ko
+[server] [audio]   ✓ place 6 ja
+[server] [audio]   ✓ place 7 vi
+[server] [audio]   ✓ place 7 en
+[server] [audio]   ✓ place 7 zh
+[server] [audio]   ✓ place 7 ko
+[server] [audio]   ✓ place 7 ja
+[server] [audio]   ✓ place 8 vi
+[server] [audio]   ✓ place 8 en
+[server] [audio]   ✓ place 8 zh
+[server] [audio]   ✓ place 8 ko
+[server] [audio]   ✓ place 8 ja
+[server] [audio]   ✓ place 9 vi
+[server] [audio]   ✓ place 9 en
+[server] [audio]   ✓ place 9 zh
+[server] [audio]   ✓ place 9 ko
+[server] [audio]   ✓ place 9 ja
+[server] [audio]   ✓ place 10 vi
+[server] [audio]   ✓ place 10 zh
+[server] [audio]   ✓ place 10 en
+[server] [audio]   ✓ place 10 ko
+[server] [audio]   ✓ place 10 ja
+[server] [audio] done. created=50 failed=0
+[server] [audio] 60 dish translation(s) missing audio — generating...
+[server] [audio]   ✓ dish 1 en
+[server] [audio]   ✓ dish 1 zh
+[server] [audio]   ✓ dish 1 ko
+[server] [audio]   ✓ dish 1 ja
+[server] [audio]   ✓ dish 1 vi
+[server] [audio]   ✓ dish 2 en
+[server] [audio]   ✓ dish 2 zh
+[server] [audio]   ✓ dish 2 ko
+[server] [audio]   ✓ dish 2 vi
+[server] [audio]   ✓ dish 2 ja
+[server] [audio]   ✓ dish 3 en
+[server] [audio]   ✓ dish 3 zh
+[server] [audio]   ✓ dish 3 ko
+[server] [audio]   ✓ dish 3 vi
+[server] [audio]   ✓ dish 3 ja
+[server] [audio]   ✓ dish 4 en
+[server] [audio]   ✓ dish 4 zh
+[server] [audio]   ✓ dish 4 ko
+[server] [audio]   ✓ dish 4 vi
+[server] [audio]   ✓ dish 4 ja
+[server] [audio]   ✓ dish 5 en
+[server] [audio]   ✓ dish 5 zh
+[server] [audio]   ✓ dish 5 vi
+[server] [audio]   ✓ dish 5 ko
+[server] [audio]   ✓ dish 5 ja
+[server] [audio]   ✓ dish 6 en
+[server] [audio]   ✓ dish 6 zh
+[server] [audio]   ✓ dish 6 ko
+[server] [audio]   ✓ dish 6 vi
+[server] [audio]   ✓ dish 6 ja
+[server] [audio]   ✓ dish 7 en
+[server] [audio]   ✓ dish 7 zh
+[server] [audio]   ✓ dish 7 ko
+[server] [audio]   ✓ dish 7 ja
+[server] [audio]   ✓ dish 7 vi
+[server] [audio]   ✓ dish 8 en
+[server] [audio]   ✓ dish 8 zh
+[server] [audio]   ✓ dish 8 ko
+[server] [audio]   ✓ dish 8 ja
+[server] [audio]   ✓ dish 8 vi
+[server] [audio]   ✓ dish 9 en
+[server] [audio]   ✓ dish 9 zh
+[server] [audio]   ✓ dish 9 ko
+[server] [audio]   ✓ dish 9 vi
+[server] [audio]   ✓ dish 9 ja
+[server] [audio]   ✓ dish 10 en
+[server] [audio]   ✓ dish 10 zh
+[server] [audio]   ✓ dish 10 ko
+[server] [audio]   ✓ dish 10 vi
+[server] [audio]   ✓ dish 10 ja
+[server] [audio]   ✓ dish 11 en
+[server] [audio]   ✓ dish 11 zh
+[server] [audio]   ✓ dish 11 ko
+[server] [audio]   ✓ dish 11 vi
+[server] [audio]   ✓ dish 11 ja
+[server] [audio]   ✓ dish 12 en
+[server] [audio]   ✓ dish 12 zh
+[server] [audio]   ✓ dish 12 ko
+[server] [audio]   ✓ dish 12 ja
+[server] [audio]   ✓ dish 12 vi
+[server] [audio] dish done. created=60 failed=0
+[server] [32m[nodemon] restarting due to changes...[39m
+[server] [32m[nodemon] restarting due to changes...[39m
+[web] [2m2:19:40 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/MapPage.jsx, /src/pages/DishDetail.jsx, /src/pages/PlaceGuide.jsx[22m
+[server] [32m[nodemon] starting `node src/index.js`[39m
+[server] [server] District 4 Culinary Guide API running on port 5000
+[server] [server] Health: http://localhost:5000/api/health
+[server] [audio] all translations already have audio.
+[server] [audio] all dish translations already have audio.
+[server] [32m[nodemon] restarting due to changes...[39m
+[server] [32m[nodemon] restarting due to changes...[39m
+[server] [32m[nodemon] starting `node src/index.js`[39m
+[server] [server] District 4 Culinary Guide API running on port 5000
+[server] [server] Health: http://localhost:5000/api/health
+[server] [audio] all translations already have audio.
+[server] [audio] all dish translations already have audio.
+[server] [32m[nodemon] restarting due to changes...[39m
+[web] [2m2:22:15 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLogin.jsx[22m
+[server] [32m[nodemon] starting `node src/index.js`[39m
+[server] [server] District 4 Culinary Guide API running on port 5000
+[server] [server] Health: http://localhost:5000/api/health
+[server] [audio] all translations already have audio.
+[server] [audio] all dish translations already have audio.
+[web] [2m3:44:42 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLogin.jsx[22m
+[web] [2m3:44:42 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLayout.jsx[22m
+[web] [2m3:44:42 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminSettings.jsx[22m
+[server] [32m[nodemon] restarting due to changes...[39m
+[server] [32m[nodemon] starting `node src/index.js`[39m
+[server] [server] District 4 Culinary Guide API running on port 5000
+[server] [server] Health: http://localhost:5000/api/health
+[server] [audio] all translations already have audio.
+[server] [audio] all dish translations already have audio.
+[web] [2m3:50:19 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLayout.jsx[22m
+[web] [2m4:08:27 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PlaceGuide.jsx[22m
+[web] [2m4:08:27 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/Dashboard.jsx[22m
+[web] [2m4:08:27 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[web] [2m4:09:36 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminPlaces.jsx[22m
+[web] [2m4:09:36 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminDishes.jsx[22m
+[web] [2m4:10:02 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLanguages.jsx[22m
+[web] [2m4:14:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLanguages.jsx[22m
+[web] [2m4:22:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PlaceGuide.jsx[22m
+[web] [2m4:22:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/Dashboard.jsx[22m
+[web] [2m4:22:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminPlaces.jsx[22m
+[web] [2m4:22:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminDishes.jsx[22m
+[web] [2m4:22:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLanguages.jsx[22m
+[web] [2m4:22:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[web] [2m4:22:37 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PlaceGuide.jsx[22m
+[web] [2m4:22:37 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/Dashboard.jsx[22m
+[web] [2m4:22:37 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminPlaces.jsx[22m
+[web] [2m4:22:37 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminDishes.jsx[22m
+[web] [2m4:22:37 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLanguages.jsx[22m
+[web] [2m4:22:37 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[web] [2m4:24:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PlaceGuide.jsx[22m
+[web] [2m4:24:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/Dashboard.jsx[22m
+[web] [2m4:24:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminPlaces.jsx[22m
+[web] [2m4:24:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminDishes.jsx[22m
+[web] [2m4:24:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLanguages.jsx[22m
+[web] [2m4:24:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[web] [2m4:24:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/PlaceGuide.jsx[22m
+[web] [2m4:24:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/Dashboard.jsx[22m
+[web] [2m4:24:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminPlaces.jsx[22m
+[web] [2m4:24:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminDishes.jsx[22m
+[web] [2m4:24:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/AdminLanguages.jsx[22m
+[web] [2m4:24:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[server] [31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[web] D:\CNPM\apps\web:
+[web] [ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] web@1.0.0 dev: `vite`
+[web] Exit status 1073807364
+[web] pnpm --filter web dev exited with code 1073807364

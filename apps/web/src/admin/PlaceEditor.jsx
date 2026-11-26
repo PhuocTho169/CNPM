@@ -73,6 +73,18 @@ export default function PlaceEditor() {
   }
 
   async function saveBasic() {
+    // Mirror the API rule so a negative radius is refused with a field-specific
+    // message instead of looking saved (the API used to clamp it silently).
+    const radius = blankToNull(place.zone_radius);
+    const buffer = blankToNull(place.zone_exit_buffer);
+    if (radius !== null && (radius < 25 || radius > 1000)) {
+      setError('Bán kính vùng phát phải từ 25 đến 1000 m — không được âm hoặc quá lớn.');
+      return;
+    }
+    if (buffer !== null && (buffer < 0 || buffer > 500)) {
+      setError('Bán kính thoát phải từ 0 đến 500 m — không được âm hoặc quá lớn.');
+      return;
+    }
     setBusy(true);
     setError(null);
     try {

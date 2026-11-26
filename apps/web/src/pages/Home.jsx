@@ -21,7 +21,7 @@ function HeroTitle({ text, accent }) {
 }
 
 export default function Home() {
-  const { languages, lang, t } = useApp();
+  const { languages, lang, setLang, t } = useApp();
   const [places, setPlaces] = useState([]);
   const [dishes, setDishes] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -47,6 +47,15 @@ export default function Home() {
       .catch((e) => setError(e?.response?.data?.message || 'Network error'))
       .finally(() => setLoading(false));
   }, [lang]);
+
+  // The navbar globe links to #language-select on other pages; scroll once the
+  // section exists (it is rendered only after the first request finishes).
+  useEffect(() => {
+    if (loading) return;
+    if (window.location.hash === '#language-select') {
+      document.getElementById('language-select')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [loading]);
 
   if (loading) return <div className="spinner" />;
 
@@ -178,17 +187,24 @@ export default function Home() {
         </section>
       )}
 
-      <section className="section container">
+      <section className="section container" id="language-select" style={{ scrollMarginTop: '90px' }}>
         <span className="eyebrow">🎧 {t('audioGuides')}</span>
         <h2 className="section-title">{t('audioTitle')}</h2>
         <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
           {/* Built from the active language list, not a hardcoded array of four,
               so English appears here as soon as it is a supported language. */}
           {languages.map((l) => (
-            <div key={l.code} className={`card ${l.code === lang ? 'card-active' : ''}`} style={{ padding: '1.3rem', alignItems: 'center', textAlign: 'center' }}>
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => setLang(l.code)}
+              aria-pressed={l.code === lang}
+              className={`card ${l.code === lang ? 'card-active' : ''}`}
+              style={{ padding: '1.3rem', alignItems: 'center', textAlign: 'center', width: '100%' }}
+            >
               <div style={{ fontSize: '2.2rem' }}>{LANG_FLAG[l.code] || '🌐'}</div>
               <div className="card-title">{l.native_name}</div>
-            </div>
+            </button>
           ))}
         </div>
       </section>

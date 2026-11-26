@@ -6,20 +6,28 @@ const { parsePagination } = require('../utils/paginate');
 
 const DEFAULT_LANG = 'vi';
 
-// GPS audio-zone geometry is admin data, but clamp it here so a typo in the
-// panel cannot create a zone that swallows the whole district (or one so small
-// a visitor can never trigger it).
+// GPS audio-zone geometry is admin data. Reject values outside the allowed
+// band instead of silently clamping them: a negative radius used to be saved
+// as 25 without telling the admin, so a typo looked like a successful save.
 //
 // Returns null when the field is absent so an unrelated admin edit never
 // stomps the radius a curator already tuned. placeService.create() owns the
 // default for genuinely new rows.
-function clampZone(value, { min, max }) {
+function validateZone(value, { min, max, label }) {
   if (value === null || value === undefined || value === '') return null;
   const n = Number(value);
   if (!Number.isFinite(n)) {
-    throw new ApiError(400, 'VALIDATION_ERROR', 'zone_radius and zone_exit_buffer must be numbers.');
+    throw new ApiError(400, 'VALIDATION_ERROR', `${label} must be a number.`);
   }
-  return Math.min(Math.max(Math.round(n), min), max);
+  const rounded = Math.round(n);
+  if (rounded < min || rounded > max) {
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      `${label} must be between ${min} and ${max} (got ${n}).`
+    );
+  }
+  return rounded;
 }
 
 function resolveLang(req) {
@@ -42,8 +50,12 @@ function placePayload(body) {
     closing_time: body.closing_time,
     is_recommended: toBoolOrNull(body.is_recommended),
     status: body.status,
-    zone_radius: clampZone(body.zone_radius, { min: 25, max: 1000 }),
-    zone_exit_buffer: clampZone(body.zone_exit_buffer, { min: 0, max: 500 }),
+    zone_radius: validateZone(body.zone_radius, {
+      min: 25, max: 1000, label: 'Zone radius (m)',
+    }),
+    zone_exit_buffer: validateZone(body.zone_exit_buffer, {
+      min: 0, max: 500, label: 'Exit buffer (m)',
+    }),
   };
 }
 

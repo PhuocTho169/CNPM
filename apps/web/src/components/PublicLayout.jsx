@@ -43,7 +43,17 @@ export default function PublicLayout() {
               title={t('chooseLanguage')}
               aria-label={t('chooseLanguage')}
               className="lang-nav-btn"
-              onClick={() => window.dispatchEvent(new Event('open-language-banner'))}
+              onClick={() => {
+                // Pages with the language chooser section (home) scroll to it;
+                // the guide pages open their entitlement banner instead.
+                const section = document.getElementById('language-select');
+                if (section) { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+                if (/^\/(place|dish)\//.test(location.pathname)) {
+                  window.dispatchEvent(new Event('open-language-banner'));
+                  return;
+                }
+                navigate('/#language-select');
+              }}
             >🌐</button>
             {!guestSession && !user ? (
               <span className="subtitle">{t('scanQrGuide')}</span>

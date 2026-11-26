@@ -38,7 +38,7 @@ import DishDetail from './pages/DishDetail';
 import CheckoutResult from './pages/CheckoutResult';
 import NotFound from './pages/NotFound';
 import AdminLogin from './admin/AdminLogin';
-import AdminLayout from './admin/AdminLayout';
+import AdminLayout, { AdminOnly } from './admin/AdminLayout';
 import Dashboard from './admin/Dashboard';
 import AdminPlaces from './admin/AdminPlaces';
 import PlaceEditor from './admin/PlaceEditor';
@@ -65,8 +65,8 @@ export default function App() {
         <Route path="dishes" element={<AdminDishes />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="routes" element={<AdminRoutes />} />
-        <Route path="languages" element={<AdminLanguages />} />
-        <Route path="users" element={<AdminUsers />} />
+        <Route path="languages" element={<AdminOnly><AdminLanguages /></AdminOnly>} />
+        <Route path="users" element={<AdminOnly><AdminUsers /></AdminOnly>} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
       <Route element={<PublicLayout />}>
